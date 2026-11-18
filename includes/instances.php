@@ -5,8 +5,8 @@
  * @copyright 2009
  */
 
-if ( ! class_exists( 'blcLinkInstance' ) ) {
-	class blcLinkInstance {
+if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
+	class Avpvh_Lnkc_Link_Instance {
 
 		//Object state
 		var $is_new = false;
@@ -25,14 +25,14 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		var $link_context = '';
 		var $raw_url      = '';
 
-		/** @var blcContainer */
-		var $_container = null;
-		var $_parser    = null;
-		/** @var blcLink|null */
-		var $_link = null;
+		/** @var Avpvh_Lnkc_Container */
+		var $cached_container = null;
+		var $cached_parser    = null;
+		/** @var Avpvh_Lnkc_Link|null */
+		var $cached_link = null;
 
 		/**
-		 * blcLinkInstance::__construct()
+		 * Avpvh_Lnkc_Link_Instance::__construct()
 		 * Class constructor
 		 *
 		 * @param int|array $arg Either the instance ID or an associate array representing the instance's DB record. Should be NULL for new instances.
@@ -44,7 +44,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 				//Load an instance with ID = $arg from the DB.
 				$arr = $wpdb->get_row(
 					$wpdb->prepare(
-						"SELECT * FROM {$wpdb->prefix}blc_instances WHERE instance_id=%d LIMIT 1",
+						"SELECT * FROM {$wpdb->prefix}avpvh_lnkc_instances WHERE instance_id=%d LIMIT 1",
 						$arg
 					),
 					ARRAY_A
@@ -66,19 +66,9 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			}
 		}
 
-		/**
-		 * blcLinkInstance::blcLinkInstance()
-		 * Old-style constructor for PHP 4. Do not use.
-		 *
-		 * @param mixed $arg
-		 * @return void
-		 */
-		function blcLinkInstance( $arg = null ) {
-			$this->__construct( $arg );
-		}
 
 		/**
-		 * blcLinkInstance::set_values()
+		 * Avpvh_Lnkc_Link_Instance::set_values()
 		 * Set property values to the ones provided in an array (doesn't sanitize).
 		 *
 		 * @param array $arr An associative array
@@ -92,7 +82,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 
 		/**
 		 * Replace this instance's URL with a new one.
-		 * Warning : this shouldn't be called directly. Use blcLink->edit() instead.
+		 * Warning : this shouldn't be called directly. Use Avpvh_Lnkc_Link->edit() instead.
 		 *
 		 * @param string $new_url
 		 * @param string $old_url
@@ -106,7 +96,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			if ( is_null( $container ) ) {
 				return new WP_Error(
 					'container_not_found',
-					sprintf( __( 'Container %1$s[%2$d] not found', 'broken-link-checker' ), $this->container_type, $this->container_id )
+					sprintf( __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
 				);
 			}
 
@@ -116,7 +106,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 					'container_edit_not_allowed',
 					sprintf(
 						// translators: %1$s: container type, %2$d: container id.
-						__( 'You are not allowed to edit the link in %1$s [%2$d].', 'broken-link-checker' ),
+						__( 'You are not allowed to edit the link in %1$s [%2$d].', 'avpvh-link-checker' ),
 						$this->container_type,
 						$this->container_id
 					)
@@ -128,7 +118,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			if ( is_null( $parser ) ) {
 				return new WP_Error(
 					'parser_not_found',
-					sprintf( __( "Parser '%s' not found.", 'broken-link-checker' ), $this->parser_type )
+					sprintf( __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
 				);
 			}
 
@@ -163,7 +153,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		}
 
 		/**
-		 * blcLinkInstance::unlink()
+		 * Avpvh_Lnkc_Link_Instance::unlink()
 		 * Remove this instance from the post/blogroll/etc. Also deletes the appropriate DB record(s).
 		 *
 		 * @return bool|WP_Error
@@ -175,7 +165,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			if ( is_null( $container ) ) {
 				return new WP_Error(
 					'container_not_found',
-					sprintf( __( 'Container %1$s[%2$d] not found', 'broken-link-checker' ), $this->container_type, $this->container_id )
+					sprintf( __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
 				);
 			}
 
@@ -185,7 +175,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 					'container_edit_not_allowed',
 					sprintf(
 						// translators: %1$s: container type, %2$d: container id.
-						__( 'You are not allowed to remove the link from %1$s [%2$d].', 'broken-link-checker' ),
+						__( 'You are not allowed to remove the link from %1$s [%2$d].', 'avpvh-link-checker' ),
 						$this->container_type,
 						$this->container_id
 					)
@@ -197,7 +187,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			if ( is_null( $parser ) ) {
 				return new WP_Error(
 					'parser_not_found',
-					sprintf( __( "Parser '%s' not found.", 'broken-link-checker' ), $this->parser_type )
+					sprintf( __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
 				);
 			}
 
@@ -219,7 +209,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			global $wpdb; /** @var wpdb $wpdb */
 
 			if ( ! empty( $this->instance_id ) ) {
-				$rez = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}blc_instances WHERE instance_id=%d", $this->instance_id ) );
+				$rez = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}avpvh_lnkc_instances WHERE instance_id=%d", $this->instance_id ) );
 				return $rez;
 			} else {
 				return false;
@@ -238,24 +228,24 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 			//Refresh the locally cached link & container properties, in case
 			//the objects have changed since they were set.
 
-			if ( ! is_null( $this->_link ) ) {
+			if ( ! is_null( $this->cached_link ) ) {
 
 				//If we have a link object assigned, but it's new, it won't have a DB ID yet.
 				//We need to save the link to get the ID and be able to maintain the link <-> instance
 				//association.
-				if ( $this->_link->is_new ) {
-					$rez = $this->_link->save();
+				if ( $this->cached_link->is_new ) {
+					$rez = $this->cached_link->save();
 					if ( ! $rez ) {
 						return false;
 					}
 				}
 
-				$this->link_id = $this->_link->link_id;
+				$this->link_id = $this->cached_link->link_id;
 			}
 
-			if ( ! is_null( $this->_container ) ) {
-				$this->container_type = $this->_container->container_type;
-				$this->container_id   = $this->_container->container_id;
+			if ( ! is_null( $this->cached_container ) ) {
+				$this->container_type = $this->cached_container->container_type;
+				$this->container_id   = $this->cached_container->container_id;
 			}
 
 			//If the link is new, insert a new row into the DB. Otherwise update the existing row.
@@ -263,7 +253,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 
 				$rez = $wpdb->query(
 					$wpdb->prepare(
-						"INSERT INTO {$wpdb->prefix}blc_instances
+						"INSERT INTO {$wpdb->prefix}avpvh_lnkc_instances
 						( link_id, container_type, container_id, container_field, parser_type, link_text, link_context, raw_url )
 						VALUES( %d, %s, %d, %s, %s, %s, %s, %s )",
 						$this->link_id,
@@ -291,7 +281,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 
 				$rez = false !== $wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->prefix}blc_instances
+						"UPDATE {$wpdb->prefix}avpvh_lnkc_instances
 						SET
 						link_id = %d,
 						container_type = %s,
@@ -343,25 +333,25 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		/**
 		 * Get the container object associated with this link instance
 		 *
-		 * @return blcContainer|null
+		 * @return Avpvh_Lnkc_Container|null
 		 */
 		function get_container() {
-			if ( is_null( $this->_container ) ) {
-				$this->_container = blcContainerHelper::get_container( array( $this->container_type, $this->container_id ) );
+			if ( is_null( $this->cached_container ) ) {
+				$this->cached_container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $this->container_id ) );
 			}
 
-			return $this->_container;
+			return $this->cached_container;
 		}
 
 		/**
 		 * Set a new container for the link instance.
 		 *
-		 * @param blcContainer $new_container
+		 * @param Avpvh_Lnkc_Container $new_container
 		 * @param string $field
 		 * @return void
 		 */
 		function set_container( &$new_container, $field = '' ) {
-			$this->_container = &$new_container;
+			$this->cached_container = &$new_container;
 
 			$this->container_field = $field;
 
@@ -377,24 +367,24 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		/**
 		 * Get the parser associated with this link instance.
 		 *
-		 * @return blcParser|null
+		 * @return Avpvh_Lnkc_Parser|null
 		 */
 		function get_parser() {
-			if ( is_null( $this->_parser ) ) {
-				$this->_parser = blcParserHelper::get_parser( $this->parser_type );
+			if ( is_null( $this->cached_parser ) ) {
+				$this->cached_parser = Avpvh_Lnkc_Parser_Helper::get_parser( $this->parser_type );
 			}
 
-			return $this->_parser;
+			return $this->cached_parser;
 		}
 
 		/**
 		 * Set a new parser fo this link instance.
 		 *
-		 * @param blcParser|null $new_parser
+		 * @param Avpvh_Lnkc_Parser|null $new_parser
 		 * @return void
 		 */
 		function set_parser( &$new_parser ) {
-			$this->_parser = &$new_parser;
+			$this->cached_parser = &$new_parser;
 
 			if ( is_null( $new_parser ) ) {
 				$this->parser_type = '';
@@ -406,29 +396,29 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		/**
 		 * Get the link object associated with this link intance.
 		 *
-		 * @return blcLink|null
+		 * @return Avpvh_Lnkc_Link|null
 		 */
 		function get_link() {
-			if ( ! is_null( $this->_link ) ) {
-				return $this->_link;
+			if ( ! is_null( $this->cached_link ) ) {
+				return $this->cached_link;
 			}
 
 			if ( empty( $this->link_id ) ) {
 				return null;
 			}
 
-			$this->_link = new blcLink( $this->link_id );
-			return $this->_link;
+			$this->cached_link = new Avpvh_Lnkc_Link( $this->link_id );
+			return $this->cached_link;
 		}
 
 		/**
 		 * Set the link associated with this link instance.
 		 *
-		 * @param blcLink $new_link
+		 * @param Avpvh_Lnkc_Link $new_link
 		 * @return void
 		 */
 		function set_link( $new_link ) {
-			$this->_link = $new_link;
+			$this->cached_link = $new_link;
 
 			if ( is_null( $new_link ) ) {
 				$this->link_id = 0;
@@ -525,13 +515,13 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 	 * Get all link instances associated with one or more links.
 	 *
 	 * @param array $link_ids Array of link IDs.
-	 * @param string $purpose An optional code indicating how the instances will be used. Available predefined constants : BLC_FOR_DISPLAY, BLC_FOR_EDITING
+	 * @param string $purpose An optional code indicating how the instances will be used. Available predefined constants : AVPVH_LNKC_FOR_DISPLAY, AVPVH_LNKC_FOR_EDITING
 	 * @param bool $load_containers Preload containers regardless of purpose. Defaults to false.
 	 * @param bool $load_wrapped_objects Preload wrapped objects regardless of purpose. Defaults to false.
 	 * @param bool $include_invalid Include instances that refer to not-loaded containers or parsers. Defaults to false.
-	 * @return blcLinkInstance[] An array indexed by link ID. Each item of the array will be an array of blcLinkInstance objects.
+	 * @return Avpvh_Lnkc_Link_Instance[] An array indexed by link ID. Each item of the array will be an array of Avpvh_Lnkc_Link_Instance objects.
 	 */
-	function blc_get_instances( $link_ids, $purpose = '', $load_containers = false, $load_wrapped_objects = false, $include_invalid = false ) {
+	function avpvh_lnkc_get_instances( $link_ids, $purpose = '', $load_containers = false, $load_wrapped_objects = false, $include_invalid = false ) {
 		global $wpdb; /** @var wpdb $wpdb */
 
 		$link_ids = array_filter( wp_parse_id_list( $link_ids ) );
@@ -542,11 +532,11 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $link_ids ), '%d' ) );
 
-		$q = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}blc_instances WHERE link_id IN ($placeholders)", $link_ids ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$q = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}avpvh_lnkc_instances WHERE link_id IN ($placeholders)", $link_ids ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		//Skip instances that reference containers or parsers that aren't currently loaded
 		if ( ! $include_invalid ) {
-			$manager           = blcModuleManager::getInstance();
+			$manager           = Avpvh_Lnkc_Module_Manager::getInstance();
 			$active_containers = $manager->get_escaped_ids( 'container' );
 			$active_parsers    = $manager->get_escaped_ids( 'parser' );
 
@@ -561,7 +551,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		}
 
 		//Also retrieve the containers, if it could be useful.
-		$load_containers = $load_containers || in_array( $purpose, array( BLC_FOR_DISPLAY, BLC_FOR_EDITING ) );
+		$load_containers = $load_containers || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY, AVPVH_LNKC_FOR_EDITING ) );
 		if ( $load_containers ) {
 			//Collect a list of (container_type, container_id) pairs
 			$container_ids = array();
@@ -572,19 +562,19 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 					array( $result['container_type'], intval( $result['container_id'] ) )
 				);
 			}
-			$containers = blcContainerHelper::get_containers( $container_ids, $purpose, '', $load_wrapped_objects );
+			$containers = Avpvh_Lnkc_Container_Helper::get_containers( $container_ids, $purpose, '', $load_wrapped_objects );
 		}
 
 		//Create an object for each instance and group them by link ID
 		$instances = array();
 		foreach ( $results as $result ) {
-			$instance = new blcLinkInstance( $result );
+			$instance = new Avpvh_Lnkc_Link_Instance( $result );
 
 			//Assign a container to the link instance, if available
 			if ( $load_containers && ! empty( $containers ) ) {
 				$key = $instance->container_type . '|' . $instance->container_id;
 				if ( isset( $containers[ $key ] ) ) {
-					$instance->_container = $containers[ $key ];
+					$instance->cached_container = $containers[ $key ];
 				}
 			}
 
@@ -603,13 +593,13 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 	 *
 	 * @return int
 	 */
-	function blc_get_usable_instance_count() {
+	function avpvh_lnkc_get_usable_instance_count() {
 		global $wpdb; /** @var wpdb $wpdb */
 
-		$q = "SELECT COUNT(instance_id) FROM {$wpdb->prefix}blc_instances WHERE 1";
+		$q = "SELECT COUNT(instance_id) FROM {$wpdb->prefix}avpvh_lnkc_instances WHERE 1";
 
 		//Skip instances that reference containers or parsers that aren't currently loaded
-		$manager           = blcModuleManager::getInstance();
+		$manager           = Avpvh_Lnkc_Module_Manager::getInstance();
 		$active_containers = $manager->get_escaped_ids( 'container' );
 		$active_parsers    = $manager->get_escaped_ids( 'parser' );
 
@@ -624,7 +614,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 	 *
 	 * @return bool
 	 */
-	function blc_cleanup_instances() {
+	function avpvh_lnkc_cleanup_instances() {
 		global $wpdb; /** @var wpdb $wpdb */
 		global $blclog;
 
@@ -632,7 +622,7 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 		$start   = microtime( true );
 		$q       = "DELETE instances.*
 		  FROM
-  			{$wpdb->prefix}blc_instances AS instances LEFT JOIN {$wpdb->prefix}blc_synch AS synch
+  			{$wpdb->prefix}avpvh_lnkc_instances AS instances LEFT JOIN {$wpdb->prefix}avpvh_lnkc_synch AS synch
   			ON instances.container_type = synch.container_type AND instances.container_id = synch.container_id
 		  WHERE
  			synch.container_id IS NULL";
@@ -642,12 +632,12 @@ if ( ! class_exists( 'blcLinkInstance' ) ) {
 
 		//Delete instances that reference containers and parsers that are no longer active
 		$start             = microtime( true );
-		$manager           = blcModuleManager::getInstance();
+		$manager           = Avpvh_Lnkc_Module_Manager::getInstance();
 		$active_containers = $manager->get_escaped_ids( 'container' );
 		$active_parsers    = $manager->get_escaped_ids( 'parser' );
 
 		$q       = "DELETE instances.*
-	      FROM {$wpdb->prefix}blc_instances AS instances
+	      FROM {$wpdb->prefix}avpvh_lnkc_instances AS instances
 	      WHERE
 	        instances.container_type NOT IN ({$active_containers}) OR
 	        instances.parser_type NOT IN ({$active_parsers})";

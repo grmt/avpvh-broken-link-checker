@@ -6,24 +6,24 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcYouTubeIframe
+ModuleClassName: Avpvh_Lnkc_Youtube_Iframe
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 120
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcYouTubeIframe extends blcEmbedParserBase {
+class Avpvh_Lnkc_Youtube_Iframe extends Avpvh_Lnkc_Embed_Parser_Base {
 	var $supported_formats = array( 'html' );
 
 	function init() {
 		parent::init();
-		$this->short_title       = __( 'YouTube Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded YouTube video', 'broken-link-checker' );
+		$this->short_title       = __( 'YouTube Video', 'avpvh-link-checker' );
+		$this->long_title        = __( 'Embedded YouTube video', 'avpvh-link-checker' );
 		$this->url_search_string = 'youtube.com/embed/';
 	}
 
@@ -34,10 +34,10 @@ class blcYouTubeIframe extends blcEmbedParserBase {
 	 * Elements without a 'src' attribute are skipped.
 	 *
 	 * Each array item has the same basic structure as the array items
-	 * returned by blcUtility::extract_tags(), plus an additional 'embed_code' key
+	 * returned by Avpvh_Lnkc_Utility::extract_tags(), plus an additional 'embed_code' key
 	 * that contains the full HTML code for the entire <ifram> tag.
 	 *
-	 * @uses blcUtility::extract_tags() This function is a simple wrapper around extract_tags()
+	 * @uses Avpvh_Lnkc_Utility::extract_tags() This function is a simple wrapper around extract_tags()
 	 *
 	 * @param string $html
 	 * @return array
@@ -49,7 +49,7 @@ class blcYouTubeIframe extends blcEmbedParserBase {
 		$html = preg_replace( '/<code[^>]*>.+?<\/code>/si', ' ', $html );
 
 		//Find likely-looking <iframe> elements
-		$iframes = blcUtility::extract_tags( $html, 'iframe', false, true );
+		$iframes = Avpvh_Lnkc_Utility::extract_tags( $html, 'iframe', false, true );
 		foreach ( $iframes as $embed ) {
 			if ( empty( $embed['attributes']['src'] ) ) {
 				continue;

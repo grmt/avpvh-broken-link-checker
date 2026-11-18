@@ -6,23 +6,23 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcYouTubeEmbed
+ModuleClassName: Avpvh_Lnkc_Youtube_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 110
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcYouTubeEmbed extends blcEmbedParserBase {
+class Avpvh_Lnkc_Youtube_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 
 	function init() {
 		parent::init();
-		$this->short_title       = __( 'YouTube Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded YouTube video', 'broken-link-checker' );
+		$this->short_title       = __( 'YouTube Video', 'avpvh-link-checker' );
+		$this->long_title        = __( 'Embedded YouTube video', 'avpvh-link-checker' );
 		$this->url_search_string = 'youtube.com/v/';
 	}
 

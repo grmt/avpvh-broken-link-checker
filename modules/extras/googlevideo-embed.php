@@ -6,23 +6,23 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcGoogleVideoEmbed
+ModuleClassName: Avpvh_Lnkc_Google_Video_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 110
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcGoogleVideoEmbed extends blcEmbedParserBase {
+class Avpvh_Lnkc_Google_Video_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 
 	function init() {
 		parent::init();
-		$this->short_title       = __( 'GoogleVideo Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded GoogleVideo video', 'broken-link-checker' );
+		$this->short_title       = __( 'GoogleVideo Video', 'avpvh-link-checker' );
+		$this->long_title        = __( 'Embedded GoogleVideo video', 'avpvh-link-checker' );
 		$this->url_search_string = 'video.google.com/';
 	}
 

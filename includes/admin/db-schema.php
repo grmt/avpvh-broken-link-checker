@@ -1,7 +1,7 @@
 <?php
 
-if ( ! function_exists( 'wpmudev_blc_local_get_charset_collate' ) ) {
-	function wpmudev_blc_local_get_charset_collate() {
+if ( ! function_exists( 'avpvh_lnkc_get_charset_collate' ) ) {
+	function avpvh_lnkc_get_charset_collate() {
 		global $wpdb;
 
 		// Let's make sure that new tables collate will match with the one set in posts table (and specifically post_status, since upon synch there's a join with that column).
@@ -43,22 +43,22 @@ if ( ! function_exists( 'wpmudev_blc_local_get_charset_collate' ) ) {
 	}
 }
 
-if ( ! function_exists( 'blc_get_db_schema' ) ) {
+if ( ! function_exists( 'avpvh_lnkc_get_db_schema' ) ) {
 
-	function blc_get_db_schema() {
+	function avpvh_lnkc_get_db_schema() {
 		global $wpdb;
 
-		$charset_collate = wpmudev_blc_local_get_charset_collate();
+		$charset_collate = avpvh_lnkc_get_charset_collate();
 
-		// Note: blc_links.url_hash intentionally has no UNIQUE KEY here. Adding the
+		// Note: avpvh_lnkc_links.url_hash intentionally has no UNIQUE KEY here. Adding the
 		// column and its unique constraint in the same pass (as this declarative
-		// schema would, via blcTableDelta::delta()) fails with a duplicate-key error
+		// schema would, via Avpvh_Lnkc_Table_Delta::delta()) fails with a duplicate-key error
 		// on any site that already has more than one link, because every existing
 		// row gets the same default '' before it's backfilled. The constraint is
-		// added explicitly, after backfilling, by blcDatabaseUpgrader::upgrade_url_hash().
-		$blc_db_schema = <<<EOM
+		// added explicitly, after backfilling, by Avpvh_Lnkc_Database_Upgrader::upgrade_url_hash().
+		$avpvh_lnkc_db_schema = <<<EOM
 
-	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}blc_filters` (
+	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}avpvh_lnkc_filters` (
 		`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 		`name` varchar(100) NOT NULL,
 		`params` text NOT NULL,
@@ -66,7 +66,7 @@ if ( ! function_exists( 'blc_get_db_schema' ) ) {
 		PRIMARY KEY (`id`)
 	) {$charset_collate};
 
-	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}blc_instances` (
+	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}avpvh_lnkc_instances` (
 		`instance_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
 		`link_id` int(10) unsigned NOT NULL,
 		`container_id` int(10) unsigned NOT NULL,
@@ -83,7 +83,7 @@ if ( ! function_exists( 'blc_get_db_schema' ) ) {
 		KEY `parser_type` (`parser_type`)
 	) {$charset_collate};
 
-	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}blc_links` (
+	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}avpvh_lnkc_links` (
 		`link_id` int(20) unsigned NOT NULL AUTO_INCREMENT,
 		`url` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
 		`url_hash` CHAR(32) NOT NULL DEFAULT '',
@@ -120,7 +120,7 @@ if ( ! function_exists( 'blc_get_db_schema' ) ) {
 
 	) {$charset_collate};
 
-	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}blc_synch` (
+	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}avpvh_lnkc_synch` (
 		`container_id` int(20) unsigned NOT NULL,
 		`container_type` varchar(40) NOT NULL,
 		`synched` tinyint(2) unsigned NOT NULL,
@@ -132,6 +132,6 @@ if ( ! function_exists( 'blc_get_db_schema' ) ) {
 
 EOM;
 
-		return $blc_db_schema;
+		return $avpvh_lnkc_db_schema;
 	}
 }

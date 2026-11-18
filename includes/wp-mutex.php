@@ -1,8 +1,8 @@
 <?php
 
-if ( ! class_exists( 'WPMutex' ) ) :
+if ( ! class_exists( 'Avpvh_Lnkc_Mutex' ) ) :
 
-	class WPMutex {
+	class Avpvh_Lnkc_Mutex {
 		/**
 		 * Get an exclusive named lock.
 		 *
@@ -14,7 +14,7 @@ if ( ! class_exists( 'WPMutex' ) ) :
 		static function acquire( $name, $timeout = 0, $network_wide = false ) {
 			global $wpdb; /* @var wpdb $wpdb */
 			if ( ! $network_wide ) {
-				$name = WPMutex::_get_private_name( $name );
+				$name = Avpvh_Lnkc_Mutex::get_private_name( $name );
 			}
 			$state = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, $timeout ) );
 			return 1 == $state;
@@ -30,7 +30,7 @@ if ( ! class_exists( 'WPMutex' ) ) :
 		static function release( $name, $network_wide = false ) {
 			global $wpdb; /* @var wpdb $wpdb */
 			if ( ! $network_wide ) {
-				$name = WPMutex::_get_private_name( $name );
+				$name = Avpvh_Lnkc_Mutex::get_private_name( $name );
 			}
 			$released = $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $name ) );
 			return 1 == $released;
@@ -44,7 +44,7 @@ if ( ! class_exists( 'WPMutex' ) ) :
 		 * @param string $name
 		 * @return string
 		 */
-		static function _get_private_name( $name ) {
+		static function get_private_name( $name ) {
 			global $current_blog;
 			if ( function_exists( 'is_multisite' ) && is_multisite() && isset( $current_blog->blog_id ) ) {
 				$name .= '-blog-' . $current_blog->blog_id;

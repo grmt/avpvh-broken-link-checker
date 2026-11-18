@@ -8,15 +8,15 @@ jQuery(function($){
 		$.getJSON(
 			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
 			{
-				'action' : 'blc_full_status',
+				'action' : 'avpvh_lnkc_full_status',
 				'random' : Math.random(),
-				'nonce' : '<?php echo wp_create_nonce( 'blc_full_status' ); ?>'
+				'nonce' : '<?php echo wp_create_nonce( 'avpvh_lnkc_full_status' ); ?>'
 			},
 			function (data, textStatus){
 				if ( data && ( typeof(data['text']) != 'undefined' ) ){
-					$('#wsblc_full_status').html(data.text);
+					$('#avpvh_lnkc_full_status').html(data.text);
 				} else {
-					$('#wsblc_full_status').html('<?php _e( '[ Network error ]', 'broken-link-checker' ); ?>');
+					$('#avpvh_lnkc_full_status').html('<?php _e( '[ Network error ]', 'avpvh-link-checker' ); ?>');
 				}
 
 				setTimeout(blcUpdateStatus, 10000);
@@ -30,18 +30,18 @@ jQuery(function($){
 		$.get(
 			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
 			{
-				'action' : 'blc_current_load',
-				'nonce' : '<?php echo esc_js( wp_create_nonce( 'blc_current_load' ) ); ?>'
+				'action' : 'avpvh_lnkc_current_load',
+				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_current_load' ) ); ?>'
 			},
 			function (data, textStatus){
-				$('#wsblc_current_load').html(data);
+				$('#avpvh_lnkc_current_load').html(data);
 
 				setTimeout(blcUpdateLoad, 10000); //...update every 10 seconds
 			}
 		);
 	}
 	//Only do it if load limiting is available on this server, though.
-	if ( $('#wsblc_current_load').length > 0 ){
+	if ( $('#avpvh_lnkc_current_load').length > 0 ){
 		blcUpdateLoad();
 	}
 
@@ -53,9 +53,9 @@ jQuery(function($){
 		var box = $('#blc-debug-info');
 		box.toggle();
 		if( box.is(':visible') ){
-			toggleButton.text('<?php _e( 'Hide debug info', 'broken-link-checker' ); ?>');
+			toggleButton.text('<?php _e( 'Hide debug info', 'avpvh-link-checker' ); ?>');
 		} else {
-			toggleButton.text('<?php _e( 'Show debug info', 'broken-link-checker' ); ?>');
+			toggleButton.text('<?php _e( 'Show debug info', 'avpvh-link-checker' ); ?>');
 		}
 
 	});
@@ -108,7 +108,7 @@ jQuery(function($){
 	//so that they notice that they need to enter the field names.
 	$('#module-checkbox-custom_field').click(function(){
 		var box = $(this);
-		var fieldList = $('#blc_custom_fields');
+		var fieldList = $('#avpvh_lnkc_custom_fields');
 		if ( box.is(':checked') && ( $.trim(fieldList.val()) == '' ) ){
 			$('#module-extra-settings-custom_field').removeClass('hidden');
 		}
@@ -118,7 +118,7 @@ jQuery(function($){
 	//so that they notice that they need to enter the field names.
 	$('#module-checkbox-acf_field').click(function(){
 		var box = $(this);
-		var fieldList = $('#blc_acf_fields');
+		var fieldList = $('#avpvh_lnkc_acf_fields');
 		if ( box.is(':checked') && ( $.trim(fieldList.val()) == '' ) ){
 			$('#module-extra-settings-acf_field').removeClass('hidden');
 		}

@@ -15,14 +15,14 @@
  * container class will look up the parsers that support the relevant format or the container's type,
  * and apply them to the to-be-parsed string.
  *
- * All sub-classes of blcParser should override at least the blcParser::parse() method.
+ * All sub-classes of Avpvh_Lnkc_Parser should override at least the Avpvh_Lnkc_Parser::parse() method.
  *
- * @see blcContainer::$fields
+ * @see Avpvh_Lnkc_Container::$fields
  *
  * @package Broken Link Checker
  * @access public
  */
-class blcParser extends blcModule {
+class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 
 	var $parser_type;
 	var $supported_formats    = array();
@@ -71,7 +71,7 @@ class blcParser extends blcModule {
 	/**
 	 * Mark containers that this parser might be interested in as unparsed.
 	 *
-	 * @uses blcContainerHelper::mark_as_unsynched_where()
+	 * @uses Avpvh_Lnkc_Container_Helper::mark_as_unsynched_where()
 	 *
 	 * @param bool $only_return If true, just return the list of formats and container types without actually modifying any synch. records.
 	 * @return void|array Either nothing or an array in the form [ [format1=>timestamp1, ...], [container_type1=>timestamp1, ...] ]
@@ -95,7 +95,7 @@ class blcParser extends blcModule {
 		if ( $only_return ) {
 			return array( $formats, $container_types );
 		} else {
-			blcContainerHelper::mark_as_unsynched_where( $formats, $container_types );
+			Avpvh_Lnkc_Container_Helper::mark_as_unsynched_where( $formats, $container_types );
 		}
 	}
 
@@ -105,7 +105,7 @@ class blcParser extends blcModule {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If ommitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new blcLinkInstance objects. The objects will include info about the links found, but not about the corresponding container entity.
+	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		return array();
@@ -121,7 +121,7 @@ class blcParser extends blcModule {
 	 * @param string $base_url The base URL to use for normalizing relative URLs.
 	 * @param string $default_link_text Link text to use when the link has none.
 	 * @param bool   $allow_url_shortcodes Whether the content comes from a trusted, site-authored source.
-	 * @return array An array of new blcLinkInstance objects.
+	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects.
 	 */
 	public function parse_container_field( $content, $base_url = '', $default_link_text = '', $allow_url_shortcodes = false ) {
 		$previous                     = $this->url_shortcodes_allowed;
@@ -181,7 +181,7 @@ class blcParser extends blcModule {
 	function edit( $content, $new_url, $old_url, $old_raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( __( "Editing is not implemented in the '%s' parser", 'broken-link-checker' ), $this->parser_type )
+			sprintf( __( "Editing is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -196,7 +196,7 @@ class blcParser extends blcModule {
 	function unlink( $content, $url, $raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( __( "Unlinking is not implemented in the '%s' parser", 'broken-link-checker' ), $this->parser_type )
+			sprintf( __( "Unlinking is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -204,7 +204,7 @@ class blcParser extends blcModule {
 	 * Get the link text for printing in the "Broken Links" table.
 	 * Sub-classes should override this method and display the link text in a way appropriate for the link type.
 	 *
-	 * @param blcLinkInstance $instance
+	 * @param Avpvh_Lnkc_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
@@ -366,7 +366,7 @@ class blcParser extends blcModule {
 	 * This method is currently only used internally, so sub-classes are not required
 	 * to implement it.
 	 *
-	 * @see blcParser::map()
+	 * @see Avpvh_Lnkc_Parser::map()
 	 *
 	 * @param string $content A text string containing the links to edit.
 	 * @param callback $callback Callback function used to modify the links.
@@ -381,23 +381,23 @@ class blcParser extends blcModule {
 /**
  * A helper class for working with parsers. All its methods should be called statically.
  *
- * @see blcParser
+ * @see Avpvh_Lnkc_Parser
  *
  * @package Broken Link Checker
  * @access public
  */
-class blcParserHelper {
+class Avpvh_Lnkc_Parser_Helper {
 
 	/**
 	 * Get the parser matching a parser type ID.
 	 *
-	 * @uses blcModuleManager::get_module()
+	 * @uses Avpvh_Lnkc_Module_Manager::get_module()
 	 *
 	 * @param string $parser_type
-	 * @return blcParser|null
+	 * @return Avpvh_Lnkc_Parser|null
 	 */
 	static function get_parser( $parser_type ) {
-		$manager = blcModuleManager::getInstance();
+		$manager = Avpvh_Lnkc_Module_Manager::getInstance();
 		return $manager->get_module( $parser_type, true, 'parser' );
 	}
 
@@ -407,13 +407,13 @@ class blcParserHelper {
 	 *
 	 * @param string $format
 	 * @param string $container_type
-	 * @return blcParser[]
+	 * @return Avpvh_Lnkc_Parser[]
 	 */
 	static function get_parsers( $format, $container_type ) {
 		$found = array();
 
 		//Retrieve a list of active parsers
-		$manager        = blcModuleManager::getInstance();
+		$manager        = Avpvh_Lnkc_Module_Manager::getInstance();
 		$active_parsers = $manager->get_modules_by_category( 'parser' );
 
 		//Try each one

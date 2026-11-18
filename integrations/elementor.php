@@ -2,15 +2,15 @@
 /**
  * Elementor Page Builder Integration
  *
- * @package Broken_Link_Checker
+ * @package Avpvh_Link_Checker
  */
 
-if ( ! class_exists( 'blcElementor' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Elementor' ) ) {
 
 	/**
 	 * Elementor Page Builder Integration
 	 */
-	class blcElementor {
+	class Avpvh_Lnkc_Elementor {
 
 		/**
 		 * Constructor

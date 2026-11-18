@@ -7,24 +7,24 @@ Author: Janis Elsts
 
 ModuleID: blogroll
 ModuleCategory: container
-ModuleClassName: blcBookmarkManager
+ModuleClassName: Avpvh_Lnkc_Bookmark_Manager
 */
 
-class blcBookmark extends blcContainer {
+class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 
 	function ui_get_source( $container_field = '', $context = 'display' ) {
 		$bookmark = $this->get_wrapped_object();
 
 		$image = sprintf(
 			'<img src="%1$s" class="blc-small-image" title="%2$s" alt="%2$s">',
-			esc_attr( plugins_url( '/images/font-awesome/font-awesome-link.png', BLC_PLUGIN_FILE_LEGACY ) ),
-			__( 'Bookmark', 'broken-link-checker' )
+			esc_attr( plugins_url( '/images/font-awesome/font-awesome-link.png', AVPVH_LNKC_PLUGIN_FILE ) ),
+			__( 'Bookmark', 'avpvh-link-checker' )
 		);
 
 		$link_name = sprintf(
 			'<a class="row-title" href="%s" title="%s">%s</a>',
 			$this->get_edit_url(),
-			__( 'Edit this bookmark', 'broken-link-checker' ),
+			__( 'Edit this bookmark', 'avpvh-link-checker' ),
 			sanitize_bookmark_field( 'link_name', $bookmark->link_name, $this->container_id, 'display' )
 		);
 
@@ -43,7 +43,7 @@ class blcBookmark extends blcContainer {
 
 		$actions = array();
 		if ( current_user_can( 'manage_links' ) ) {
-			$actions['edit']   = '<span class="edit"><a href="' . $this->get_edit_url() . '" title="' . esc_attr( __( 'Edit this bookmark', 'broken-link-checker' ) ) . '">' . __( 'Edit' ) . '</a>';
+			$actions['edit']   = '<span class="edit"><a href="' . $this->get_edit_url() . '" title="' . esc_attr( __( 'Edit this bookmark', 'avpvh-link-checker' ) ) . '">' . __( 'Edit' ) . '</a>';
 			$actions['delete'] = "<span class='delete'><a class='submitdelete' href='" . esc_url( $delete_url ) . "' onclick=\"if ( confirm('" . esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete." ), $bookmark->link_name ) ) . "') ) { return true;}return false;\">" . __( 'Delete' ) . '</a>';
 		}
 
@@ -80,7 +80,7 @@ class blcBookmark extends blcContainer {
 		if ( is_null( $this->wrapped_object ) ) {
 			return new WP_Error(
 				'no_wrapped_object',
-				__( 'Nothing to update', 'broken-link-checker' )
+				__( 'Nothing to update', 'avpvh-link-checker' )
 			);
 		}
 
@@ -94,7 +94,7 @@ class blcBookmark extends blcContainer {
 		} else {
 			return new WP_Error(
 				'update_failed',
-				sprintf( __( 'Updating bookmark %d failed', 'broken-link-checker' ), $this->container_id )
+				sprintf( __( 'Updating bookmark %d failed', 'avpvh-link-checker' ), $this->container_id )
 			);
 		}
 	}
@@ -109,7 +109,7 @@ class blcBookmark extends blcContainer {
 		if ( wp_delete_link( $this->container_id ) ) {
 			//Note that there is no need to explicitly delete the synch. record and instances
 			//associated with this link - wp_delete_link() will execute the 'delete_link' action,
-			//which will be noticed by blcBookmarkManager, which will then delete anything that needs
+			//which will be noticed by Avpvh_Lnkc_Bookmark_Manager, which will then delete anything that needs
 			//to be deleted.
 
 			//But in case the (undocumented) behaviour of wp_delete_link() changes in a later WP version,
@@ -125,7 +125,7 @@ class blcBookmark extends blcContainer {
 			}
 
 			$msg = sprintf(
-				__( 'Failed to delete blogroll link "%1$s" (%2$d)', 'broken-link-checker' ),
+				__( 'Failed to delete blogroll link "%1$s" (%2$d)', 'avpvh-link-checker' ),
 				$link_name,
 				$this->container_id
 			);
@@ -173,8 +173,8 @@ class blcBookmark extends blcContainer {
 
 }
 
-class blcBookmarkManager extends blcContainerManager {
-	var $container_class_name = 'blcBookmark';
+class Avpvh_Lnkc_Bookmark_Manager extends Avpvh_Lnkc_Container_Manager {
+	var $container_class_name = 'Avpvh_Lnkc_Bookmark';
 	var $fields               = array( 'link_url' => 'url_field' );
 
 	/**
@@ -197,13 +197,13 @@ class blcBookmarkManager extends blcContainerManager {
 	 * @param string $purpose An optional code indicating how the retrieved containers will be used.
 	 * @param bool $load_wrapped_objects Preload wrapped objects regardless of purpose.
 	 *
-	 * @return array of blcBookmark indexed by "container_type|container_id"
+	 * @return array of Avpvh_Lnkc_Bookmark indexed by "container_type|container_id"
 	 */
 	function get_containers( $containers, $purpose = '', $load_wrapped_objects = false ) {
 		$containers = $this->make_containers( $containers );
 
 		//Preload bookmark data if it is likely to be useful later
-		$preload = $load_wrapped_objects || in_array( $purpose, array( BLC_FOR_DISPLAY, BLC_FOR_PARSING ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY, AVPVH_LNKC_FOR_PARSING ) );
 		if ( $preload ) {
 			$bookmark_ids = array();
 			foreach ( $containers as $container ) {
@@ -237,14 +237,14 @@ class blcBookmarkManager extends blcContainerManager {
 			//Usually the number of bookmarks is rather small, so it's cheap enough to always
 			//drop the entire list of bookmark-related synch records and recreate it from scratch.
 			$q = $wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}blc_synch WHERE container_type = %s",
+				"DELETE FROM {$wpdb->prefix}avpvh_lnkc_synch WHERE container_type = %s",
 				$this->container_type
 			);
 			$wpdb->query( $q ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 
 		//Create new synchronization records for all bookmarks (AKA the blogroll).
-		$q = "INSERT INTO {$wpdb->prefix}blc_synch(container_id, container_type, synched)
+		$q = "INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
 			  SELECT link_id, %s, 0
 			  FROM {$wpdb->links}
 			  WHERE 1";
@@ -259,7 +259,7 @@ class blcBookmarkManager extends blcContainerManager {
 	 * @return void
 	 */
 	function hook_add_link( $link_id ) {
-		$container = blcContainerHelper::get_container( array( $this->container_type, $link_id ) );
+		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $link_id ) );
 		$container->mark_as_unsynched();
 	}
 
@@ -281,7 +281,7 @@ class blcBookmarkManager extends blcContainerManager {
 	 */
 	function hook_delete_link( $link_id ) {
 		//Get the container object.
-		$container = blcContainerHelper::get_container( array( $this->container_type, $link_id ) );
+		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $link_id ) );
 		//Get the link(s) associated with it.
 		$links = $container->get_links();
 
@@ -293,7 +293,7 @@ class blcBookmarkManager extends blcContainerManager {
 		foreach ( $links as $link ) {
 			$link_ids[] = $link->link_id;
 		}
-		blc_cleanup_links( $link_ids );
+		avpvh_lnkc_cleanup_links( $link_ids );
 	}
 
 	/**
@@ -308,7 +308,7 @@ class blcBookmarkManager extends blcContainerManager {
 				'%d blogroll link deleted.',
 				'%d blogroll links deleted.',
 				$n,
-				'broken-link-checker'
+				'avpvh-link-checker'
 			),
 			$n
 		);

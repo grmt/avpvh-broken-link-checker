@@ -5,15 +5,15 @@
  * @copyright 2010
  */
 
-if ( ! class_exists( 'blcLink' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Link' ) ) {
 
-	define( 'BLC_LINK_STATUS_UNKNOWN', 'unknown' );
-	define( 'BLC_LINK_STATUS_OK', 'ok' );
-	define( 'BLC_LINK_STATUS_INFO', 'info' );
-	define( 'BLC_LINK_STATUS_WARNING', 'warning' );
-	define( 'BLC_LINK_STATUS_ERROR', 'error' );
+	define( 'AVPVH_LNKC_LINK_STATUS_UNKNOWN', 'unknown' );
+	define( 'AVPVH_LNKC_LINK_STATUS_OK', 'ok' );
+	define( 'AVPVH_LNKC_LINK_STATUS_INFO', 'info' );
+	define( 'AVPVH_LNKC_LINK_STATUS_WARNING', 'warning' );
+	define( 'AVPVH_LNKC_LINK_STATUS_ERROR', 'error' );
 
-	class blcLink {
+	class Avpvh_Lnkc_Link {
 
 		//Object state
 		var $is_new = false;
@@ -54,7 +54,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		var $field_format;
 
 		//A cached list of the link's instances
-		var $_instances = null;
+		var $cached_instances = null;
 
 		var $http_status_codes   = array(
 			// [Informational 1xx]
@@ -138,7 +138,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 
 			if ( is_numeric( $arg ) ) {
 				//Load a link with ID = $arg from the DB.
-				$q   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}blc_links WHERE link_id=%d LIMIT 1", $arg );
+				$q   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}avpvh_lnkc_links WHERE link_id=%d LIMIT 1", $arg );
 				$arr = $wpdb->get_row( $q, ARRAY_A ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 				if ( is_array( $arr ) ) { //Loaded successfully
@@ -151,7 +151,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			} elseif ( is_string( $arg ) ) {
 				//Load a link with URL = $arg from the DB. Create a new one if the record isn't found.
 				//          $blclog->debug(__CLASS__ .':' . __FUNCTION__ . ' Trying to load a link by URL:', $arg);
-				$q   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}blc_links WHERE url=%s LIMIT 1", $arg );
+				$q   = $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}avpvh_lnkc_links WHERE url=%s LIMIT 1", $arg );
 				$arr = $wpdb->get_row( $q, ARRAY_A ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 				if ( is_array( $arr ) ) { //Loaded successfully
@@ -172,12 +172,9 @@ if ( ! class_exists( 'blcLink' ) ) {
 			}
 		}
 
-		function blcLink( $arg = null ) {
-			$this->__construct( $arg );
-		}
 
 		/**
-		 * blcLink::set_values()
+		 * Avpvh_Lnkc_Link::set_values()
 		 * Set the internal values to the ones provided in an array (doesn't sanitize).
 		 *
 		 * @param array $arr An associative array of values
@@ -225,7 +222,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 				$this->being_checked = false;
 
 				//Add an explanatory notice to the link's log
-				$error_notice = '[' . __( 'The plugin script was terminated while trying to check the link.', 'broken-link-checker' ) . ']';
+				$error_notice = '[' . __( 'The plugin script was terminated while trying to check the link.', 'avpvh-link-checker' ) . ']';
 				if ( strpos( $this->log, $error_notice ) === false ) {
 					$this->log = $error_notice . "\r\n" . $this->log;
 				}
@@ -267,14 +264,14 @@ if ( ! class_exists( 'blcLink' ) ) {
 				'status_code'      => '',
 			);
 
-			$checker = blcCheckerHelper::get_checker_for( $this->get_ascii_url() );
+			$checker = Avpvh_Lnkc_Checker_Helper::get_checker_for( $this->get_ascii_url() );
 
 			if ( is_null( $checker ) ) {
 				//Oops, there are no checker implementations that can handle this link.
 				//Assume the link is working, but leave a note in the log.
 				$this->broken        = false;
 				$this->being_checked = false;
-				$this->log           = __( "The plugin doesn't know how to check this type of link.", 'broken-link-checker' );
+				$this->log           = __( "The plugin doesn't know how to check this type of link.", 'avpvh-link-checker' );
 
 				if ( $save_results ) {
 					$this->save();
@@ -296,7 +293,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			//Filter the returned array to leave only the restricted set of keys that we're interested in.
 			$results = array_intersect_key( $results, $defaults );
 
-			//The result hash is special - see blcLink::status_changed()
+			//The result hash is special - see Avpvh_Lnkc_Link::status_changed()
 			$new_result_hash = $results['result_hash'];
 			unset( $results['result_hash'] );
 
@@ -325,7 +322,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			global $wpdb;
 			$wpdb->query( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 				$wpdb->prepare(
-					"UPDATE {$wpdb->prefix}blc_links
+					"UPDATE {$wpdb->prefix}avpvh_lnkc_links
 					SET being_checked = 1,
 						last_check_attempt = %s,
 						check_count = %d
@@ -350,7 +347,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 				return $check_results;
 			}
 
-			$configuration = blc_get_configuration();
+			$configuration = avpvh_lnkc_get_configuration();
 			if ( ! $configuration->get( 'warnings_enabled', true ) ) {
 				//The user wants all failures to be reported as "broken", regardless of severity.
 				if ( $check_results['warning'] ) {
@@ -529,7 +526,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 				 * @param bool   $broken  The new "broken" status of the link (true if the link is now marked as broken, false otherwise).
 				 * @param int    $link_id The link's database ID.
 				 */
-				do_action( 'blc_link_status_changed', $posts, $this->url, $broken, $this->link_id );
+				do_action( 'avpvh_lnkc_link_status_changed', $posts, $this->url, $broken, $this->link_id );
 			}
 
 			$this->broken      = $broken;
@@ -549,14 +546,14 @@ if ( ! class_exists( 'blcLink' ) ) {
 
 			//Add a line indicating link status to the log
 			if ( $this->broken || $this->warning ) {
-				$this->log .= "\n" . __( 'Link is broken.', 'broken-link-checker' );
+				$this->log .= "\n" . __( 'Link is broken.', 'avpvh-link-checker' );
 			} else {
-				$this->log .= "\n" . __( 'Link is valid.', 'broken-link-checker' );
+				$this->log .= "\n" . __( 'Link is valid.', 'avpvh-link-checker' );
 			}
 		}
 
 		/**
-		 * blcLink::save()
+		 * Avpvh_Lnkc_Link::save()
 		 * Save link data to DB.
 		 *
 		 * @return bool True if saved successfully, false otherwise.
@@ -589,7 +586,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 				// If a row with the same url_hash already exists, LAST_INSERT_ID() returns its
 				// existing link_id so $wpdb->insert_id is populated correctly.
 				$q = sprintf(
-					"INSERT INTO {$wpdb->prefix}blc_links( %s ) VALUES( %s )\n"
+					"INSERT INTO {$wpdb->prefix}avpvh_lnkc_links( %s ) VALUES( %s )\n"
 					. 'ON DUPLICATE KEY UPDATE link_id = LAST_INSERT_ID(link_id)',
 					implode( ', ', array_keys( $values ) ),
 					implode( ', ', array_values( $values ) )
@@ -606,13 +603,13 @@ if ( ! class_exists( 'blcLink' ) ) {
 					$blclog->error( __CLASS__ . ':' . __FUNCTION__ . ' Error adding link', $this->url );
 				}
 
-				TransactionManager::getInstance()->commit();
+				Avpvh_Lnkc_Transaction_Manager::getInstance()->commit();
 
 				return $rez;
 
 			} else {
 				if ( true !== $this->isOptionLinkChanged ) {
-					TransactionManager::getInstance()->start();
+					Avpvh_Lnkc_Transaction_Manager::getInstance()->start();
 				}
 				$this->isOptionLinkChanged = false;
 				//Generate the field = dbvalue expressions
@@ -624,7 +621,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 
 				//Update an existing DB record
 				$q = sprintf(
-					"UPDATE {$wpdb->prefix}blc_links SET %s WHERE link_id=%d",
+					"UPDATE {$wpdb->prefix}avpvh_lnkc_links SET %s WHERE link_id=%d",
 					$set_exprs,
 					intval( $this->link_id )
 				);
@@ -640,7 +637,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 					//FB::error($wpdb->last_error, "Error updating link {$this->url}");
 				}
 
-				TransactionManager::getInstance()->commit();
+				Avpvh_Lnkc_Transaction_Manager::getInstance()->commit();
 
 				return $rez;
 			}
@@ -659,7 +656,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			$dbvalues = array();
 
 			foreach ( $values as $name => $value ) {
-				//Skip fields that don't exist in the blc_links table.
+				//Skip fields that don't exist in the avpvh_lnkc_links table.
 				if ( ! isset( $this->field_format[ $name ] ) ) {
 					continue;
 				}
@@ -706,7 +703,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		function to_native_format( $values ) {
 
 			foreach ( $values as $name => $value ) {
-				//Don't process fields that don't exist in the blc_links table.
+				//Don't process fields that don't exist in the avpvh_lnkc_links table.
 				if ( ! isset( $this->field_format[ $name ] ) ) {
 					continue;
 				}
@@ -745,7 +742,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		}
 
 		/**
-		 * blcLink::edit()
+		 * Avpvh_Lnkc_Link::edit()
 		 * Edit all instances of the link by changing the URL.
 		 *
 		 * Here's how this really works : create a new link with the new URL. Then edit()
@@ -757,7 +754,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		 * @param string $new_text Optional.
 		 * @return array An associative array with these keys :
 		 *   new_link_id - the database ID of the new link.
-		 *   new_link - the new link (an instance of blcLink).
+		 *   new_link - the new link (an instance of Avpvh_Lnkc_Link).
 		 *   cnt_okay - the number of successfully edited link instances.
 		 *   cnt_error - the number of instances that caused problems.
 		 *   errors - an array of WP_Error objects corresponding to the failed edits.
@@ -766,7 +763,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			if ( ! $this->valid() ) {
 				return new WP_Error(
 					'link_invalid',
-					__( 'Link is not valid', 'broken-link-checker' )
+					__( 'Link is not valid', 'avpvh-link-checker' )
 				);
 			}
 
@@ -783,14 +780,14 @@ if ( ! class_exists( 'blcLink' ) ) {
 					'errors'      => array(
 						new WP_Error(
 							'no_instances_found',
-							__( 'This link can not be edited because it is not used anywhere on this site.', 'broken-link-checker' )
+							__( 'This link can not be edited because it is not used anywhere on this site.', 'avpvh-link-checker' )
 						),
 					),
 				);
 			};
 
 			//Load or create a link with the URL = $new_url
-			$new_link = new blcLink( $new_url );
+			$new_link = new Avpvh_Lnkc_Link( $new_url );
 			$was_new  = $new_link->is_new;
 			if ( $new_link->is_new ) {
 				//FB::log($new_link, 'Saving a new link');
@@ -809,7 +806,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 					'errors'      => array(
 						new WP_Error(
 							'link_creation_failed',
-							__( 'Failed to create a DB entry for the new URL.', 'broken-link-checker' )
+							__( 'Failed to create a DB entry for the new URL.', 'avpvh-link-checker' )
 						),
 					),
 				);
@@ -861,7 +858,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		 * Edit all of of this link's instances and replace the URL with the URL that it redirects to.
 		 * This method does nothing if the link isn't a redirect.
 		 *
-		 * @see blcLink::edit()
+		 * @see Avpvh_Lnkc_Link::edit()
 		 *
 		 * @return array|WP_Error
 		 */
@@ -869,14 +866,14 @@ if ( ! class_exists( 'blcLink' ) ) {
 			if ( ! $this->valid() ) {
 				return new WP_Error(
 					'link_invalid',
-					__( 'Link is not valid', 'broken-link-checker' )
+					__( 'Link is not valid', 'avpvh-link-checker' )
 				);
 			}
 
 			if ( ( $this->redirect_count <= 0 ) || empty( $this->final_url ) ) {
 				return new WP_Error(
 					'not_redirect',
-					__( 'This link is not a redirect', 'broken-link-checker' )
+					__( 'This link is not a redirect', 'avpvh-link-checker' )
 				);
 			}
 
@@ -903,7 +900,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 			if ( ! $this->valid() ) {
 				return new WP_Error(
 					'link_invalid',
-					__( 'Link is not valid', 'broken-link-checker' )
+					__( 'Link is not valid', 'avpvh-link-checker' )
 				);
 			}
 
@@ -930,7 +927,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 						'errors'       => array(
 							new WP_Error(
 								'deletion_failed',
-								__( "Couldn't delete the link's database record", 'broken-link-checker' )
+								__( "Couldn't delete the link's database record", 'avpvh-link-checker' )
 							),
 						),
 					);
@@ -967,7 +964,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 						$errors,
 						new WP_Error(
 							'deletion_failed',
-							__( "Couldn't delete the link's database record", 'broken-link-checker' )
+							__( "Couldn't delete the link's database record", 'avpvh-link-checker' )
 						)
 					);
 				}
@@ -1001,11 +998,11 @@ if ( ! class_exists( 'blcLink' ) ) {
 
 				if ( $remove_instances ) {
 					//Remove instances, if any
-					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}blc_instances WHERE link_id=%d", $this->link_id ) );
+					$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}avpvh_lnkc_instances WHERE link_id=%d", $this->link_id ) );
 				}
 
 				//Remove the link itself
-				$rez           = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}blc_links WHERE link_id=%d", $this->link_id ) );
+				$rez           = $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}avpvh_lnkc_links WHERE link_id=%d", $this->link_id ) );
 				$this->link_id = 0;
 
 				return $rez;
@@ -1020,21 +1017,21 @@ if ( ! class_exists( 'blcLink' ) ) {
 		 *
 		 * @param bool $ignore_cache Don't use the internally cached instance list.
 		 * @param string $purpose
-		 * @return blcLinkInstance[] An array of instance objects or FALSE on failure.
+		 * @return Avpvh_Lnkc_Link_Instance[] An array of instance objects or FALSE on failure.
 		 */
 		function get_instances( $ignore_cache = false, $purpose = '' ) {
 			if ( ! $this->valid() || empty( $this->link_id ) ) {
 				return false;
 			}
 
-			if ( $ignore_cache || is_null( $this->_instances ) ) {
-				$instances = blc_get_instances( array( $this->link_id ), $purpose );
+			if ( $ignore_cache || is_null( $this->cached_instances ) ) {
+				$instances = avpvh_lnkc_get_instances( array( $this->link_id ), $purpose );
 				if ( ! empty( $instances ) ) {
-					$this->_instances = $instances[ $this->link_id ];
+					$this->cached_instances = $instances[ $this->link_id ];
 				}
 			}
 
-			return $this->_instances;
+			return $this->cached_instances;
 		}
 
 		/**
@@ -1043,8 +1040,8 @@ if ( ! class_exists( 'blcLink' ) ) {
 		 * @return array Associative array with two keys, 'text' and 'code'.
 		 */
 		function analyse_status() {
-			$code = BLC_LINK_STATUS_UNKNOWN;
-			$text = _x( 'Unknown', 'link status', 'broken-link-checker' );
+			$code = AVPVH_LNKC_LINK_STATUS_UNKNOWN;
+			$text = _x( 'Unknown', 'link status', 'avpvh-link-checker' );
 
 			//Status text
 			if ( isset( $this->status_text ) && ! empty( $this->status_text ) && ! empty( $this->status_code ) ) {
@@ -1056,21 +1053,21 @@ if ( ! class_exists( 'blcLink' ) ) {
 			} else {
 
 				if ( $this->broken || $this->warning ) {
-					$code = BLC_LINK_STATUS_WARNING;
-					$text = __( 'Unknown Error', 'broken-link-checker' );
+					$code = AVPVH_LNKC_LINK_STATUS_WARNING;
+					$text = __( 'Unknown Error', 'avpvh-link-checker' );
 
 					if ( $this->timeout ) {
 
-						$text = __( 'Timeout', 'broken-link-checker' );
-						$code = BLC_LINK_STATUS_WARNING;
+						$text = __( 'Timeout', 'avpvh-link-checker' );
+						$code = AVPVH_LNKC_LINK_STATUS_WARNING;
 
 					} elseif ( $this->http_code ) {
 
 						//Only 404 (Not Found) and 410 (Gone) are treated as broken-for-sure.
 						if ( in_array( $this->http_code, array( 404, 410 ) ) ) {
-							$code = BLC_LINK_STATUS_ERROR;
+							$code = AVPVH_LNKC_LINK_STATUS_ERROR;
 						} else {
-							$code = BLC_LINK_STATUS_WARNING;
+							$code = AVPVH_LNKC_LINK_STATUS_WARNING;
 						}
 
 						if ( array_key_exists( intval( $this->http_code ), $this->http_status_codes ) ) {
@@ -1080,14 +1077,14 @@ if ( ! class_exists( 'blcLink' ) ) {
 				} else {
 
 					if ( ! $this->last_check ) {
-						$text = __( 'Not checked', 'broken-link-checker' );
-						$code = BLC_LINK_STATUS_UNKNOWN;
+						$text = __( 'Not checked', 'avpvh-link-checker' );
+						$code = AVPVH_LNKC_LINK_STATUS_UNKNOWN;
 					} elseif ( $this->false_positive ) {
-						$text = __( 'False positive', 'broken-link-checker' );
-						$code = BLC_LINK_STATUS_UNKNOWN;
+						$text = __( 'False positive', 'avpvh-link-checker' );
+						$code = AVPVH_LNKC_LINK_STATUS_UNKNOWN;
 					} else {
-						$text = _x( 'OK', 'link status', 'broken-link-checker' );
-						$code = BLC_LINK_STATUS_OK;
+						$text = _x( 'OK', 'link status', 'avpvh-link-checker' );
+						$code = AVPVH_LNKC_LINK_STATUS_OK;
 					}
 				}
 			}
@@ -1101,7 +1098,7 @@ if ( ! class_exists( 'blcLink' ) ) {
 		 * @return string
 		 */
 		function get_ascii_url() {
-			return blcUtility::idn_to_ascii( $this->url );
+			return Avpvh_Lnkc_Utility::idn_to_ascii( $this->url );
 		}
 
 		/**
@@ -1149,16 +1146,16 @@ if ( ! class_exists( 'blcLink' ) ) {
  * @param int|array $link_id (optional) Only check these links
  * @return bool
  */
-function blc_cleanup_links( $link_id = null ) {
+function avpvh_lnkc_cleanup_links( $link_id = null ) {
 	global $wpdb; /* @var wpdb $wpdb */
 	global $blclog;
 
 	$start = microtime( true );
-	$q     = "DELETE FROM {$wpdb->prefix}blc_links
-			USING {$wpdb->prefix}blc_links LEFT JOIN {$wpdb->prefix}blc_instances
-				ON {$wpdb->prefix}blc_instances.link_id = {$wpdb->prefix}blc_links.link_id
+	$q     = "DELETE FROM {$wpdb->prefix}avpvh_lnkc_links
+			USING {$wpdb->prefix}avpvh_lnkc_links LEFT JOIN {$wpdb->prefix}avpvh_lnkc_instances
+				ON {$wpdb->prefix}avpvh_lnkc_instances.link_id = {$wpdb->prefix}avpvh_lnkc_links.link_id
 			WHERE
-				{$wpdb->prefix}blc_instances.link_id IS NULL";
+				{$wpdb->prefix}avpvh_lnkc_instances.link_id IS NULL";
 
 	if ( null !== $link_id ) {
 		$link_ids = array_filter( wp_parse_id_list( $link_id ) );
@@ -1173,7 +1170,7 @@ function blc_cleanup_links( $link_id = null ) {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $link_ids ), '%d' ) );
 
-		$q .= $wpdb->prepare( " AND {$wpdb->prefix}blc_links.link_id IN ($placeholders)", $link_ids ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$q .= $wpdb->prepare( " AND {$wpdb->prefix}avpvh_lnkc_links.link_id IN ($placeholders)", $link_ids ); //phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	$rez     = $wpdb->query( $q ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared

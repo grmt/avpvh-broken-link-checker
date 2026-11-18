@@ -11,7 +11,7 @@ require 'containers.php';
 require 'checkers.php';
 require 'parsers.php';
 
-$blc_module_manager = blcModuleManager::getInstance(
+$avpvh_lnkc_module_manager = Avpvh_Lnkc_Module_Manager::getInstance(
 	array(
 		//List of modules active by default
 		'http',             //Link checker for the HTTP(s) protocol
@@ -35,4 +35,4 @@ $blc_module_manager = blcModuleManager::getInstance(
 require 'any-post.php';
 
 //Let other plugins register virtual modules.
-do_action( 'blc_register_modules', $blc_module_manager );
+do_action( 'avpvh_lnkc_register_modules', $avpvh_lnkc_module_manager );

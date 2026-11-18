@@ -4,18 +4,18 @@
  * Registry for BLC Configuration Manager instances
  * Singleton pattern implementation
  */
-class blcConfigurationRegistry {
+class Avpvh_Lnkc_Configuration_Registry {
 	/**
 	 * Singleton instance
 	 *
-	 * @var blcConfigurationRegistry|null
+	 * @var Avpvh_Lnkc_Configuration_Registry|null
 	 */
 	private static $instance = null;
 
 	/**
 	 * Configuration store
 	 *
-	 * @var blcConfigStore
+	 * @var Avpvh_Lnkc_Config_Store
 	 */
 	public $options;
 
@@ -24,8 +24,8 @@ class blcConfigurationRegistry {
 	 */
 	private function __construct() {
 		// Initialize registry.
-		$this->options = new blcConfigStore();
-		add_action( 'blc_configuration_options_changed', array( $this, 'invalidate_cache' ), 15, 2 );
+		$this->options = new Avpvh_Lnkc_Config_Store();
+		add_action( 'avpvh_lnkc_configuration_options_changed', array( $this, 'invalidate_cache' ), 15, 2 );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class blcConfigurationRegistry {
 	/**
 	 * Get singleton instance
 	 *
-	 * @return blcConfigurationRegistry
+	 * @return Avpvh_Lnkc_Configuration_Registry
 	 */
 	public static function get_instance() {
 		return self::$instance;
@@ -47,7 +47,7 @@ class blcConfigurationRegistry {
 	/**
 	 * Create and initialize the singleton instance
 	 *
-	 * @return blcConfigurationRegistry
+	 * @return Avpvh_Lnkc_Configuration_Registry
 	 */
 	public static function create() {
 		self::$instance = new self();
@@ -66,7 +66,7 @@ class blcConfigurationRegistry {
 	/**
 	 * Register a configuration manager
 	 *
-	 * @param  blcConfigurationManager $manager Configuration manager instance.
+	 * @param  Avpvh_Lnkc_Configuration_Manager $manager Configuration manager instance.
 	 * @return bool True on success, false if key already exists
 	 */
 	public function register( $manager ) {
@@ -84,7 +84,7 @@ class blcConfigurationRegistry {
 	 * Get a registered configuration manager
 	 *
 	 * @param string $key Unique identifier for the manager.
-	 * @return ?blcConfigurationManager Manager instance or default instance if not found
+	 * @return ?Avpvh_Lnkc_Configuration_Manager Manager instance or default instance if not found
 	 */
 	public function get_manager( $key ) {
 		if ( $this->options->has_manager( $key ) ) {
@@ -161,7 +161,7 @@ class blcConfigurationRegistry {
 	public function save_options() {
 		foreach ( $this->options->get_managers() as $manager ) {
 			if (
-				$manager instanceof blcConfigurationManager &&
+				$manager instanceof Avpvh_Lnkc_Configuration_Manager &&
 				$manager->is_modified()
 			) {
 				$manager->save_options();
@@ -177,7 +177,7 @@ class blcConfigurationRegistry {
 	public function save_defaults() {
 		foreach ( $this->options->get_managers() as $manager ) {
 			if (
-				$manager instanceof blcConfigurationManager &&
+				$manager instanceof Avpvh_Lnkc_Configuration_Manager &&
 				! $manager->db_option_loaded
 			) {
 				$manager->save_defaults();
@@ -230,7 +230,7 @@ class blcConfigurationRegistry {
 	 * Invalidate cached settings when options change.
 	 *
 	 * @param array                        $options Changed options.
-	 * @param blcConfigurationManager|null $manager Manager that changed options.
+	 * @param Avpvh_Lnkc_Configuration_Manager|null $manager Manager that changed options.
 	 * @return void
 	 */
 	public function invalidate_cache( $options, $manager = null ): void {

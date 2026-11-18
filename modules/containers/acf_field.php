@@ -8,14 +8,14 @@ Author: Janne Aalto
 
 ModuleID: acf_field
 ModuleCategory: container
-ModuleClassName: blcAcfMetaManager
+ModuleClassName: Avpvh_Lnkc_Acf_Meta_Manager
 */
 
 //Note : If it ever becomes necessary to check metadata on objects other than posts, it will
-//be fairly easy to extract a more general metadata container class from blcAcfMeta.
+//be fairly easy to extract a more general metadata container class from Avpvh_Lnkc_Acf_Meta.
 
 /**
- * blcAcfMeta - A link container class for post metadata (AKA custom fields).
+ * Avpvh_Lnkc_Acf_Meta - A link container class for post metadata (AKA custom fields).
  *
  * Due to the way metadata works, this container differs significantly from other containers :
  *    - container_field is equal to meta name, and container_id holds the ID of the post.
@@ -29,7 +29,7 @@ ModuleClassName: blcAcfMetaManager
  * @package Broken Link Checker
  * @access public
  */
-class blcAcfMeta extends blcContainer {
+class Avpvh_Lnkc_Acf_Meta extends Avpvh_Lnkc_Container {
 
 	var $meta_type = 'post';
 
@@ -50,7 +50,7 @@ class blcAcfMeta extends blcContainer {
 	}
 
 	function update_wrapped_object() {
-		trigger_error( 'Function blcAcfMeta::update_wrapped_object() does nothing and should not be used.', E_USER_WARNING );
+		trigger_error( 'Function Avpvh_Lnkc_Acf_Meta::update_wrapped_object() does nothing and should not be used.', E_USER_WARNING );
 	}
 
 	/**
@@ -99,7 +99,7 @@ class blcAcfMeta extends blcContainer {
 		if ( $rez ) {
 			return true;
 		} else {
-			return new WP_Error( 'metadata_update_failed', sprintf( __( "Failed to update the meta field '%1\$s' on %2\$s [%3\$d]", 'broken-link-checker' ), $field, $this->meta_type, $this->container_id ) );
+			return new WP_Error( 'metadata_update_failed', sprintf( __( "Failed to update the meta field '%1\$s' on %2\$s [%3\$d]", 'avpvh-link-checker' ), $field, $this->meta_type, $this->container_id ) );
 		}
 	}
 
@@ -107,7 +107,7 @@ class blcAcfMeta extends blcContainer {
 	 * "Unlink"-ing a custom fields removes all metadata fields that contain the specified URL.
 	 *
 	 * @param string $field_name
-	 * @param blcParser $parser
+	 * @param Avpvh_Lnkc_Parser $parser
 	 * @param string $url
 	 * @param string $raw_url
 	 *
@@ -129,7 +129,7 @@ class blcAcfMeta extends blcContainer {
 		if ( $rez ) {
 			return true;
 		} else {
-			return new WP_Error( 'metadata_delete_failed', sprintf( __( "Failed to delete the meta field '%1\$s' on %2\$s [%3\$d]", 'broken-link-checker' ), $field_name, $this->meta_type, $this->container_id ) );
+			return new WP_Error( 'metadata_delete_failed', sprintf( __( "Failed to delete the meta field '%1\$s' on %2\$s [%3\$d]", 'avpvh-link-checker' ), $field_name, $this->meta_type, $this->container_id ) );
 		}
 	}
 
@@ -137,7 +137,7 @@ class blcAcfMeta extends blcContainer {
 	 * Change a meta field containing the specified URL to a new URL.
 	 *
 	 * @param string $field_name Meta name
-	 * @param blcParser $parser
+	 * @param Avpvh_Lnkc_Parser $parser
 	 * @param string $new_url New URL.
 	 * @param string $old_url
 	 * @param string $old_raw_url Old meta value.
@@ -188,7 +188,7 @@ class blcAcfMeta extends blcContainer {
 
 		//Update the field with the new value returned by the parser.
 		//Notice how $old_raw_url is used instead of $old_value. $old_raw_url contains the entire old
-		//value of the metadata field (see blcMetadataParser::parse()) and thus can be used to
+		//value of the metadata field (see Avpvh_Lnkc_Metadata_Parser::parse()) and thus can be used to
 		//differentiate between multiple meta fields with identical names.
 		$update_result = $this->update_field( $field_name, $edit_result['content'], $old_raw_url );
 		if ( is_wp_error( $update_result ) ) {
@@ -261,7 +261,7 @@ class blcAcfMeta extends blcContainer {
 				}
 			}
 		}
-		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( __( 'View "%s"', 'broken-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( __( 'View "%s"', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
 
 		return $actions;
 	}
@@ -342,7 +342,7 @@ class blcAcfMeta extends blcContainer {
 			if ( wp_delete_post( $this->container_id ) ) {
 				return true;
 			} else {
-				return new WP_Error( 'delete_failed', sprintf( __( 'Failed to delete post "%1$s" (%2$d)', 'broken-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
+				return new WP_Error( 'delete_failed', sprintf( __( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
 			}
 		}
 	}
@@ -356,7 +356,7 @@ class blcAcfMeta extends blcContainer {
 		//        error_log(print_r('trash_wrapped_object', true));
 
 		if ( ! EMPTY_TRASH_DAYS ) {
-			return new WP_Error( 'trash_disabled', sprintf( __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'broken-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
+			return new WP_Error( 'trash_disabled', sprintf( __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
 		}
 
 		$post = &get_post( $this->container_id );
@@ -368,7 +368,7 @@ class blcAcfMeta extends blcContainer {
 		if ( wp_trash_post( $this->container_id ) ) {
 			return true;
 		} else {
-			return new WP_Error( 'trash_failed', sprintf( __( 'Failed to move post "%1$s" (%2$d) to the trash', 'broken-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
+			return new WP_Error( 'trash_failed', sprintf( __( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ), esc_html( get_the_title( $this->container_id ) ), $this->container_id ) );
 		}
 	}
 
@@ -393,7 +393,7 @@ class blcAcfMeta extends blcContainer {
 	}
 }
 
-class blcAcfExtractedFieldWalker {
+class Avpvh_Lnkc_Acf_Extracted_Field_Walker {
 
 	private $keys;
 
@@ -431,9 +431,9 @@ class blcAcfExtractedFieldWalker {
 	}
 }
 
-class blcAcfMetaManager extends blcContainerManager {
+class Avpvh_Lnkc_Acf_Meta_Manager extends Avpvh_Lnkc_Container_Manager {
 
-	var $container_class_name = 'blcAcfMeta';
+	var $container_class_name = 'Avpvh_Lnkc_Acf_Meta';
 
 	protected $selected_fields = array();
 
@@ -492,7 +492,7 @@ class blcAcfMetaManager extends blcContainerManager {
 	 * @param string $purpose An optional code indicating how the retrieved containers will be used.
 	 * @param bool $load_wrapped_objects Preload wrapped objects regardless of purpose.
 	 *
-	 * @return array of blcAcfMeta indexed by "container_type|container_id"
+	 * @return array of Avpvh_Lnkc_Acf_Meta indexed by "container_type|container_id"
 	 */
 	function get_containers( $containers, $purpose = '', $load_wrapped_objects = false ) {
 
@@ -511,7 +511,7 @@ class blcAcfMetaManager extends blcContainerManager {
 		don't need to actually store the results anywhere in the container object().
 		*/
 
-		$preload = $load_wrapped_objects || in_array( $purpose, array( BLC_FOR_DISPLAY ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY ) );
 		if ( $preload ) {
 			$post_ids = array();
 			foreach ( $containers as $container ) {
@@ -583,8 +583,8 @@ class blcAcfMetaManager extends blcContainerManager {
 
 		//Only check custom fields on selected post types. By default, that's "post" and "page".
 		$post_types = array( 'post', 'page' );
-		if ( class_exists( 'blcPostTypeOverlord' ) ) {
-			$overlord   = blcPostTypeOverlord::getInstance();
+		if ( class_exists( 'Avpvh_Lnkc_Post_Type_Overlord' ) ) {
+			$overlord   = Avpvh_Lnkc_Post_Type_Overlord::getInstance();
 			$post_types = array_merge( $post_types, $overlord->enabled_post_types );
 			$post_types = array_unique( $post_types );
 		}
@@ -595,7 +595,7 @@ class blcAcfMetaManager extends blcContainerManager {
 			//Create new synchronization records for all posts.
 			$blclog->log( '...... Creating synch records for all custom fields on ' . $escaped_post_types );
 			$start = microtime( true );
-			$q     = "INSERT INTO {$wpdb->prefix}blc_synch(container_id, container_type, synched)
+			$q     = "INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
 				  SELECT id, '{$this->container_type}', 0
 				  FROM {$wpdb->posts}
 				  WHERE
@@ -609,7 +609,7 @@ class blcAcfMetaManager extends blcContainerManager {
 			$start = microtime( true );
 			$q     = "DELETE synch.*
 				  FROM
-					 {$wpdb->prefix}blc_synch AS synch LEFT JOIN {$wpdb->posts} AS posts
+					 {$wpdb->prefix}avpvh_lnkc_synch AS synch LEFT JOIN {$wpdb->posts} AS posts
 					 ON posts.ID = synch.container_id
 				  WHERE
 					 synch.container_type = '{$this->container_type}' AND posts.ID IS NULL";
@@ -621,7 +621,7 @@ class blcAcfMetaManager extends blcContainerManager {
 			$blclog->log( '...... Marking custom fields on changed posts as unsynched' );
 			$start = microtime( true );
 			$q     = "UPDATE
-					{$wpdb->prefix}blc_synch AS synch
+					{$wpdb->prefix}avpvh_lnkc_synch AS synch
 					JOIN {$wpdb->posts} AS posts ON (synch.container_id = posts.ID and synch.container_type='{$this->container_type}')
 				  SET
 					synched = 0
@@ -633,10 +633,10 @@ class blcAcfMetaManager extends blcContainerManager {
 			//Create synch. records for posts that don't have them.
 			$blclog->log( '...... Creating custom field synch records for new ' . $escaped_post_types );
 			$start = microtime( true );
-			$q     = "INSERT INTO {$wpdb->prefix}blc_synch(container_id, container_type, synched)
+			$q     = "INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
 				  SELECT id, '{$this->container_type}', 0
 				  FROM
-				    {$wpdb->posts} AS posts LEFT JOIN {$wpdb->prefix}blc_synch AS synch
+				    {$wpdb->posts} AS posts LEFT JOIN {$wpdb->prefix}avpvh_lnkc_synch AS synch
 					ON (synch.container_id = posts.ID and synch.container_type='{$this->container_type}')
 				  WHERE
 				  	posts.post_status = 'publish'
@@ -709,7 +709,7 @@ class blcAcfMetaManager extends blcContainerManager {
 			return;
 		}
 
-		$container = blcContainerHelper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		$container->mark_as_unsynched();
 
 	}
@@ -724,13 +724,13 @@ class blcAcfMetaManager extends blcContainerManager {
 	function post_deleted( $post_id ) {
 		//Get the associated container object
 
-		$container = blcContainerHelper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 
 		if ( null != $container ) {
 			//Delete it
 			$container->delete();
 			//Clean up any dangling links
-			blc_cleanup_links();
+			avpvh_lnkc_cleanup_links();
 		}
 	}
 
@@ -744,21 +744,21 @@ class blcAcfMetaManager extends blcContainerManager {
 	 */
 	function post_untrashed( $post_id ) {
 		//Get the associated container object
-		$container = blcContainerHelper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		$container->mark_as_unsynched();
 	}
 
 	/**
 	 * Get the message to display after $n posts have been deleted.
 	 *
-	 * @uses blcAnyPostContainerManager::ui_bulk_delete_message()
+	 * @uses Avpvh_Lnkc_Any_Post_Container_Manager::ui_bulk_delete_message()
 	 *
 	 * @param int $n Number of deleted posts.
 	 *
 	 * @return string A delete confirmation message, e.g. "5 posts were moved to the trash"
 	 */
 	function ui_bulk_delete_message( $n ) {
-		return blcAnyPostContainerManager::ui_bulk_delete_message( $n );
+		return Avpvh_Lnkc_Any_Post_Container_Manager::ui_bulk_delete_message( $n );
 	}
 
 	/**
@@ -769,6 +769,6 @@ class blcAcfMetaManager extends blcContainerManager {
 	 * @return string A confirmation message, e.g. "5 posts were moved to trash"
 	 */
 	function ui_bulk_trash_message( $n ) {
-		return blcAnyPostContainerManager::ui_bulk_trash_message( $n );
+		return Avpvh_Lnkc_Any_Post_Container_Manager::ui_bulk_trash_message( $n );
 	}
 }

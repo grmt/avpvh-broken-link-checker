@@ -9,7 +9,7 @@ ModuleID: rapidshare-checker
 ModuleCategory: checker
 ModuleContext: on-demand
 ModuleLazyInit: true
-ModuleClassName: blcRapidShareChecker
+ModuleClassName: Avpvh_Lnkc_Rapidshare_Checker
 ModulePriority: 100
 
 ModuleCheckerUrlPattern: @^https?://(?:[\w\d]+\.)*rapidshare\.\w+/files/(\d+)/([^&?#/]+?)(?:$|[&?#/])@i
@@ -22,7 +22,7 @@ ModuleCheckerUrlPattern: @^https?://(?:[\w\d]+\.)*rapidshare\.\w+/files/(\d+)/([
  * @author Janis Elsts
  * @access public
  */
-class blcRapidShareChecker extends blcChecker {
+class Avpvh_Lnkc_Rapidshare_Checker extends Avpvh_Lnkc_Checker {
 
 	/**
 	 * Determine if the checker can parse a specific URL.
@@ -48,7 +48,7 @@ class blcRapidShareChecker extends blcChecker {
 			'redirect_count' => 0,
 			'timeout'        => false,
 			'broken'         => false,
-			'log'            => sprintf( "<em>(%s)</em>\n\n", __( 'Using RapidShare API', 'broken-link-checker' ) ),
+			'log'            => sprintf( "<em>(%s)</em>\n\n", __( 'Using RapidShare API', 'avpvh-link-checker' ) ),
 			'result_hash'    => '',
 			'status_code'    => '',
 			'status_text'    => '',
@@ -98,7 +98,7 @@ class blcRapidShareChecker extends blcChecker {
 			$file_name
 		);
 
-		$conf = blc_get_configuration();
+		$conf = avpvh_lnkc_get_configuration();
 		$args = array( 'timeout' => $conf->options['timeout'] );
 
 		$start                      = microtime_float();
@@ -135,58 +135,58 @@ class blcRapidShareChecker extends blcChecker {
 						case 0:
 							$file_status_text      = 'File not found';
 							$result['broken']      = true;
-							$result['status_code'] = BLC_LINK_STATUS_ERROR;
-							$result['status_text'] = __( 'Not Found', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+							$result['status_text'] = __( 'Not Found', 'avpvh-link-checker' );
 							break;
 
 						case 1:
 							$file_status_text      = 'File OK (Anonymous downloading)';
-							$result['status_code'] = BLC_LINK_STATUS_OK;
-							$result['status_text'] = _x( 'OK', 'link status', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
+							$result['status_text'] = _x( 'OK', 'link status', 'avpvh-link-checker' );
 							break;
 
 						case 2:
 							$file_status_text      = 'File OK (TrafficShare direct download without any logging)';
-							$result['status_code'] = BLC_LINK_STATUS_OK;
-							$result['status_text'] = _x( 'OK', 'link status', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
+							$result['status_text'] = _x( 'OK', 'link status', 'avpvh-link-checker' );
 							break;
 
 						case 3:
 							$file_status_text      = 'Server down';
 							$result['broken']      = true;
-							$result['status_code'] = BLC_LINK_STATUS_WARNING;
-							$result['status_text'] = __( 'RS Server Down', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+							$result['status_text'] = __( 'RS Server Down', 'avpvh-link-checker' );
 							break;
 
 						case 4:
 							$file_status_text      = 'File marked as illegal';
 							$result['broken']      = true;
-							$result['status_code'] = BLC_LINK_STATUS_ERROR;
-							$result['status_text'] = __( 'File Blocked', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+							$result['status_text'] = __( 'File Blocked', 'avpvh-link-checker' );
 							break;
 
 						case 5:
 							$file_status_text      = 'Anonymous file locked because it has more than 10 downloads';
 							$result['broken']      = true;
-							$result['status_code'] = BLC_LINK_STATUS_WARNING;
-							$result['status_text'] = __( 'File Locked', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+							$result['status_text'] = __( 'File Locked', 'avpvh-link-checker' );
 							break;
 
 						case 6:
 							$file_status_text      = 'File OK (TrafficShare direct download with enabled logging)';
-							$result['status_code'] = BLC_LINK_STATUS_OK;
-							$result['status_text'] = _x( 'OK', 'link status', 'broken-link-checker' );
+							$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
+							$result['status_text'] = _x( 'OK', 'link status', 'avpvh-link-checker' );
 							break;
 					}
 
 					$result['log'] .= sprintf(
-						__( 'RapidShare : %s', 'broken-link-checker' ),
+						__( 'RapidShare : %s', 'avpvh-link-checker' ),
 						$file_status_text
 					);
 
 				} else {
 					$result['log'] .= sprintf(
-						__( 'RapidShare API error: %s', 'broken-link-checker' ),
+						__( 'RapidShare API error: %s', 'avpvh-link-checker' ),
 						esc_html( $response['body'] )
 					);
 				}

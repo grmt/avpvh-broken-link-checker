@@ -1,15 +1,15 @@
 <?php
 
-class blcModuleManager {
+class Avpvh_Lnkc_Module_Manager {
 
-	/* @var blcConfigurationManager */
+	/* @var Avpvh_Lnkc_Configuration_Manager */
 	var $plugin_conf;
 	var $module_dir = '';
 
-	var $_module_cache;
-	var $_category_cache;
-	var $_category_cache_active;
-	var $_virtual_modules = array();
+	var $module_cache;
+	var $category_cache;
+	var $category_cache_active;
+	var $virtual_modules = array();
 
 	var $loaded;
 	var $instances;
@@ -25,7 +25,7 @@ class blcModuleManager {
 	function init( $default_active_modules = null ) {
 		$this->module_dir = realpath( dirname( __FILE__ ) . '/../modules' );
 
-		$this->plugin_conf            = blc_get_configuration();
+		$this->plugin_conf            = avpvh_lnkc_get_configuration();
 		$this->default_active_modules = $default_active_modules;
 
 		$this->loaded    = array();
@@ -38,13 +38,13 @@ class blcModuleManager {
 	 * Get an instance of the module manager.
 	 *
 	 * @param array|null $default_active_modules
-	 * @return blcModuleManager
+	 * @return Avpvh_Lnkc_Module_Manager
 	 */
 	//phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 	static function getInstance( $default_active_modules = null ) {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
-			$instance = new blcModuleManager();
+			$instance = new Avpvh_Lnkc_Module_Manager();
 			$instance->init( $default_active_modules );
 		}
 		return $instance;
@@ -58,7 +58,7 @@ class blcModuleManager {
 	 * @return array An associative array of module headers indexed by module ID.
 	 */
 	function get_modules() {
-		if ( ! isset( $this->_module_cache ) ) {
+		if ( ! isset( $this->module_cache ) ) {
 			//Refresh the module cache.
 
 			$relative_path = '/' . plugin_basename( $this->module_dir );
@@ -68,7 +68,7 @@ class blcModuleManager {
 			}
 			$modules = get_plugins( $relative_path );
 
-			$this->_module_cache = array();
+			$this->module_cache = array();
 
 			foreach ( $modules as $module_filename => $module_header ) {
 				//Figure out the module ID. If not specified, it is equal to module's filename (sans the .php)
@@ -79,13 +79,13 @@ class blcModuleManager {
 				}
 
 				$module_header                     = $this->normalize_module_header( $module_header, $module_id, $module_filename );
-				$this->_module_cache[ $module_id ] = $module_header;
+				$this->module_cache[ $module_id ] = $module_header;
 			}
 
-			$this->_category_cache = null;
+			$this->category_cache = null;
 		}
 
-		return array_merge( $this->_module_cache, $this->_virtual_modules );
+		return array_merge( $this->module_cache, $this->virtual_modules );
 	}
 
 	/**
@@ -108,8 +108,8 @@ class blcModuleManager {
 	 * @return array An array of categories or module data.
 	 */
 	function get_modules_by_category( $category = '', $markup = false, $translate = false ) {
-		if ( ! isset( $this->_category_cache ) ) {
-			$this->_category_cache = $this->sort_into_categories( $this->get_modules() );
+		if ( ! isset( $this->category_cache ) ) {
+			$this->category_cache = $this->sort_into_categories( $this->get_modules() );
 		}
 
 		if ( empty( $category ) ) {
@@ -117,11 +117,11 @@ class blcModuleManager {
 
 				//Translate/apply markup to module headers
 				$processed = array();
-				foreach ( $this->_category_cache as $category_id => $modules ) {
+				foreach ( $this->category_cache as $category_id => $modules ) {
 					$processed[ $category_id ] = array();
 					foreach ( $modules as $module_id => $module_data ) {
 						if ( $translate ) {
-							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'broken-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 						}
 						$processed[ $category_id ][ $module_id ] = $module_data;
 					}
@@ -129,22 +129,22 @@ class blcModuleManager {
 
 				return $processed;
 			} else {
-				return $this->_category_cache;
+				return $this->category_cache;
 			}
 		} else {
-			if ( isset( $this->_category_cache[ $category ] ) ) {
+			if ( isset( $this->category_cache[ $category ] ) ) {
 				if ( $markup || $translate ) {
 					//Translate/apply markup to module headers
 					$processed = array();
-					foreach ( $this->_category_cache[ $category ] as $module_id => $module_data ) {
+					foreach ( $this->category_cache[ $category ] as $module_id => $module_data ) {
 						if ( $translate ) {
-							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'broken-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 						}
 						$processed[ $module_id ] = $module_data;
 					}
 					return $processed;
 				} else {
-					return $this->_category_cache[ $category ];
+					return $this->category_cache[ $category ];
 				}
 			} else {
 				return array();
@@ -155,21 +155,21 @@ class blcModuleManager {
 	/**
 	 * Retrieve active modules that match a specific category, or all active modules sorted by categories.
 	 *
-	 * @see blcModuleManager::get_modules_by_category()
+	 * @see Avpvh_Lnkc_Module_Manager::get_modules_by_category()
 	 *
 	 * @param string $category Category id. Optional.
 	 * @return array An associative array of categories or module data.
 	 */
 	function get_active_by_category( $category = '' ) {
-		if ( ! isset( $this->_category_cache_active ) ) {
-			$this->_category_cache_active = $this->sort_into_categories( $this->get_active_modules() );
+		if ( ! isset( $this->category_cache_active ) ) {
+			$this->category_cache_active = $this->sort_into_categories( $this->get_active_modules() );
 		}
 
 		if ( empty( $category ) ) {
-			return $this->_category_cache_active;
+			return $this->category_cache_active;
 		} else {
-			if ( isset( $this->_category_cache_active[ $category ] ) ) {
-				return $this->_category_cache_active[ $category ];
+			if ( isset( $this->category_cache_active[ $category ] ) ) {
+				return $this->category_cache_active[ $category ];
 			} else {
 				return array();
 			}
@@ -248,7 +248,7 @@ class blcModuleManager {
 	 * @param string $module_id Module ID.
 	 * @param bool $autoload Optional. Whether to load the module file if it's not loaded yet. Defaults to TRUE.
 	 * @param string $category Optional. Return the module only if it's in a specific category. Categories are ignored by default.
-	 * @return blcModule A reference to a module object, or NULL on error.
+	 * @return Avpvh_Lnkc_Module A reference to a module object, or NULL on error.
 	 */
 	function get_module( $module_id, $autoload = true, $category = '' ) {
 		$no_result = null;
@@ -289,8 +289,8 @@ class blcModuleManager {
 	 */
 	function get_module_data( $module_id, $use_active_cache = true ) {
 		//Check virtual modules
-		if ( isset( $this->_virtual_modules[ $module_id ] ) ) {
-			return $this->_virtual_modules[ $module_id ];
+		if ( isset( $this->virtual_modules[ $module_id ] ) ) {
+			return $this->virtual_modules[ $module_id ];
 		}
 
 		//Check active modules
@@ -299,12 +299,12 @@ class blcModuleManager {
 		}
 
 		//Otherwise, use the general module cache
-		if ( ! isset( $this->_module_cache ) ) {
+		if ( ! isset( $this->module_cache ) ) {
 			$this->get_modules(); //Populates the cache
 		}
 
-		if ( isset( $this->_module_cache[ $module_id ] ) ) {
-			return $this->_module_cache[ $module_id ];
+		if ( isset( $this->module_cache[ $module_id ] ) ) {
+			return $this->module_cache[ $module_id ];
 		} else {
 			return false;
 		}
@@ -451,7 +451,7 @@ class blcModuleManager {
 			$this->plugin_conf->options['active_modules'] = $active_modules;
 			$this->plugin_conf->save_options();
 			//Invalidate the per-category active module cache
-			$this->_category_cache_active = null;
+			$this->category_cache_active = null;
 
 			//Notify the module that it's been activated
 			$module = $this->get_module( $module_id );
@@ -509,7 +509,7 @@ class blcModuleManager {
 		$this->plugin_conf->save_options();
 		$this->refresh_active_module_cache();
 
-		$this->_category_cache_active = null; //Invalidate the by-category cache since we just changed something
+		$this->category_cache_active = null; //Invalidate the by-category cache since we just changed something
 		return true;
 	}
 
@@ -555,7 +555,7 @@ class blcModuleManager {
 		$this->refresh_active_module_cache();
 
 		//Invalidate the per-category active module cache
-		$this->_category_cache_active = null;
+		$this->category_cache_active = null;
 	}
 
 	/**
@@ -608,7 +608,7 @@ class blcModuleManager {
 		$this->plugin_conf->options['all_modules'] = $all_modules;
 
 		$this->plugin_conf->save_options();
-		$this->_category_cache_active = null; //Invalidate the by-category active module cache
+		$this->category_cache_active = null; //Invalidate the by-category active module cache
 		return $this->plugin_conf->options['all_modules'];
 	}
 
@@ -677,7 +677,7 @@ class blcModuleManager {
 
 			//Virtual modules don't need to be explicitly loaded, but they must
 			//be registered.
-			if ( ! array_key_exists( $module_id, $this->_virtual_modules ) ) {
+			if ( ! array_key_exists( $module_id, $this->virtual_modules ) ) {
 				return false;
 			}
 			$this->loaded[ $module_id ] = true;
@@ -699,7 +699,7 @@ class blcModuleManager {
 	 *
 	 * @param string $module_id
 	 * @param array $module_data Optional. The header data of the module that needs to be instantiated. If not specified, it will be retrieved automatically.
-	 * @return object The newly instantiated module object (extends blcModule), or NULL on error.
+	 * @return object The newly instantiated module object (extends Avpvh_Lnkc_Module), or NULL on error.
 	 */
 	function init_module( $module_id, $module_data = null ) {
 		//Each module is only instantiated once.
@@ -745,7 +745,7 @@ class blcModuleManager {
 	function register_virtual_module( $module_id, $module_data ) {
 		$module_data                          = $this->normalize_module_header( $module_data, $module_id );
 		$module_data['virtual']               = true;
-		$this->_virtual_modules[ $module_id ] = $module_data;
+		$this->virtual_modules[ $module_id ] = $module_data;
 	}
 
 	/**
@@ -834,7 +834,7 @@ class blcModuleManager {
 			}
 		} else {
 			//Virtual modules need to be currently registered
-			if ( ! array_key_exists( $module_data['ModuleID'], $this->_virtual_modules ) ) {
+			if ( ! array_key_exists( $module_data['ModuleID'], $this->virtual_modules ) ) {
 				return new WP_Error( 'module_not_registered', 'The virtual module is not registered' );
 			}
 		}
@@ -884,7 +884,7 @@ class blcModuleManager {
 			'ModuleHidden'       => 'false',
 			'ModuleAlwaysActive' => 'false',
 			'ModuleRequiresPro'  => 'false',
-			'TextDomain'         => 'broken-link-checker', //For translating module headers
+			'TextDomain'         => 'avpvh-link-checker', //For translating module headers
 		);
 
 		$module_header['ModuleID'] = $module_id;   //Just for consistency
@@ -928,8 +928,8 @@ class blcModuleManager {
 	 *
 	 * @return string
 	 */
-	function _build_header_translation_code() {
-		$this->_module_cache = null; //Clear the cache
+	function build_header_translation_code() {
+		$this->module_cache = null; //Clear the cache
 		$modules             = $this->get_modules();
 
 		$strings = array();
@@ -939,7 +939,7 @@ class blcModuleManager {
 			}
 			if ( ! empty( $module_header['Name'] ) ) {
 				$strings[] = sprintf(
-					'_x("%s", "module name", "broken-link-checker");',
+					'_x("%s", "module name", "avpvh-link-checker");',
 					str_replace( '"', '\"', $module_header['Name'] )
 				);
 			}

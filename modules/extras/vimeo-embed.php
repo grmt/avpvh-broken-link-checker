@@ -6,23 +6,23 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcVimeoEmbed
+ModuleClassName: Avpvh_Lnkc_Vimeo_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcVimeoEmbed extends blcEmbedParserBase {
+class Avpvh_Lnkc_Vimeo_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 	var $supported_formats = array( 'html' );
 
 	function init() {
 		parent::init();
 		$this->url_search_string = 'vimeo.com/moogaloop.swf?';
-		$this->short_title       = __( 'Vimeo Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded Vimeo video', 'broken-link-checker' );
+		$this->short_title       = __( 'Vimeo Video', 'avpvh-link-checker' );
+		$this->long_title        = __( 'Embedded Vimeo video', 'avpvh-link-checker' );
 	}
 
 	function link_url_from_src( $src ) {

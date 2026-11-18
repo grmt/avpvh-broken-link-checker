@@ -6,7 +6,7 @@
  * Version:     1.0.0
  * Author:      grmt
  * Author URI:  https://github.com/grmt/avpvh-link-checker
- * Text Domain: broken-link-checker
+ * Text Domain: avpvh-link-checker
  * Domain Path: /languages
  * Requires at least: 7.1
  * Requires PHP: 8.4
@@ -22,8 +22,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'BLC_DIRECTORY_LEGACY', __DIR__ );
-define( 'BLC_PLUGIN_FILE_LEGACY', __FILE__ );
+define( 'AVPVH_LNKC_DIRECTORY', __DIR__ );
+define( 'AVPVH_LNKC_PLUGIN_FILE', __FILE__ );
 
 add_action(
 	'plugins_loaded',

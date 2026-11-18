@@ -2,24 +2,24 @@
 /**
  * SiteOrigin Page Builder Integration
  *
- * @package Broken_Link_Checker
+ * @package Avpvh_Link_Checker
  */
 
-if ( ! class_exists( 'blcSiteOrigin' ) ) {
+if ( ! class_exists( 'Avpvh_Lnkc_Site_Origin' ) ) {
 
 	/**
 	 * SiteOrigin Page Builder Integration
 	 */
-	class blcSiteOrigin {
+	class Avpvh_Lnkc_Site_Origin {
 
 		/**
 		 * Constructor
 		 */
 		protected function __construct() {
 
-			add_filter( 'blc-parser-html-link-content', array( $this, 'decode_html_widget' ) );
-			add_filter( 'blc_parser_html_link_pre_content', array( $this, 'decode_html_widget' ) );
-			add_filter( 'blc_parser_html_link_post_content', array( $this, 'encode_back_html_widget' ) );
+			add_filter( 'avpvh_lnkc_parser_html_link_content', array( $this, 'decode_html_widget' ) );
+			add_filter( 'avpvh_lnkc_parser_html_link_pre_content', array( $this, 'decode_html_widget' ) );
+			add_filter( 'avpvh_lnkc_parser_html_link_post_content', array( $this, 'encode_back_html_widget' ) );
 		}
 
 		/**

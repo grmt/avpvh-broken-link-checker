@@ -9,7 +9,7 @@ ModuleID: taxonomy_checker
 ModuleCategory: checker
 ModuleContext: on-demand
 ModuleLazyInit: true
-ModuleClassName: blcTaxonomyChecker
+ModuleClassName: Avpvh_Lnkc_Taxonomy_Checker
 ModulePriority: -1
 */
 
@@ -24,7 +24,7 @@ ModulePriority: -1
  * @package Broken Link Checker
  * @access public
  */
-class blcTaxonomyChecker extends blcChecker {
+class Avpvh_Lnkc_Taxonomy_Checker extends Avpvh_Lnkc_Checker {
 
 	/**
 	 * Returns true for any URL using the taxonomy:// pseudo-scheme.
@@ -60,7 +60,7 @@ class blcTaxonomyChecker extends blcChecker {
 			return array(
 				'broken'      => true,
 				'http_code'   => 0,
-				'log'         => __( 'Could not determine taxonomy slug from the stored URL.', 'broken-link-checker' ),
+				'log'         => __( 'Could not determine taxonomy slug from the stored URL.', 'avpvh-link-checker' ),
 				'result_hash' => 'taxonomy_empty_slug',
 			);
 		}
@@ -70,7 +70,7 @@ class blcTaxonomyChecker extends blcChecker {
 				'broken'      => false,
 				'http_code'   => 200,
 				/* translators: %s: taxonomy slug */
-				'log'         => sprintf( __( "Taxonomy '%s' is registered.", 'broken-link-checker' ), $taxonomy ),
+				'log'         => sprintf( __( "Taxonomy '%s' is registered.", 'avpvh-link-checker' ), $taxonomy ),
 				'result_hash' => 'taxonomy_valid|' . $taxonomy,
 			);
 		}
@@ -79,7 +79,7 @@ class blcTaxonomyChecker extends blcChecker {
 			'broken'      => true,
 			'http_code'   => 404,
 			/* translators: %s: taxonomy slug */
-			'log'         => sprintf( __( "Taxonomy '%s' is not registered. The term relationship may be orphaned.", 'broken-link-checker' ), $taxonomy ),
+			'log'         => sprintf( __( "Taxonomy '%s' is not registered. The term relationship may be orphaned.", 'avpvh-link-checker' ), $taxonomy ),
 			'result_hash' => 'taxonomy_invalid|' . $taxonomy,
 		);
 	}

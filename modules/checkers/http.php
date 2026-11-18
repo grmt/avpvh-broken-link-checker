@@ -10,32 +10,32 @@ ModuleID: http
 ModuleCategory: checker
 ModuleContext: on-demand
 ModuleLazyInit: true
-ModuleClassName: blcHttpChecker
+ModuleClassName: Avpvh_Lnkc_Http_Checker
 ModulePriority: -1
 */
 
-require_once BLC_DIRECTORY_LEGACY . '/includes/token-bucket.php';
+require_once AVPVH_LNKC_DIRECTORY . '/includes/token-bucket.php';
 
 // TODO: Rewrite sub-classes as transports, not stand-alone checkers
-class blcHttpChecker extends blcChecker {
-	/* @var blcChecker */
+class Avpvh_Lnkc_Http_Checker extends Avpvh_Lnkc_Checker {
+	/* @var Avpvh_Lnkc_Checker */
 	var $implementation = null;
 
-	/** @var  blcTokenBucketList */
+	/** @var  Avpvh_Lnkc_Token_Bucket_List */
 	private $token_bucket_list;
 
 	function init() {
 		parent::init();
 
-		$conf                    = blc_get_configuration();
-		$this->token_bucket_list = new blcTokenBucketList(
+		$conf                    = avpvh_lnkc_get_configuration();
+		$this->token_bucket_list = new Avpvh_Lnkc_Token_Bucket_List(
 			$conf->get( 'http_throttle_rate', 3 ),
 			$conf->get( 'http_throttle_period', 15 ),
 			$conf->get( 'http_throttle_min_interval', 2 )
 		);
 
-		if ( apply_filters( 'wpmudev_blc_local_use_curl', function_exists( 'curl_init' ) || is_callable( 'curl_init' ) )  ) {
-			$this->implementation = new blcCurlHttp(
+		if ( apply_filters( 'avpvh_lnkc_use_curl', function_exists( 'curl_init' ) || is_callable( 'curl_init' ) )  ) {
+			$this->implementation = new Avpvh_Lnkc_Curl_Http(
 				$this->module_id,
 				$this->cached_header,
 				$this->plugin_conf,
@@ -43,7 +43,7 @@ class blcHttpChecker extends blcChecker {
 			);
 		} else {
 			// try and use wp request method
-			$this->implementation = new blcWPHttp(
+			$this->implementation = new Avpvh_Lnkc_Wp_Http(
 				$this->module_id,
 				$this->cached_header,
 				$this->plugin_conf,
@@ -81,7 +81,7 @@ class blcHttpChecker extends blcChecker {
  * @package Broken Link Checker
  * @access public
  */
-class blcHttpCheckerBase extends blcChecker {
+class Avpvh_Lnkc_Http_Checker_Base extends Avpvh_Lnkc_Checker {
 
 	function clean_url( $url ) {
 		$url = html_entity_decode( $url );
@@ -416,7 +416,7 @@ class blcHttpCheckerBase extends blcChecker {
 
 }
 
-class blcCurlHttp extends blcHttpCheckerBase {
+class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 
 	var $last_headers = '';
 
@@ -446,9 +446,9 @@ class blcCurlHttp extends blcHttpCheckerBase {
 			$result = array(
 				'warning'     => true,
 				'log'         => "Invalid URL.\nURL fails to pass validation for safe use in the HTTP API.",
-				'status_text' => __( 'Invalid URL', 'broken-link-checker' ),
+				'status_text' => __( 'Invalid URL', 'avpvh-link-checker' ),
 				'error_code'  => 'invalid_url',
-				'status_code' => BLC_LINK_STATUS_WARNING,
+				'status_code' => AVPVH_LNKC_LINK_STATUS_WARNING,
 			);
 
 			return $result;
@@ -457,7 +457,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 		$blclog->debug( __CLASS__ . ' Clean URL:', $url );
 
 		// Get the BLC configuration. It's used below to set the right timeout values and such.
-		$conf = blc_get_configuration();
+		$conf = avpvh_lnkc_get_configuration();
 
 		$nobody = ! $use_get; // Whether to send a HEAD request (the default) or a GET request
 
@@ -541,13 +541,13 @@ class blcCurlHttp extends blcHttpCheckerBase {
 			$result['redirect_count'] = 0;
 			$result['broken']         = false;
 			$result['warning']        = true;
-			$result['status_code']    = BLC_LINK_STATUS_WARNING;
-			$result['status_text']    = __( 'Unsafe Redirect', 'broken-link-checker' );
+			$result['status_code']    = AVPVH_LNKC_LINK_STATUS_WARNING;
+			$result['status_text']    = __( 'Unsafe Redirect', 'avpvh-link-checker' );
 			$result['error_code']     = 'unsafe_redirect';
 
 			$log .= sprintf(
 				/* translators: %s: host name of the redirect target that was refused. */
-				__( 'Refused to follow a redirect to "%s" because it resolves to a private, loopback or otherwise reserved address.', 'broken-link-checker' ),
+				__( 'Refused to follow a redirect to "%s" because it resolves to a private, loopback or otherwise reserved address.', 'avpvh-link-checker' ),
 				esc_html( (string) $blocked_host )
 			) . "\n";
 
@@ -561,7 +561,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 					$result['http_code'],
 					'0',
 					'0',
-					blcLink::remove_query_string( $result['final_url'] ),
+					Avpvh_Lnkc_Link::remove_query_string( $result['final_url'] ),
 				)
 			);
 
@@ -601,8 +601,8 @@ class blcCurlHttp extends blcHttpCheckerBase {
 			// different names or values in PHP.
 			switch ( $error_code ) {
 				case 6: // CURLE_COULDNT_RESOLVE_HOST
-					$result['status_code'] = BLC_LINK_STATUS_WARNING;
-					$result['status_text'] = __( 'Server Not Found', 'broken-link-checker' );
+					$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+					$result['status_text'] = __( 'Server Not Found', 'avpvh-link-checker' );
 					$result['error_code']  = 'couldnt_resolve_host';
 					break;
 
@@ -617,19 +617,19 @@ class blcCurlHttp extends blcHttpCheckerBase {
 					if ( $result['request_duration'] >= 0.9 * $conf->options['timeout'] ) {
 						$result['timeout'] = true;
 					} else {
-						$result['status_code'] = BLC_LINK_STATUS_WARNING;
-						$result['status_text'] = __( 'Connection Failed', 'broken-link-checker' );
+						$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+						$result['status_text'] = __( 'Connection Failed', 'avpvh-link-checker' );
 						$result['error_code']  = 'connection_failed';
 					}
 					break;
 
 				default:
-					$result['status_code'] = BLC_LINK_STATUS_WARNING;
-					$result['status_text'] = __( 'Unknown Error', 'broken-link-checker' );
+					$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+					$result['status_text'] = __( 'Unknown Error', 'avpvh-link-checker' );
 			}
 		} elseif ( 999 === $final_http_code ) {
-			$result['status_code'] = BLC_LINK_STATUS_WARNING;
-			$result['status_text'] = __( 'Unknown Error', 'broken-link-checker' );
+			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+			$result['status_text'] = __( 'Unknown Error', 'avpvh-link-checker' );
 			$result['warning']     = true;
 		} else {
 			$result['broken'] = $this->is_error_code( $final_http_code );
@@ -644,7 +644,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 			)
 		);
 
-		$use_get = apply_filters( 'blc_use_get_checker', false, $result );
+		$use_get = apply_filters( 'avpvh_lnkc_use_get_checker', false, $result );
 
 		if ( $nobody && ! $result['timeout'] && ! $use_get && ( $result['broken'] || $result['redirect_count'] == 1 ) ) {
 			// The site in question might be expecting GET instead of HEAD, so lets retry the request
@@ -665,9 +665,9 @@ class blcCurlHttp extends blcHttpCheckerBase {
 		// Build the log from HTTP code and headers.
 		$log .= '=== ';
 		if ( $result['http_code'] ) {
-			$log .= sprintf( __( 'HTTP code : %d', 'broken-link-checker' ), $result['http_code'] );
+			$log .= sprintf( __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
 		} else {
-			$log .= __( '(No response)', 'broken-link-checker' );
+			$log .= __( '(No response)', 'avpvh-link-checker' );
 		}
 		$log .= " ===\n\n";
 
@@ -685,7 +685,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 		}
 
 		if ( ! empty( $result['broken'] ) && ! empty( $result['timeout'] ) ) {
-			$log .= "\n(" . __( "Most likely the connection timed out or the domain doesn't exist.", 'broken-link-checker' ) . ')';
+			$log .= "\n(" . __( "Most likely the connection timed out or the domain doesn't exist.", 'avpvh-link-checker' ) . ')';
 		}
 
 		$result['log'] = $log;
@@ -698,7 +698,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 				$result['http_code'],
 				! empty( $result['broken'] ) ? 'broken' : '0',
 				! empty( $result['timeout'] ) ? 'timeout' : '0',
-				blcLink::remove_query_string( $result['final_url'] ),
+				Avpvh_Lnkc_Link::remove_query_string( $result['final_url'] ),
 			)
 		);
 
@@ -708,7 +708,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 	/**
 	 * Pin the transport options that must not be negotiable.
 	 *
-	 * These are applied after the 'broken-link-checker-curl-options' filter on
+	 * These are applied after the 'avpvh_lnkc_curl_options' filter on
 	 * purpose. That filter is public, and anything switching redirect following
 	 * back on through it would hand the redirect chain to cURL again and quietly
 	 * undo the per-hop validation check() performs.
@@ -763,7 +763,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 		// Masquerade as a recent version of Chrome
 		//$ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.34 Safari/537.36';
 		// Use a custom user agent string.
-		$ua = apply_filters( 'wpmudev_blc_local_ua', 'WPMU DEV Broken Link Checker Local Engine', $url, $use_get );
+		$ua = apply_filters( 'avpvh_lnkc_ua', 'WPMU DEV Broken Link Checker Local Engine', $url, $use_get );
 		curl_setopt( $ch, CURLOPT_USERAGENT, $ua );
 
 		// Close the connection after the request (disables keep-alive). The plugin rate-limits requests,
@@ -823,12 +823,12 @@ class blcCurlHttp extends blcHttpCheckerBase {
 			curl_setopt( $ch, CURLINFO_HEADER_OUT, true );
 		}
 
-		if (  apply_filters( 'wpmudev_blc_local_accept_encoding_header', true ) ) {
+		if (  apply_filters( 'avpvh_lnkc_accept_encoding_header', true ) ) {
 			curl_setopt( $ch, CURLOPT_ENCODING, '' );
 		}
 
 		// Apply filter for additional options
-		curl_setopt_array( $ch, apply_filters( 'broken-link-checker-curl-options', array() ) );
+		curl_setopt_array( $ch, apply_filters( 'avpvh_lnkc_curl_options', array() ) );
 
 		// Applied last, after the public filter above, so the boundary cannot be
 		// negotiated away by third-party code.
@@ -845,7 +845,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 
 		// Apply filter before curl closes. This now runs once per hop rather than
 		// once per check, because each hop is a request in its own right.
-		apply_filters( 'broken-link-checker-curl-before-close', $ch, $content, $this->last_headers );
+		apply_filters( 'avpvh_lnkc_curl_before-close', $ch, $content, $this->last_headers );
 
 		curl_close( $ch );
 
@@ -865,7 +865,7 @@ class blcCurlHttp extends blcHttpCheckerBase {
 
 }
 
-class blcWPHttp extends blcHttpCheckerBase {
+class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 
 	/**
 	 * Check a URL with the WordPress HTTP API.
@@ -896,7 +896,7 @@ class blcWPHttp extends blcHttpCheckerBase {
 		$log    = '';
 
 		// Get the timeout setting from the BLC configuration.
-		$conf    = blc_get_configuration();
+		$conf    = avpvh_lnkc_get_configuration();
 		$timeout = $conf->options['timeout'];
 
 		global $blclog;
@@ -915,9 +915,9 @@ class blcWPHttp extends blcHttpCheckerBase {
 			$result = array(
 				'warning'     => true,
 				'log'         => "Invalid URL.\nURL fails to pass validation for safe use in the HTTP API.",
-				'status_text' => __( 'Invalid URL', 'broken-link-checker' ),
+				'status_text' => __( 'Invalid URL', 'avpvh-link-checker' ),
 				'error_code'  => 'invalid_url',
-				'status_code' => BLC_LINK_STATUS_WARNING,
+				'status_code' => AVPVH_LNKC_LINK_STATUS_WARNING,
 			);
 
 			return $result;
@@ -1023,13 +1023,13 @@ class blcWPHttp extends blcHttpCheckerBase {
 			$result['broken']         = false;
 			$result['timeout']        = false;
 			$result['warning']        = true;
-			$result['status_code']    = BLC_LINK_STATUS_WARNING;
-			$result['status_text']    = __( 'Unsafe Redirect', 'broken-link-checker' );
+			$result['status_code']    = AVPVH_LNKC_LINK_STATUS_WARNING;
+			$result['status_text']    = __( 'Unsafe Redirect', 'avpvh-link-checker' );
 			$result['error_code']     = 'unsafe_redirect';
 
 			$log .= sprintf(
 				/* translators: %s: host name of the redirect target that was refused. */
-				__( 'Refused to follow a redirect to "%s" because it resolves to a private, loopback or otherwise reserved address.', 'broken-link-checker' ),
+				__( 'Refused to follow a redirect to "%s" because it resolves to a private, loopback or otherwise reserved address.', 'avpvh-link-checker' ),
 				esc_html( (string) $blocked_host )
 			) . "\n";
 
@@ -1043,7 +1043,7 @@ class blcWPHttp extends blcHttpCheckerBase {
 					$result['http_code'],
 					'0',
 					'0',
-					blcLink::remove_query_string( $result['final_url'] ),
+					Avpvh_Lnkc_Link::remove_query_string( $result['final_url'] ),
 				)
 			);
 
@@ -1053,9 +1053,9 @@ class blcWPHttp extends blcHttpCheckerBase {
 		// Build the log
 		$log .= '=== ';
 		if ( $result['http_code'] ) {
-			$log .= sprintf( __( 'HTTP code : %d', 'broken-link-checker' ), $result['http_code'] );
+			$log .= sprintf( __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
 		} else {
-			$log .= __( '(No response)', 'broken-link-checker' );
+			$log .= __( '(No response)', 'avpvh-link-checker' );
 		}
 		$log .= " ===\n\n";
 
@@ -1064,14 +1064,14 @@ class blcWPHttp extends blcHttpCheckerBase {
 		}
 
 		if ( is_wp_error( $request ) ) {
-			$log              .= __( 'Request timed out.', 'broken-link-checker' ) . "\n";
+			$log              .= __( 'Request timed out.', 'avpvh-link-checker' ) . "\n";
 			$result['timeout'] = true;
 		}
 
 		// Determine if the link counts as "broken"
 		$result['broken'] = $this->is_error_code( $result['http_code'] ) || $result['timeout'];
 
-		$log          .= '<em>(' . __( 'Using WP HTTP', 'broken-link-checker' ) . ')</em>';
+		$log          .= '<em>(' . __( 'Using WP HTTP', 'avpvh-link-checker' ) . ')</em>';
 		$result['log'] = $log;
 
 		/*
@@ -1094,7 +1094,7 @@ class blcWPHttp extends blcHttpCheckerBase {
 				$result['http_code'],
 				$result['broken'] ? 'broken' : '0',
 				$result['timeout'] ? 'timeout' : '0',
-				blcLink::remove_query_string( $result['final_url'] ),
+				Avpvh_Lnkc_Link::remove_query_string( $result['final_url'] ),
 			)
 		);
 

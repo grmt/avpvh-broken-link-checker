@@ -11,15 +11,15 @@ require_once __DIR__ . '/trait-blc-taxonomy-container-ui.php';
  *
  * Each taxonomy slug found in the post's term-taxonomy relationships becomes a
  * separate field (keyed by the slug) using the 'taxonomy_reference' format.  The
- * companion blcTaxonomyRefParser converts those slugs into taxonomy:// pseudo-URLs,
- * and blcTaxonomyChecker tests whether each taxonomy is still registered.
+ * companion Avpvh_Lnkc_Taxonomy_Ref_Parser converts those slugs into taxonomy:// pseudo-URLs,
+ * and Avpvh_Lnkc_Taxonomy_Checker tests whether each taxonomy is still registered.
  *
  * @package Broken Link Checker
  * @access public
  */
-class blcTaxonomyContainer extends blcContainer {
+class Avpvh_Lnkc_Taxonomy_Container extends Avpvh_Lnkc_Container {
 
-	use blcTaxonomyContainerUI;
+	use Avpvh_Lnkc_Taxonomy_Container_Ui;
 
 	/**
 	 * Retrieve the post object wrapped by this container.
@@ -42,7 +42,7 @@ class blcTaxonomyContainer extends blcContainer {
 	public function update_wrapped_object() {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			trigger_error(
-				'blcTaxonomyContainer::update_wrapped_object() is not supported.',
+				'Avpvh_Lnkc_Taxonomy_Container::update_wrapped_object() is not supported.',
 				E_USER_WARNING
 			);
 		}
@@ -73,7 +73,7 @@ class blcTaxonomyContainer extends blcContainer {
 		global $wpdb;
 
 		// Get the taxonomy_reference parser. It must be active for this to work.
-		$parsers = blcParserHelper::get_parsers( 'taxonomy_reference', $this->container_type );
+		$parsers = Avpvh_Lnkc_Parser_Helper::get_parsers( 'taxonomy_reference', $this->container_type );
 		if ( empty( $parsers ) ) {
 			// No parser available, so we can't create any instances. Just mark as synched to avoid repeated attempts.
 			$this->mark_as_synched();
@@ -142,7 +142,7 @@ class blcTaxonomyContainer extends blcContainer {
 	 * Return the raw URL unchanged so BLC considers it a no-op.
 	 *
 	 * @param string      $field_name The taxonomy slug (stored as container_field).
-	 * @param blcParser   $parser     The parser instance requesting the edit.
+	 * @param Avpvh_Lnkc_Parser   $parser     The parser instance requesting the edit.
 	 * @param string      $new_url    Ignored.
 	 * @param string      $old_url    Ignored.
 	 * @param string      $old_raw_url Ignored.
@@ -160,7 +160,7 @@ class blcTaxonomyContainer extends blcContainer {
 	 * are removed from this post.
 	 *
 	 * @param string    $field_name The taxonomy slug (stored as container_field).
-	 * @param blcParser $parser     The parser instance requesting the unlink.
+	 * @param Avpvh_Lnkc_Parser $parser     The parser instance requesting the unlink.
 	 * @param string    $url        Ignored.
 	 * @param string    $raw_url    The original taxonomy slug.
 	 * @return bool|WP_Error
@@ -233,7 +233,7 @@ class blcTaxonomyContainer extends blcContainer {
 			'delete_failed',
 			sprintf(
 				// translators: %1$s: post title, %2$d: post ID.
-				__( 'Failed to delete post "%1$s" (%2$d)', 'broken-link-checker' ),
+				__( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
 				get_the_title( $this->container_id ),
 				$this->container_id
 			)
@@ -251,7 +251,7 @@ class blcTaxonomyContainer extends blcContainer {
 				'trash_disabled',
 				sprintf(
 					// translators: %1$s: post title, %2$d: post ID.
-					__( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'broken-link-checker' ),
+					__( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
 					get_the_title( $this->container_id ),
 					$this->container_id
 				)
@@ -271,7 +271,7 @@ class blcTaxonomyContainer extends blcContainer {
 			'trash_failed',
 			sprintf(
 				// translators: %1$s: post title, %2$d: post ID.
-				__( 'Failed to move post "%1$s" (%2$d) to the trash', 'broken-link-checker' ),
+				__( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
 				get_the_title( $this->container_id ),
 				$this->container_id
 			)
