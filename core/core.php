@@ -116,12 +116,6 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 
 			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 
-			if ( empty( WPMUDEV_BLC\App\Options\Settings\Model::instance()->get( 'use_legacy_blc_version' ) ) ) {
-				if ( ! WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() ) {
-					return;
-				}
-			}
-
 			if ( $method_called ) {
 				return;
 			}
@@ -167,7 +161,7 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 					'blc-screen-options',
 					'',
 					array( $this, 'screen_options_html' ),
-					'link-checker_page_blc_local',
+					'toplevel_page_blc_local',
 					array( $this, 'ajax_save_screen_options' ),
 					true
 				);
@@ -488,15 +482,14 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 				add_filter( 'plugin_action_links', array( $this, 'plugin_action_links' ), 10, 2 );
 			}
 
-			$menu_title = __( 'Broken Links (Old)', 'broken-link-checker' );
+			$menu_title = __( 'Broken Links', 'broken-link-checker' );
 			if ( $this->conf->options['show_link_count_bubble'] ) {
 				// To make it easier to notice when broken links appear, display the current number of
 				// broken links in a little bubble notification in the "Broken Links" menu.
 				// (Similar to how the number of plugin updates and unmoderated comments is displayed).
 				$blc_link_query = $this->get_link_query();
 				$broken_links   = $blc_link_query->get_filter_links( 'broken', array( 'count_only' => true ) );
-				if ( WPMUDEV_BLC\App\Options\Settings\Model::instance()->get( 'use_legacy_blc_version' ) && $broken_links > 0 ) {
-					// TODO: Appropriating existing CSS classes for my own purposes is hacky. Fix eventually.
+				if ( $broken_links > 0 ) {
 					$menu_title .= sprintf(
 						' <span class="update-plugins"><span class="update-count blc-menu-bubble">%d</span></span>',
 						$broken_links
@@ -504,81 +497,70 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 				}
 			}
 
-			/**
-			 * Until multisites are officially supported, BLC v2 menus are disabled in subsites.
-			 * Legacy menus are loaded instead.
-			 */
-			if ( WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() ) {
-				$page_controler_cloud = WPMUDEV_BLC\App\Admin_Pages\Cloud_Page\Controller::instance();
-				$links_page_hook      = add_menu_page(
-					__( 'Broken Links', 'broken-link-checker' ),
-					__( 'Broken Links', 'broken-link-checker' ),
-					'edit_others_posts',
-					WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\Controller::instance()->get_menu_slug(),
-					array( WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\Controller::instance(), 'output' ),
-					$page_controler_cloud->__get( 'icon_url' )
-				);
+			// One page: the link list, with the settings as a second tab (&local-settings=true).
+			$page_hook = add_menu_page(
+				__( 'Broken Links', 'broken-link-checker' ),
+				$menu_title,
+				'edit_others_posts',
+				'blc_local',
+				array( $this, 'output_page' ),
+				'dashicons-admin-links'
+			);
 
-				// Add plugin-specific scripts and CSS only to its own pages.
-				add_action( 'admin_print_styles-' . $links_page_hook, array( $this, 'options_page_css' ) );
-				add_action( 'admin_print_styles-' . $links_page_hook, array( $this, 'links_page_css' ) );
-
-				add_action( 'admin_print_scripts-' . $links_page_hook, array( $this, 'enqueue_settings_scripts' ) );
-				add_action( 'admin_print_scripts-' . $links_page_hook, array( $this, 'enqueue_link_page_scripts' ) );
-			}
-
-            /*
-			$submenu_parent_slug = 'blc_dash';
-			$settings_menu_title = __( 'Settings (Old)', 'broken-link-checker' );
-
-			if ( WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() ) {
-				$page_controler_v2   = WPMUDEV_BLC\App\Admin_Pages\Dashboard\Controller::instance();
-				$submenu_parent_slug = 'view-broken-links';
-				$settings_menu_title = __( 'Settings', 'broken-link-checker' );
-				$links_page_hook     = add_menu_page(
-					__( 'Broken Links', 'broken-link-checker' ),
-					__( 'Broken Links', 'broken-link-checker' ),
-					'edit_others_posts',
-					'view-broken-links',
-					array( $this, 'links_page' ),
-					$page_controler_v2->__get( 'icon_url' )
-				);
+			if ( $this->is_settings_tab() ) {
+				add_action( 'admin_print_styles-' . $page_hook, array( $this, 'options_page_css' ) );
+				add_action( 'admin_print_scripts-' . $page_hook, array( $this, 'enqueue_settings_scripts' ) );
 			} else {
-				$links_page_hook = add_submenu_page(
-					'blc_dash',
-					__( 'View Broken Links', 'broken-link-checker' ),
-					$menu_title,
-					'edit_others_posts',
-					'view-broken-links',
-					array( $this, 'links_page' )
-				);
+				add_action( 'admin_print_styles-' . $page_hook, array( $this, 'links_page_css' ) );
+				add_action( 'admin_print_scripts-' . $page_hook, array( $this, 'enqueue_link_page_scripts' ) );
+			}
+		}
+
+		/**
+		 * Whether the request is for the settings tab of the plugin's page.
+		 *
+		 * @return bool
+		 */
+		public function is_settings_tab() {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only picks the tab to show.
+			return current_user_can( 'manage_options' ) && ! empty( $_GET['local-settings'] );
+		}
+
+		/**
+		 * Callback of the plugin's admin page: the settings tab or the link list.
+		 *
+		 * @return void
+		 */
+		public function output_page() {
+			if ( $this->is_settings_tab() ) {
+				$this->options_page();
+			} else {
+				$this->links_page();
+			}
+		}
+
+		/**
+		 * Print the page title and the tabs that switch between the link list and the settings.
+		 *
+		 * @return void
+		 */
+		public function print_page_header() {
+			$settings = $this->is_settings_tab();
+			echo '<h1 class="wp-heading-inline">' . esc_html__( 'Broken Links', 'broken-link-checker' ) . '</h1>';
+
+			if ( ! current_user_can( 'manage_options' ) ) {
+				return;
 			}
 
-			$options_page_hook = add_submenu_page(
-				$submenu_parent_slug,
-				__( 'Legacy Settings', 'broken-link-checker' ),
-				$settings_menu_title,
-				'manage_options',
-				'link-checker-settings',
-				array( $this, 'options_page' )
+			printf(
+				'<nav class="nav-tab-wrapper"><a href="%1$s" class="nav-tab%2$s">%3$s</a><a href="%4$s" class="nav-tab%5$s">%6$s</a></nav>',
+				esc_url( admin_url( 'admin.php?page=blc_local' ) ),
+				$settings ? '' : ' nav-tab-active',
+				esc_html__( 'Links', 'broken-link-checker' ),
+				esc_url( admin_url( 'admin.php?page=blc_local&local-settings=true' ) ),
+				$settings ? ' nav-tab-active' : '',
+				esc_html__( 'Settings', 'broken-link-checker' )
 			);
-
-			// Add plugin-specific scripts and CSS only to the it's own pages.
-			add_action( 'admin_print_styles-' . $options_page_hook, array( $this, 'options_page_css' ) );
-			add_action( 'admin_print_styles-' . $links_page_hook, array( $this, 'links_page_css' ) );
-
-			add_action( 'admin_print_scripts-' . $options_page_hook, array( $this, 'enqueue_settings_scripts' ) );
-			add_action( 'admin_print_scripts-' . $links_page_hook, array( $this, 'enqueue_link_page_scripts' ) );
-
-			// Make the Settings page link to the link list.
-			add_screen_meta_link(
-				'link-checker-settings',
-				__( 'Go to Broken Links', 'broken-link-checker' ),
-				admin_url( 'admin.php?page=view-broken-links' ),
-				$options_page_hook,
-				array( 'style' => 'font-weight: bold;' )
-			);
-            */
 		}
 
 		/**
@@ -593,7 +575,6 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 		 */
 		public function plugin_action_links( $links, $file ) {
 			if ( $file === $this->my_basename ) {
-				//$links[] = "<a href='admin.php?page=link-checker-settings'>" . __( 'Settings' ) . '</a>';
 				$links[] = "<a href='admin.php?page=blc_local&local-settings=true'>" . __( 'Settings' ) . '</a>';
 			}
 
@@ -997,8 +978,7 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
                 <a href="#blc-admin-content" class="screen-reader-text"><?php esc_html_e( 'Skip to main content', 'broken-link-checker' ); ?></a>
                <!-- <h2><?php //_e( 'Broken Link Checker Options', 'broken-link-checker' ); ?></h2>-->
 
-	            <?php WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\View::instance()->local_header(); ?>
-                <?php WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\View::instance()->local_nav(); ?>
+	            <?php $this->print_page_header(); ?>
 
                 <div id="blc-admin-content" tabindex="-1">
 
@@ -2133,8 +2113,7 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 
             <div class="wrap">
 				<?php
-				WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\View::instance()->local_header();
-				WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\View::instance()->local_nav();
+				$this->print_page_header();
 
 				$blc_link_query->print_filter_menu( $filter_id );
 
@@ -2904,18 +2883,6 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 		function links_page_css() {
 			wp_enqueue_style( 'blc-links-page', plugins_url( 'css/links-page.css', $this->loader ), array(), '20260803-2' );
 
-			if ( WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() ) {
-                $local_style = WPMUDEV_BLC\App\Admin_Pages\Local_Submenu\Controller::instance()->get_local_style_data();
-
-                if ( ! empty( $local_style['blc_local_style'] ) ) {
-                    $src = $local_style['blc_local_style']['src'] ?? null;
-                    $ver = $local_style['blc_local_style']['ver'] ?? null;
-
-                    if ( ! empty( $src ) && ! empty( $ver ) ) {
-	                    wp_enqueue_style( 'blc-local-style', $src, array(), $ver );
-                    }
-                }
-			}
 		}
 
 		/**
@@ -2962,7 +2929,7 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 					'admin notice under Tools - Broken links - Warnings',
 					'broken-link-checker'
 				),
-				esc_attr( admin_url( 'admin.php?page=link-checker-settings#blc_warning_settings' ) ),
+				esc_attr( admin_url( 'admin.php?page=blc_local&local-settings=true#blc_warning_settings' ) ),
 				_x(
 					'Change warning settings',
 					'a link from the admin notice under Tools - Broken links - Warnings',
@@ -3391,13 +3358,6 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 		 *
 		 */
 		function cron_check_links() {
-			if ( ! WPMUDEV_BLC\App\Options\Settings\Model::instance()->get( 'use_legacy_blc_version' ) ) {
-				//return;
-				if ( ! WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() ) {
-					return;
-				}
-			}
-
 			$this->work();
 		}
 
@@ -4509,16 +4469,6 @@ if ( ! class_exists( 'wsBrokenLinkChecker' ) ) {
 		function maybe_send_email_notifications() {
 			global $wpdb;
 			/** @var wpdb $wpdb */
-			//Check if email notifications are enabled.
-			if ( ! WPMUDEV_BLC\App\Options\Settings\Model::instance()->get( 'use_legacy_blc_version' ) ) {
-				//If we're on a multisite subsite, check if sending notifications is allowed.
-				if (
-					WPMUDEV_BLC\Core\Utils\Utilities::is_subsite() &&
-					! apply_filters( 'blc_allow_subsites_email_notification', false )
-				) {
-					return;
-				}
-			}
 
 			// email notification.
 			$send_notification = apply_filters( 'blc_allow_send_email_notification', $this->conf->options['send_email_notifications'] );

@@ -10,8 +10,14 @@ if ( ! function_exists( 'wpmudev_blc_local_get_charset_collate' ) ) {
 		// For reference :
 		// v4.5: https://github.com/WordPress/WordPress/blob/4.5-branch/wp-includes/wp-db.php#L761
 		// v4.6: https://github.com/WordPress/WordPress/blob/4.6-branch/wp-includes/wp-db.php#L798
-		$collate         = WPMUDEV_BLC\Core\Utils\Utilities::get_table_col_collation( $wpdb->posts, 'post_type' );
-		$charset         = WPMUDEV_BLC\Core\Utils\Utilities::get_table_col_charset( $wpdb->posts, 'post_type' );
+		$collate         = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COLLATION_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+				$wpdb->posts,
+				'post_type'
+			)
+		);
+		$charset         = $collate ? strtok( $collate, '_' ) : null;
 		$charset_collate = '';
 
 		if ( ! empty( $collate ) && ! empty( $charset ) ) {

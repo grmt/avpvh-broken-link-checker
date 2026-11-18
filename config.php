@@ -8,12 +8,7 @@
 // Load and initialize the plugin's configuration.
 require BLC_DIRECTORY_LEGACY . '/includes/config-manager.php';
 
-// Load the appropriate version of the configuration store class based on PHP version.
-if ( version_compare( PHP_VERSION, '8.0.0', '<' ) ) {
-	require BLC_DIRECTORY_LEGACY . '/includes/config-store.php7.php';
-} else {
-	require BLC_DIRECTORY_LEGACY . '/includes/config-store.php';
-}
+require BLC_DIRECTORY_LEGACY . '/includes/config-store.php';
 
 // Create the global configuration manager instance.
 require BLC_DIRECTORY_LEGACY . '/includes/configuration-registry.php';
