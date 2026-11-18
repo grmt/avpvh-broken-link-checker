@@ -69,8 +69,14 @@ class Avpvh_Lnkc_Http_Checker extends Avpvh_Lnkc_Checker {
 			$this->token_bucket_list->takeToken( $domain );
 		}
 
+		// A host rule may ask for more time between requests than the token bucket gives.
+		$rules = Avpvh_Lnkc_Host_Rules::instance();
+		$rules->wait_for_host( $url );
+
 		$blclog->debug( 'HTTP module checking "' . $url . '"' );
-		return $this->implementation->check( $url, $use_get );
+		$result = $this->implementation->check( $url, $use_get );
+
+		return is_array( $result ) ? $rules->apply_ok_codes( $url, $result ) : $result;
 	}
 }
 
@@ -577,6 +583,8 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// Preserve the final destination's HTTP code for broken-link detection.
 		// $result['http_code'] may be overridden below with the redirect code for display.
 		$final_http_code = $result['http_code'];
+		// Host rules judge the final code, not the redirect code shown.
+		$result['final_http_code'] = $final_http_code;
 
 		// If at least one redirect occurred, extract the first redirect status code
 		// from the accumulated response headers so the Status column displays 301/302.
@@ -760,10 +768,8 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		curl_setopt( $ch, CURLOPT_URL, $this->urlencodefix( $url ) );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
 
-		// Masquerade as a recent version of Chrome
-		//$ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.34 Safari/537.36';
-		// Use a custom user agent string.
-		$ua = apply_filters( 'avpvh_lnkc_ua', 'WPMU DEV Broken Link Checker Local Engine', $url, $use_get );
+		// The host rule's user agent, else the default setting (a desktop browser unless set).
+		$ua = apply_filters( 'avpvh_lnkc_ua', Avpvh_Lnkc_Host_Rules::instance()->user_agent( $url ), $url, $use_get );
 		curl_setopt( $ch, CURLOPT_USERAGENT, $ua );
 
 		// Close the connection after the request (disables keep-alive). The plugin rate-limits requests,
@@ -928,7 +934,7 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// Fetch the URL with WP_Http. Try HEAD first to avoid downloading the body.
 		$request_args = array(
 			'timeout'     => $timeout,
-			'user-agent'  => 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)', // masquerade as IE 7
+			'user-agent'  => apply_filters( 'avpvh_lnkc_ua', Avpvh_Lnkc_Host_Rules::instance()->user_agent( $url ), $url, true ),
 			'aa'          => 1024 * 5,
 			/*
 			 * Walk the redirect chain here rather than letting the HTTP API follow

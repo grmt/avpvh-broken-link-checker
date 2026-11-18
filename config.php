@@ -104,7 +104,9 @@ function avpvh_lnkc_create_general_configuration() {
 			'suggestions_enabled'              => true, // Whether to suggest alternative URLs for broken links.
 			'warnings_enabled'                 => true, // Try to automatically detect temporary problems and false positives, and report them as "Warnings" instead of broken links.
 			'enable_load_limit'                => true, // Enable/disable load monitoring.
-			'exclusion_list'                   => array(), // Links that contain a substring listed in this array won't be checked.
+			'exclusion_list'                   => array(), // Links matching an entry (text, * wildcard or /regex/) won't be checked.
+			'host_rules'                       => array(), // Per-host user agent, minimum interval, accepted codes or skip; see Avpvh_Lnkc_Host_Rules.
+			'default_user_agent'               => '', // User agent for hosts without a rule; empty for a desktop browser.
 			'need_resynch'                     => false, // [Internal flag] True if there are unparsed items.
 			'max_execution_time'               => 7 * 60, // (in seconds) How long the worker instance may run, at most.
 			'check_threshold'                  => 72,  // (in hours) Check each link every 72 hours.

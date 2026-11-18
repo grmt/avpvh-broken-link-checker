@@ -83,9 +83,9 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		public $is_textdomain_loaded = false;
 
 		/**
-		 * Cached compiled regex for the exclusion list. Null means not yet built.
+		 * Compiled exclusion list, or null until built.
 		 *
-		 * @var string|null
+		 * @var list<string>|null
 		 */
 		private $exclusion_regex = null;
 
@@ -247,40 +247,27 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		 * @return bool
 		 */
 		public function is_excluded( $url ) {
+			if ( Avpvh_Lnkc_Host_Rules::instance()->is_skipped( (string) $url ) ) {
+				return true;
+			}
 			if ( is_null( $this->exclusion_regex ) ) {
 				$this->build_exclusion_regex();
 			}
-			if ( empty( $this->exclusion_regex ) ) {
-				return false;
-			}
-			return (bool) preg_match( $this->exclusion_regex, $url );
+
+			return Avpvh_Lnkc_Url_Pattern::matches_any( $this->exclusion_regex, (string) $url );
 		}
 
 		/**
-		 * Build (or rebuild) the cached exclusion-list regex from the current options.
+		 * Build (or rebuild) the cached exclusion-list expressions from the current options.
 		 * Call this whenever the exclusion list changes.
+		 *
+		 * Entries are plain text (matched anywhere), * wildcards or /regular expressions/;
+		 * see Avpvh_Lnkc_Url_Pattern.
 		 */
 		public function build_exclusion_regex() {
-			if (
-				isset( $this->conf->options['exclusion_list'] ) &&
-				is_array( $this->conf->options['exclusion_list'] )
-			) {
-				$list = $this->conf->options['exclusion_list'];
-			} else {
-				$list = array();
-			}
+			$list = $this->conf->options['exclusion_list'] ?? array();
 
-			// Exclude empty elements.
-			$list = array_filter( $list, 'strlen' );
-
-			if ( empty( $list ) ) {
-				$this->exclusion_regex = '';
-				return;
-			}
-
-			$patterns = array_map( fn( $w ) => preg_quote( $w, '/' ), $list );
-			// Join resulted patterns.
-			$this->exclusion_regex = '/' . implode( '|', $patterns ) . '/i';
+			$this->exclusion_regex = Avpvh_Lnkc_Url_Pattern::compile( is_array( $list ) ? $list : array() );
 		}
 
 		/**
@@ -706,6 +693,19 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				);
 				// Invalidate the cached exclusion regex so it is rebuilt on next check.
 				$this->exclusion_regex = null;
+
+				// Per-host rules; rows without a valid host are dropped.
+				$host_rules = isset( $cleanPost['host_rules'] ) && is_array( $cleanPost['host_rules'] ) ? $cleanPost['host_rules'] : array();
+				$this->conf->options['host_rules'] = Avpvh_Lnkc_Host_Rules::normalize_rules(
+					array_map(
+						static fn( $row ) => is_array( $row ) ? array_map( static fn( $v ) => is_string( $v ) ? sanitize_text_field( $v ) : $v, $row ) : $row,
+						$host_rules
+					)
+				);
+				$this->conf->options['default_user_agent'] = isset( $cleanPost['default_user_agent'] ) && is_string( $cleanPost['default_user_agent'] )
+					? sanitize_text_field( $cleanPost['default_user_agent'] )
+					: '';
+				Avpvh_Lnkc_Host_Rules::reset();
 
 				//Parse the custom field list
 				$new_custom_fields = array_filter(
@@ -1466,7 +1466,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                         <th scope="row"><?php _e( 'Exclusion list', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <label for="exclusion_list">
-												<?php _e( "Don't check links where the URL contains any of these words (one per line):", 'avpvh-link-checker' ); ?>
+												<?php _e( "Don't check links whose URL matches any of these entries (one per line):", 'avpvh-link-checker' ); ?>
                                             </label>
                                             <br/>
                                             <textarea name="exclusion_list" id="exclusion_list" cols='45' rows='4' aria-describedby="exclusion_list_desc"><?php
@@ -1475,8 +1475,26 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 											}
 											?></textarea>
                                             <p class="description" id="exclusion_list_desc">
-												<?php _e( 'Enter one URL fragment per line. Links containing any of these fragments will be excluded from checking.', 'avpvh-link-checker' ); ?>
+												<?php
+												echo wp_kses(
+													__( 'An entry is text that may occur anywhere in the URL (<code>example.com/private</code>), a pattern with <code>*</code> for any characters (<code>https://*.example.com/*.pdf</code>), or a regular expression between slashes (<code>/\.pdf$/i</code>). Text and patterns ignore case.', 'avpvh-link-checker' ),
+													array( 'code' => array() )
+												);
+												?>
                                             </p>
+											<?php
+											$invalid_patterns = array_filter(
+												(array) ( $this->conf->options['exclusion_list'] ?? array() ),
+												static fn( $entry ) => is_string( $entry ) && Avpvh_Lnkc_Url_Pattern::is_invalid_regex( $entry )
+											);
+											if ( ! empty( $invalid_patterns ) ) {
+												printf(
+													'<div class="notice notice-warning inline"><p>%s <code>%s</code></p></div>',
+													esc_html__( 'These regular expressions are not valid and are ignored:', 'avpvh-link-checker' ),
+													implode( '</code> <code>', array_map( 'esc_html', $invalid_patterns ) )
+												);
+											}
+											?>
                                         </td>
                                     </tr>
 
@@ -1520,6 +1538,57 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			<?php _e( 'Links that take longer than this to load will be marked as broken.', 'avpvh-link-checker' ); ?>
 		</span>
 
+                                        </td>
+                                    </tr>
+
+                                    <tr valign="top">
+                                        <th scope="row"><label for="avpvh_lnkc_default_user_agent"><?php esc_html_e( 'User agent', 'avpvh-link-checker' ); ?></label></th>
+                                        <td>
+                                            <input type="text" class="large-text" name="default_user_agent" id="avpvh_lnkc_default_user_agent" value="<?php echo esc_attr( (string) $this->conf->get( 'default_user_agent', '' ) ); ?>" placeholder="<?php echo esc_attr( Avpvh_Lnkc_Host_Rules::BROWSER_USER_AGENT ); ?>" aria-describedby="avpvh_lnkc_default_user_agent_desc" />
+                                            <p class="description" id="avpvh_lnkc_default_user_agent_desc">
+												<?php esc_html_e( 'Sent with every request to a host without its own user agent. Leave empty to send the one of a current desktop browser, as many sites refuse anything else.', 'avpvh-link-checker' ); ?>
+                                            </p>
+                                        </td>
+                                    </tr>
+
+                                    <tr valign="top">
+                                        <th scope="row"><?php esc_html_e( 'Host rules', 'avpvh-link-checker' ); ?></th>
+                                        <td>
+                                            <p class="description" id="avpvh_lnkc_host_rules_desc">
+												<?php esc_html_e( 'A rule applies to the host and all its subdomains; the most specific rule wins. Set a user agent, the minimum number of seconds between two requests, HTTP codes that count as working (such as 403 for a site that refuses link checkers), or skip the host altogether. Empty a host to remove its rule.', 'avpvh-link-checker' ); ?>
+                                            </p>
+                                            <table class="widefat striped" style="margin-top:8px" aria-describedby="avpvh_lnkc_host_rules_desc">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col"><?php esc_html_e( 'Host', 'avpvh-link-checker' ); ?></th>
+                                                        <th scope="col"><?php esc_html_e( 'User agent', 'avpvh-link-checker' ); ?></th>
+                                                        <th scope="col"><?php esc_html_e( 'Min. interval (s)', 'avpvh-link-checker' ); ?></th>
+                                                        <th scope="col"><?php esc_html_e( 'Codes that work', 'avpvh-link-checker' ); ?></th>
+                                                        <th scope="col"><?php esc_html_e( 'Skip', 'avpvh-link-checker' ); ?></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+												<?php
+												$host_rule_rows = Avpvh_Lnkc_Host_Rules::normalize_rules( $this->conf->get( 'host_rules', array() ) );
+												for ( $i = 0; $i < 3; $i++ ) {
+													$host_rule_rows[] = array( 'host' => '', 'user_agent' => '', 'min_interval' => 0, 'ok_codes' => array(), 'skip' => false );
+												}
+												foreach ( $host_rule_rows as $i => $rule ) {
+													$name = 'host_rules[' . (int) $i . ']';
+													?>
+                                                    <tr>
+                                                        <td><input type="text" name="<?php echo esc_attr( $name ); ?>[host]" value="<?php echo esc_attr( $rule['host'] ); ?>" placeholder="example.com" aria-label="<?php esc_attr_e( 'Host', 'avpvh-link-checker' ); ?>" /></td>
+                                                        <td><input type="text" class="regular-text" name="<?php echo esc_attr( $name ); ?>[user_agent]" value="<?php echo esc_attr( $rule['user_agent'] ); ?>" placeholder="<?php esc_attr_e( 'Default', 'avpvh-link-checker' ); ?>" aria-label="<?php esc_attr_e( 'User agent', 'avpvh-link-checker' ); ?>" /></td>
+                                                        <td><input type="number" class="small-text" min="0" max="<?php echo esc_attr( (string) Avpvh_Lnkc_Host_Rules::MAX_INTERVAL ); ?>" name="<?php echo esc_attr( $name ); ?>[min_interval]" value="<?php echo esc_attr( $rule['min_interval'] ? (string) $rule['min_interval'] : '' ); ?>" aria-label="<?php esc_attr_e( 'Minimum interval in seconds', 'avpvh-link-checker' ); ?>" /></td>
+                                                        <td><input type="text" class="small-text" style="width:8em" name="<?php echo esc_attr( $name ); ?>[ok_codes]" value="<?php echo esc_attr( implode( ', ', $rule['ok_codes'] ) ); ?>" placeholder="403, 429" aria-label="<?php esc_attr_e( 'HTTP codes that count as working', 'avpvh-link-checker' ); ?>" /></td>
+                                                        <td><input type="checkbox" name="<?php echo esc_attr( $name ); ?>[skip]" value="1" <?php checked( $rule['skip'] ); ?> aria-label="<?php esc_attr_e( 'Skip this host', 'avpvh-link-checker' ); ?>" /></td>
+                                                    </tr>
+													<?php
+												}
+												?>
+                                                </tbody>
+                                            </table>
+                                            <p class="description"><?php esc_html_e( 'Save to get more empty rows.', 'avpvh-link-checker' ); ?></p>
                                         </td>
                                     </tr>
 
@@ -2346,22 +2415,15 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$post = stripslashes_deep( $post ); //Ceterum censeo, WP shouldn't mangle superglobals.
 			}
 
-			$search         = isset( $post['search'] ) ? esc_attr( $post['search'] ) : '';
-			$replace        = isset( $post['replace'] ) ? esc_attr( $post['replace'] ) : '';
+			$search         = isset( $post['search'] ) && is_string( $post['search'] ) ? $post['search'] : '';
+			$replace        = isset( $post['replace'] ) && is_string( $post['replace'] ) ? $post['replace'] : '';
 			$use_regex      = ! empty( $post['regex'] );
 			$case_sensitive = ! empty( $post['case_sensitive'] );
 
-			$delimiter = '`'; //Pick a char that's uncommon in URLs so that escaping won't usually be a problem
-			if ( $use_regex ) {
-				$search = $delimiter . $this->escape_regex_delimiter( $search, $delimiter ) . $delimiter;
-				if ( ! $case_sensitive ) {
-					$search .= 'i';
-				}
-			} elseif ( ! $case_sensitive ) {
-				//str_ireplace() would be more appropriate for case-insensitive, non-regexp replacement,
-				//but that's only available in PHP5.
-				$search    = $delimiter . preg_quote( $search, $delimiter ) . $delimiter . 'i';
-				$use_regex = true;
+			try {
+				$replacer = new Avpvh_Lnkc_Url_Replacer( $search, $replace, $use_regex, $case_sensitive );
+			} catch ( InvalidArgumentException $e ) {
+				return array( esc_html( $e->getMessage() ), 'error' );
 			}
 
 			if ( count( $selected_links ) > 0 ) {
@@ -2389,14 +2451,16 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 					//Edit the links
 					foreach ( $links as $link ) {
-						if ( $use_regex ) {
-							$new_url = preg_replace( $search, $replace, $link->url );
-						} else {
-							$new_url = str_replace( $search, $replace, $link->url );
+						$new_url = $replacer->apply( $link->url );
+
+						if ( $new_url === $link->url ) {
+							$skipped_links ++;
+							continue;
 						}
 
-						if ( $new_url == $link->url ) {
-							$skipped_links ++;
+						// A replacement that leaves no usable URL (or a javascript: one) is refused.
+						if ( '' === esc_url_raw( $new_url ) ) {
+							$failed_links ++;
 							continue;
 						}
 
@@ -2447,42 +2511,6 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			}
 
 			return array( $message, $msg_class );
-		}
-
-		/**
-		 * Escape all instances of the $delimiter character with a backslash (unless already escaped).
-		 *
-		 * @param string $pattern
-		 * @param string $delimiter
-		 *
-		 * @return string
-		 */
-		private function escape_regex_delimiter( $pattern, $delimiter ) {
-			if ( empty( $pattern ) ) {
-				return '';
-			}
-
-			$output  = '';
-			$length  = strlen( $pattern );
-			$escaped = false;
-
-			for ( $i = 0; $i < $length; $i ++ ) {
-				$char = $pattern[ $i ];
-
-				if ( $escaped ) {
-					$escaped = false;
-				} else {
-					if ( '\\' == $char ) {
-						$escaped = true;
-					} elseif ( $char == $delimiter ) {
-						$char = '\\' . $char;
-					}
-				}
-
-				$output .= $char;
-			}
-
-			return $output;
 		}
 
 		/**

@@ -381,7 +381,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 		 * @return string
 		 */
 		private static function map_host( $url, $function ) {
-			if ( ! function_exists( $function ) || ! preg_match( '@^(\w+:/*(?:[^/@]*\@)?)?([^/:?#]+)(.*)$@s', (string) $url, $matches ) ) {
+			if ( ! function_exists( $function ) || ! preg_match( '~^(\w+:/*(?:[^/@]*@)?)?([^/:?#]+)(.*)$~s', (string) $url, $matches ) ) {
 				return $url;
 			}
 			$host = $matches[2];

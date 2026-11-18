@@ -264,6 +264,9 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_custom_css' ) ) {
 			require_once AVPVH_LNKC_DIRECTORY . '/includes/link-query.php';
 			require_once AVPVH_LNKC_DIRECTORY . '/includes/instances.php';
 			require_once AVPVH_LNKC_DIRECTORY . '/includes/utility-class.php';
+			require_once AVPVH_LNKC_DIRECTORY . '/includes/class-url-pattern.php';
+			require_once AVPVH_LNKC_DIRECTORY . '/includes/class-host-rules.php';
+			require_once AVPVH_LNKC_DIRECTORY . '/includes/class-url-replacer.php';
 
 			// Load the module subsystem
 			require_once AVPVH_LNKC_DIRECTORY . '/includes/modules.php';
