@@ -9,3 +9,5 @@
 /composer.json          export-ignore
 /composer.lock          export-ignore
 /phpcs.xml.dist         export-ignore
+/phpunit.xml.dist       export-ignore
+/codecov.yml            export-ignore
