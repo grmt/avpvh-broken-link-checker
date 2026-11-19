@@ -693,6 +693,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			$post_type_object->_edit_link = str_replace( 'postType=%s&', '', $post_type_object->_edit_link );
 		}
 
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the core filter, as get_edit_post_link() applies it.
 		return apply_filters( 'get_edit_post_link', $link, $post->ID, $context );
 	}
 

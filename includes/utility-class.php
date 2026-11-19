@@ -31,32 +31,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 		 * @return bool
 		 */
 		static function is_safe_mode() {
-			// Check php.ini safe_mode only if PHP version is lower than 5.3.0, else set to false.
-			if ( version_compare( phpversion(), '5.3.0', '<' ) ) {
-				$safe_mode = ini_get( 'safe_mode' );
-			} else {
-				$safe_mode = false;
-			}
-
-			// Null, 0, '', '0' and so on count as false.
-			if ( ! $safe_mode ) {
-				return false;
-			}
-			// Test for some textual true/false variations.
-			switch ( strtolower( $safe_mode ) ) {
-				case 'on':
-				case 'true':
-				case 'yes':
-					return true;
-
-				case 'off':
-				case 'false':
-				case 'no':
-					return false;
-
-				default: // Let PHP handle anything else.
-					return (bool) (int) $safe_mode;
-			}
+			// safe_mode was removed in PHP 5.4.
+			return false;
 		}
 
 		public static function is_host_wp_engine() {

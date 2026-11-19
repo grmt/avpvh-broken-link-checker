@@ -26,7 +26,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 	function check( $url ) {
 		//Throttle API requests to avoid getting blocked due to quota violation.
-		$delta = microtime_float() - $this->last_api_request;
+		$delta = microtime( true ) - $this->last_api_request;
 		if ( $delta < $this->api_grace_period ) {
 			usleep( intval( $this->api_grace_period - $delta ) * 1000000 );
 		}
@@ -84,9 +84,9 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 		$conf = avpvh_lnkc_get_configuration();
 		$args = array( 'timeout' => $conf->options['timeout'] );
 
-		$start                      = microtime_float();
+		$start                      = microtime( true );
 		$response                   = wp_remote_get( $api_url, $args );
-		$result['request_duration'] = microtime_float() - $start;
+		$result['request_duration'] = microtime( true ) - $start;
 		$this->last_api_request     = $start;
 
 		//Got anything?

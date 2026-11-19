@@ -129,6 +129,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 			}
 		}
 
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the core filter, as get_edit_post_link() applies it.
 		return apply_filters( 'get_edit_post_link', $link, $post->ID, 'display' );
 	}
 }

@@ -7,19 +7,6 @@
  * @package Avpvh_Link_Checker
  */
 
-if ( ! function_exists( 'microtime_float' ) ) {
-	/**
-	 * Calcualate microtime_float
-	 *
-	 * @since 1.0.0
-	 */
-	function microtime_float() {
-		list( $usec, $sec ) = explode( ' ', microtime() );
-
-		return ( (float) $usec + (float) $sec );
-	}
-}
-
 require AVPVH_LNKC_DIRECTORY . '/includes/screen-options/screen-options.php';
 require AVPVH_LNKC_DIRECTORY . '/includes/screen-meta-links.php';
 require AVPVH_LNKC_DIRECTORY . '/includes/wp-mutex.php';
@@ -2145,7 +2132,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				echo '<div id="message" class="' . $msg_class . ' fade"><p>' . $message . '</p></div>';
 			}
 
-			$start_time = microtime_float();
+			$start_time = microtime( true );
 
 			//Load custom filters, if any
 			$avpvh_lnkc_link_query->load_custom_filters();
@@ -2216,7 +2203,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					);
 
 				}
-				printf( '<!-- Total elapsed : %.4f seconds -->', microtime_float() - $start_time );
+				printf( '<!-- Total elapsed : %.4f seconds -->', microtime( true ) - $start_time );
 
 				//Load assorted JS event handlers and other shinies
 				include dirname( $this->loader ) . '/includes/admin/links-page-js.php';
@@ -3081,11 +3068,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		}
 
 		function start_timer() {
-			$this->execution_start_time = microtime_float();
+			$this->execution_start_time = microtime( true );
 		}
 
 		function execution_time() {
-			return microtime_float() - $this->execution_start_time;
+			return microtime( true ) - $this->execution_start_time;
 		}
 
 		/**

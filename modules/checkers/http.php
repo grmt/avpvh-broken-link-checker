@@ -841,9 +841,9 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		$this->apply_transport_restrictions( $ch );
 
 		// Execute the request
-		$start_time                = microtime_float();
+		$start_time                = microtime( true );
 		$content                   = curl_exec( $ch );
-		$measured_request_duration = microtime_float() - $start_time;
+		$measured_request_duration = microtime( true ) - $start_time;
 
 		$info  = curl_getinfo( $ch );
 		$errno = curl_errno( $ch );
@@ -929,7 +929,7 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 			return $result;
 		}
 
-		$start_time = microtime_float();
+		$start_time = microtime( true );
 
 		// Fetch the URL with WP_Http. Try HEAD first to avoid downloading the body.
 		$request_args = array(

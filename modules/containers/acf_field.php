@@ -314,6 +314,7 @@ class Avpvh_Lnkc_Acf_Meta extends Avpvh_Lnkc_Container {
 			}
 		}
 
+		// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- the core filter, as get_edit_post_link() applies it.
 		return apply_filters( 'get_edit_post_link', $link, $post->ID, $context );
 	}
 
