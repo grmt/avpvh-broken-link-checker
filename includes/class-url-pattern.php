@@ -2,7 +2,7 @@
 /**
  * Patterns for the exclusion list.
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Wildcard and plain entries ignore case.
  */
-final class Avpvh_Lnkc_Url_Pattern {
+final class Avpvh_Brkn_Url_Pattern {
 
 	/**
 	 * The regular expression for one entry, or null for an empty or invalid entry.

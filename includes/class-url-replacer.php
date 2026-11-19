@@ -2,7 +2,7 @@
 /**
  * Find and replace in link URLs.
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
  * One search-and-replace over URLs: plain text or a regular expression, with
  * or without regard to case.
  */
-final class Avpvh_Lnkc_Url_Replacer {
+final class Avpvh_Brkn_Url_Replacer {
 
 	/**
 	 * The search as a regular expression, or null for a case-sensitive plain search.
@@ -44,7 +44,7 @@ final class Avpvh_Lnkc_Url_Replacer {
 		bool $case_sensitive = false
 	) {
 		if ( '' === $search ) {
-			throw new InvalidArgumentException( esc_html__( 'Enter the text to look for.', 'avpvh-link-checker' ) );
+			throw new InvalidArgumentException( esc_html__( 'Enter the text to look for.', 'avpvh-broken-link-checker' ) );
 		}
 
 		$this->literal = ! $use_regex;
@@ -53,7 +53,7 @@ final class Avpvh_Lnkc_Url_Replacer {
 			$this->regex = '`' . self::escape_delimiter( $search ) . '`' . ( $case_sensitive ? '' : 'i' );
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- preg_match() warns about the very pattern being tested.
 			if ( false === @preg_match( $this->regex, '' ) ) {
-				throw new InvalidArgumentException( esc_html__( 'The regular expression is not valid.', 'avpvh-link-checker' ) );
+				throw new InvalidArgumentException( esc_html__( 'The regular expression is not valid.', 'avpvh-broken-link-checker' ) );
 			}
 		} elseif ( ! $case_sensitive ) {
 			$this->regex = '`' . preg_quote( $search, '`' ) . '`i';

@@ -1,8 +1,8 @@
 <?php
 
-class Avpvh_Lnkc_Module_Manager {
+class Avpvh_Brkn_Module_Manager {
 
-	/* @var Avpvh_Lnkc_Configuration_Manager */
+	/* @var Avpvh_Brkn_Configuration_Manager */
 	var $plugin_conf;
 	var $module_dir = '';
 
@@ -25,7 +25,7 @@ class Avpvh_Lnkc_Module_Manager {
 	function init( $default_active_modules = null ) {
 		$this->module_dir = realpath( dirname( __FILE__ ) . '/../modules' );
 
-		$this->plugin_conf            = avpvh_lnkc_get_configuration();
+		$this->plugin_conf            = avpvh_brkn_get_configuration();
 		$this->default_active_modules = $default_active_modules;
 
 		$this->loaded    = array();
@@ -38,13 +38,13 @@ class Avpvh_Lnkc_Module_Manager {
 	 * Get an instance of the module manager.
 	 *
 	 * @param array|null $default_active_modules
-	 * @return Avpvh_Lnkc_Module_Manager
+	 * @return Avpvh_Brkn_Module_Manager
 	 */
 	//phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
 	static function getInstance( $default_active_modules = null ) {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
-			$instance = new Avpvh_Lnkc_Module_Manager();
+			$instance = new Avpvh_Brkn_Module_Manager();
 			$instance->init( $default_active_modules );
 		}
 		return $instance;
@@ -121,7 +121,7 @@ class Avpvh_Lnkc_Module_Manager {
 					$processed[ $category_id ] = array();
 					foreach ( $modules as $module_id => $module_data ) {
 						if ( $translate ) {
-							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-broken-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 						}
 						$processed[ $category_id ][ $module_id ] = $module_data;
 					}
@@ -138,7 +138,7 @@ class Avpvh_Lnkc_Module_Manager {
 					$processed = array();
 					foreach ( $this->category_cache[ $category ] as $module_id => $module_data ) {
 						if ( $translate ) {
-							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+							$module_data['Name'] = _x( $module_data['Name'], 'module name', 'avpvh-broken-link-checker' ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
 						}
 						$processed[ $module_id ] = $module_data;
 					}
@@ -155,7 +155,7 @@ class Avpvh_Lnkc_Module_Manager {
 	/**
 	 * Retrieve active modules that match a specific category, or all active modules sorted by categories.
 	 *
-	 * @see Avpvh_Lnkc_Module_Manager::get_modules_by_category()
+	 * @see Avpvh_Brkn_Module_Manager::get_modules_by_category()
 	 *
 	 * @param string $category Category id. Optional.
 	 * @return array An associative array of categories or module data.
@@ -248,7 +248,7 @@ class Avpvh_Lnkc_Module_Manager {
 	 * @param string $module_id Module ID.
 	 * @param bool $autoload Optional. Whether to load the module file if it's not loaded yet. Defaults to TRUE.
 	 * @param string $category Optional. Return the module only if it's in a specific category. Categories are ignored by default.
-	 * @return Avpvh_Lnkc_Module A reference to a module object, or NULL on error.
+	 * @return Avpvh_Brkn_Module A reference to a module object, or NULL on error.
 	 */
 	function get_module( $module_id, $autoload = true, $category = '' ) {
 		$no_result = null;
@@ -699,7 +699,7 @@ class Avpvh_Lnkc_Module_Manager {
 	 *
 	 * @param string $module_id
 	 * @param array $module_data Optional. The header data of the module that needs to be instantiated. If not specified, it will be retrieved automatically.
-	 * @return object The newly instantiated module object (extends Avpvh_Lnkc_Module), or NULL on error.
+	 * @return object The newly instantiated module object (extends Avpvh_Brkn_Module), or NULL on error.
 	 */
 	function init_module( $module_id, $module_data = null ) {
 		//Each module is only instantiated once.
@@ -884,7 +884,7 @@ class Avpvh_Lnkc_Module_Manager {
 			'ModuleHidden'       => 'false',
 			'ModuleAlwaysActive' => 'false',
 			'ModuleRequiresPro'  => 'false',
-			'TextDomain'         => 'avpvh-link-checker', //For translating module headers
+			'TextDomain'         => 'avpvh-broken-link-checker', //For translating module headers
 		);
 
 		$module_header['ModuleID'] = $module_id;   //Just for consistency
@@ -939,7 +939,7 @@ class Avpvh_Lnkc_Module_Manager {
 			}
 			if ( ! empty( $module_header['Name'] ) ) {
 				$strings[] = sprintf(
-					'_x("%s", "module name", "avpvh-link-checker");',
+					'_x("%s", "module name", "avpvh-broken-link-checker");',
 					str_replace( '"', '\"', $module_header['Name'] )
 				);
 			}

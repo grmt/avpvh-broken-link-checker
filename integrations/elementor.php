@@ -3,15 +3,15 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Elementor Page Builder Integration
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
-if ( ! class_exists( 'Avpvh_Lnkc_Elementor' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Elementor' ) ) {
 
 	/**
 	 * Elementor Page Builder Integration
 	 */
-	class Avpvh_Lnkc_Elementor {
+	class Avpvh_Brkn_Elementor {
 
 		/**
 		 * Constructor

@@ -11,15 +11,15 @@ jQuery(function($){
 		$.getJSON(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_full_status',
+				'action' : 'avpvh_brkn_full_status',
 				'random' : Math.random(),
-				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_full_status' ) ); ?>'
+				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_full_status' ) ); ?>'
 			},
 			function (data, textStatus){
 				if ( data && ( typeof(data['text']) != 'undefined' ) ){
-					$('#avpvh_lnkc_full_status').html(data.text);
+					$('#avpvh_brkn_full_status').html(data.text);
 				} else {
-					$('#avpvh_lnkc_full_status').html('<?php echo esc_js( __( '[ Network error ]', 'avpvh-link-checker' ) ); ?>');
+					$('#avpvh_brkn_full_status').html('<?php echo esc_js( __( '[ Network error ]', 'avpvh-broken-link-checker' ) ); ?>');
 				}
 
 				setTimeout(blcUpdateStatus, 10000);
@@ -33,18 +33,18 @@ jQuery(function($){
 		$.get(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_current_load',
-				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_current_load' ) ); ?>'
+				'action' : 'avpvh_brkn_current_load',
+				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_current_load' ) ); ?>'
 			},
 			function (data, textStatus){
-				$('#avpvh_lnkc_current_load').html(data);
+				$('#avpvh_brkn_current_load').html(data);
 
 				setTimeout(blcUpdateLoad, 10000); //...update every 10 seconds
 			}
 		);
 	}
 	//Only do it if load limiting is available on this server, though.
-	if ( $('#avpvh_lnkc_current_load').length > 0 ){
+	if ( $('#avpvh_brkn_current_load').length > 0 ){
 		blcUpdateLoad();
 	}
 
@@ -56,9 +56,9 @@ jQuery(function($){
 		var box = $('#blc-debug-info');
 		box.toggle();
 		if( box.is(':visible') ){
-			toggleButton.text('<?php echo esc_js( __( 'Hide debug info', 'avpvh-link-checker' ) ); ?>');
+			toggleButton.text('<?php echo esc_js( __( 'Hide debug info', 'avpvh-broken-link-checker' ) ); ?>');
 		} else {
-			toggleButton.text('<?php echo esc_js( __( 'Show debug info', 'avpvh-link-checker' ) ); ?>');
+			toggleButton.text('<?php echo esc_js( __( 'Show debug info', 'avpvh-broken-link-checker' ) ); ?>');
 		}
 
 	});
@@ -111,7 +111,7 @@ jQuery(function($){
 	//so that they notice that they need to enter the field names.
 	$('#module-checkbox-custom_field').click(function(){
 		var box = $(this);
-		var fieldList = $('#avpvh_lnkc_custom_fields');
+		var fieldList = $('#avpvh_brkn_custom_fields');
 		if ( box.is(':checked') && ( $.trim(fieldList.val()) == '' ) ){
 			$('#module-extra-settings-custom_field').removeClass('hidden');
 		}
@@ -121,7 +121,7 @@ jQuery(function($){
 	//so that they notice that they need to enter the field names.
 	$('#module-checkbox-acf_field').click(function(){
 		var box = $(this);
-		var fieldList = $('#avpvh_lnkc_acf_fields');
+		var fieldList = $('#avpvh_brkn_acf_fields');
 		if ( box.is(':checked') && ( $.trim(fieldList.val()) == '' ) ){
 			$('#module-extra-settings-acf_field').removeClass('hidden');
 		}

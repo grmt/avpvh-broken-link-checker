@@ -15,7 +15,7 @@ function alterLinkCounter(factor, filterId){
 	cnt = cnt + factor;
 	counter.html(cnt);
 
-	if ( avpvh_lnkc_is_broken_filter ){
+	if ( avpvh_brkn_is_broken_filter ){
 		//Update the broken link count displayed beside the "Broken Links" menu
 		var menuBubble = jQuery('span.blc-menu-bubble');
 		if ( menuBubble.length > 0 ){
@@ -45,10 +45,10 @@ function reloadDetailsRow(link_id){
 	var details_row = jQuery('#link-details-'+link_id);
 
 	//Load up the new link info                     (so sue me)
-	details_row.find('td').html('<center><?php echo esc_js( __( 'Loading...', 'avpvh-link-checker' ) ); ?></center>').on( 'load', function() {
+	details_row.find('td').html('<center><?php echo esc_js( __( 'Loading...', 'avpvh-broken-link-checker' ) ); ?></center>').on( 'load', function() {
 		"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 		{
-			'action' : 'avpvh_lnkc_link_details',
+			'action' : 'avpvh_brkn_link_details',
 			'link_id' : link_id
 		}
 	});
@@ -64,7 +64,7 @@ jQuery(function($){
 		return false;
 	});
 
-	var ajaxInProgressHtml = '<?php echo esc_js( __( 'Wait...', 'avpvh-link-checker' ) ); ?>';
+	var ajaxInProgressHtml = '<?php echo esc_js( __( 'Wait...', 'avpvh-broken-link-checker' ) ); ?>';
 
 	//The "Not broken" button - manually mark the link as valid. The link will be checked again later.
 	$(".blc-discard-button").on('click', function () {
@@ -77,9 +77,9 @@ jQuery(function($){
 		$.post(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_discard',
+				'action' : 'avpvh_brkn_discard',
 				'link_id' : link_id,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_discard' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_discard' ) ); ?>'
 			},
 			function (data, textStatus){
 				if (data == 'OK'){
@@ -95,7 +95,7 @@ jQuery(function($){
 
 					//Flash the main row green to indicate success, then remove it if the current view
 					//is supposed to show only broken links or warnings.
-					var should_hide_link = avpvh_lnkc_is_broken_filter || (avpvh_lnkc_current_base_filter == 'warnings');
+					var should_hide_link = avpvh_brkn_is_broken_filter || (avpvh_brkn_current_base_filter == 'warnings');
 
 					flashElementGreen(master, function(){
 						if ( should_hide_link ){
@@ -111,7 +111,7 @@ jQuery(function($){
 						alterLinkCounter(-1);
 					}
 				} else {
-					me.html('<?php echo esc_js( __( 'Not broken', 'avpvh-link-checker' ) ); ?>');
+					me.html('<?php echo esc_js( __( 'Not broken', 'avpvh-broken-link-checker' ) ); ?>');
 					alert(data);
 				}
 			}
@@ -128,14 +128,14 @@ jQuery(function($){
 
 		var master = me.closest('.blc-row');
 		var link_id = master.attr('id').split('-')[2];
-		var should_hide_link = $.inArray(avpvh_lnkc_current_base_filter, ['broken', 'redirects', 'warnings']) > -1;
+		var should_hide_link = $.inArray(avpvh_brkn_current_base_filter, ['broken', 'redirects', 'warnings']) > -1;
 
 		$.post(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_dismiss',
+				'action' : 'avpvh_brkn_dismiss',
 				'link_id' : link_id,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_dismiss' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_dismiss' ) ); ?>'
 			},
 			function (data, textStatus){
 				if (data == 'OK'){
@@ -175,14 +175,14 @@ jQuery(function($){
 
 		var master = me.closest('.blc-row');
 		var link_id = master.attr('id').split('-')[2];
-		var should_hide_link = (avpvh_lnkc_current_base_filter == 'dismissed');
+		var should_hide_link = (avpvh_brkn_current_base_filter == 'dismissed');
 
 		$.post(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_undismiss',
+				'action' : 'avpvh_brkn_undismiss',
 				'link_id' : link_id,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_undismiss' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_undismiss' ) ); ?>'
 			},
 			function (data, textStatus){
 				if (data == 'OK'){
@@ -225,9 +225,9 @@ jQuery(function($){
 		$.post(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_recheck',
+				'action' : 'avpvh_brkn_recheck',
 				'link_id' : link_id,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_recheck' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_recheck' ) ); ?>'
 			},
 			function (response){
 				me.html(oldButtonHtml);
@@ -259,15 +259,15 @@ jQuery(function($){
 
 		var master = me.closest('.blc-row');
 		var linkId = master.attr('id').split('-')[2];
-		var shouldHideLink = avpvh_lnkc_current_base_filter == 'redirects';
+		var shouldHideLink = avpvh_brkn_current_base_filter == 'redirects';
 		var details = $('#link-details-' + linkId);
 
 		$.post(
 			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
-				'action' : 'avpvh_lnkc_deredirect',
+				'action' : 'avpvh_brkn_deredirect',
 				'link_id' : linkId,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_deredirect' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_deredirect' ) ); ?>'
 			},
 			function (response){
 				me.closest('span').hide();
@@ -302,7 +302,7 @@ jQuery(function($){
 	 * @param {Object} xhr The jqXHR of the failed request.
 	 */
 	function alertAjaxFailure(xhr) {
-		var message = '<?php echo esc_js( __( 'An unexpected error occurred!', 'avpvh-link-checker' ) ); ?>';
+		var message = '<?php echo esc_js( __( 'An unexpected error occurred!', 'avpvh-broken-link-checker' ) ); ?>';
 
 		if (xhr && xhr.responseText) {
 			try {
@@ -398,8 +398,8 @@ jQuery(function($){
 		var linkText = master.data('link-text'),
 			canEditText = master.data('can-edit-text') == 1, //jQuery will convert a '1' to 1 (number) when reading a data attribute.
 			canEditUrl = master.data('can-edit-url') == 1,
-			noneText = '<?php echo esc_js( _x( '(None)', 'link text', 'avpvh-link-checker' ) ); ?>',
-			multipleLinksText = '<?php echo esc_js( _x( '(Multiple links)', 'link text', 'avpvh-link-checker' ) ); ?>';
+			noneText = '<?php echo esc_js( _x( '(None)', 'link text', 'avpvh-broken-link-checker' ) ); ?>',
+			multipleLinksText = '<?php echo esc_js( _x( '(Multiple links)', 'link text', 'avpvh-broken-link-checker' ) ); ?>';
 
 		titleInput.prop('readonly', !canEditText);
 		urlInput.prop('readonly', !canEditUrl);
@@ -420,7 +420,7 @@ jQuery(function($){
 		}
 
 		//Populate the list of URL replacement suggestions.
-		if (canEditUrl && avpvh_lnkc_suggestions_enabled && (master.hasClass('link-status-error') || master.hasClass('link-status-warning'))) {
+		if (canEditUrl && avpvh_brkn_suggestions_enabled && (master.hasClass('link-status-error') || master.hasClass('link-status-warning'))) {
 			editRow.find('.blc-url-replacement-suggestions').show();
 			var suggestionList = editRow.find('.blc-suggestion-list');
 			findReplacementSuggestions(linkUrl, suggestionList);
@@ -457,9 +457,9 @@ jQuery(function($){
 	 * @param suggestionList jQuery object that represents a list element.
 	 */
 	function findReplacementSuggestions(url, suggestionList) {
-		var searchingText     = '<?php echo esc_js( _x( 'Searching...', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
-		var noSuggestionsText = '<?php echo esc_js( _x( 'No suggestions available.', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
-		var iaSuggestionName  = '<?php echo esc_js( /* translators: %s: archive date. */ _x( 'Archived page from %s (via the Wayback Machine)', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
+		var searchingText     = '<?php echo esc_js( _x( 'Searching...', 'link suggestions', 'avpvh-broken-link-checker' ) ); ?>';
+		var noSuggestionsText = '<?php echo esc_js( _x( 'No suggestions available.', 'link suggestions', 'avpvh-broken-link-checker' ) ); ?>';
+		var iaSuggestionName  = '<?php echo esc_js( /* translators: %s: archive date. */ _x( 'Archived page from %s (via the Wayback Machine)', 'link suggestions', 'avpvh-broken-link-checker' ) ); ?>';
 
 		suggestionList.empty().append('<li>' + searchingText + '</li>');
 
@@ -526,11 +526,11 @@ jQuery(function($){
 		$.post(
 			'<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
 			{
-				'action'   : 'avpvh_lnkc_edit',
+				'action'   : 'avpvh_brkn_edit',
 				'link_id'  : linkId,
 				'new_url'  : newUrl,
 				'new_text' : newText,
-				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_edit' ) ); ?>'
+				'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_edit' ) ); ?>'
 			},
 			function(response) {
 				progressIndicator.hide();
@@ -563,22 +563,22 @@ jQuery(function($){
 
 			if ( response.cnt_okay > 0 ){
 				var fragment = sprintf(
-					'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully modified.', 'avpvh-link-checker' ) ); ?>',
+					'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully modified.', 'avpvh-broken-link-checker' ) ); ?>',
 					response.cnt_okay
 				);
 				msg = msg + fragment + '\n';
 				if ( response.cnt_error > 0 ){
 					fragment = sprintf(
-						'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be edited and still point to the old URL.", 'avpvh-link-checker' ) ); ?>',
+						'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be edited and still point to the old URL.", 'avpvh-broken-link-checker' ) ); ?>',
 						response.cnt_error
 					);
 					msg = msg + fragment + "\n";
 				}
 			} else {
-				msg = msg + '<?php echo esc_js( __( 'The link could not be modified.', 'avpvh-link-checker' ) ); ?>\n';
+				msg = msg + '<?php echo esc_js( __( 'The link could not be modified.', 'avpvh-broken-link-checker' ) ); ?>\n';
 			}
 
-			msg = msg + '\n<?php echo esc_js( __( 'The following error(s) occurred :', 'avpvh-link-checker' ) ); ?>\n* ';
+			msg = msg + '\n<?php echo esc_js( __( 'The following error(s) occurred :', 'avpvh-broken-link-checker' ) ); ?>\n* ';
 			msg = msg + response.errors.join('\n* ');
 
 			alert(msg);
@@ -650,7 +650,7 @@ jQuery(function($){
 		var urlField = editRow.find('.blc-link-url-field');
 		var newUrl = urlField.val();
 		if ($.trim(newUrl) == '') {
-			alert('<?php echo esc_js( __( 'Error: Link URL must not be empty.', 'avpvh-link-checker' ) ); ?>');
+			alert('<?php echo esc_js( __( 'Error: Link URL must not be empty.', 'avpvh-broken-link-checker' ) ); ?>');
 			urlField.trigger('focus');
 			return;
 		}
@@ -689,19 +689,19 @@ jQuery(function($){
 		var me = this;
 		var master = $(me).parents('.blc-row');
 
-		var confirm_msg = "<?php echo esc_js( __( 'Are you sure you want to unlink and remove this link from all posts?', 'avpvh-link-checker' ) ); ?>";
+		var confirm_msg = "<?php echo esc_js( __( 'Are you sure you want to unlink and remove this link from all posts?', 'avpvh-broken-link-checker' ) ); ?>";
 
 		if( confirm( confirm_msg ) ) {
 			//Find the link ID
 			var link_id = master.attr('id').split('-')[2];
-			$(me).html('<?php echo esc_js( __( 'Wait...', 'avpvh-link-checker' ) ); ?>');
+			$(me).html('<?php echo esc_js( __( 'Wait...', 'avpvh-broken-link-checker' ) ); ?>');
 
 			$.post(
 				"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 				{
-					'action' : 'avpvh_lnkc_unlink',
+					'action' : 'avpvh_brkn_unlink',
 					'link_id' : link_id,
-					'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_unlink' ) ); ?>'
+					'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_unlink' ) ); ?>'
 				},
 				function (data, textStatus){
 					eval('data = ' + data);
@@ -729,21 +729,21 @@ jQuery(function($){
 
 							if ( data.cnt_okay > 0 ){
 								msg = msg + sprintf(
-									'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully unlinked.', 'avpvh-link-checker' ) ); ?>\n',
+									'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully unlinked.', 'avpvh-broken-link-checker' ) ); ?>\n',
 									data.cnt_okay
 								);
 
 								if ( data.cnt_error > 0 ){
 									msg = msg + sprintf(
-										'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be removed.", 'avpvh-link-checker' ) ); ?>\n',
+										'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be removed.", 'avpvh-broken-link-checker' ) ); ?>\n',
 										data.cnt_error
 									);
 								}
 							} else {
-								msg = msg + '<?php echo esc_js( __( 'The plugin failed to remove the link.', 'avpvh-link-checker' ) ); ?>\n';
+								msg = msg + '<?php echo esc_js( __( 'The plugin failed to remove the link.', 'avpvh-broken-link-checker' ) ); ?>\n';
 							}
 
-							msg = msg + '\n<?php echo esc_js( __( 'The following error(s) occured :', 'avpvh-link-checker' ) ); ?>\n* ';
+							msg = msg + '\n<?php echo esc_js( __( 'The following error(s) occured :', 'avpvh-broken-link-checker' ) ); ?>\n* ';
 							msg = msg + data.errors.join('\n* ');
 
 							//Show the error message
@@ -751,11 +751,11 @@ jQuery(function($){
 						}
 					}
 
-					$(me).html('<?php echo esc_js( __( 'Unlink', 'avpvh-link-checker' ) ); ?>');
+					$(me).html('<?php echo esc_js( __( 'Unlink', 'avpvh-broken-link-checker' ) ); ?>');
 				}
 			).fail(function (xhr) {
 				alertAjaxFailure(xhr);
-				$(me).html('<?php echo esc_js( __( 'Unlink', 'avpvh-link-checker' ) ); ?>');
+				$(me).html('<?php echo esc_js( __( 'Unlink', 'avpvh-broken-link-checker' ) ); ?>');
 			});
 
 		}
@@ -794,7 +794,7 @@ jQuery(function($){
 
 	//The "Save This Search Query" button creates a new custom filter based on the current search
 	$('#blc-create-filter').on('click', function(){
-		var filter_name = prompt("<?php echo esc_js( __( 'Enter a name for the new custom filter', 'avpvh-link-checker' ) ); ?>", "");
+		var filter_name = prompt("<?php echo esc_js( __( 'Enter a name for the new custom filter', 'avpvh-broken-link-checker' ) ); ?>", "");
 		if ( filter_name ){
 			$('#blc-custom-filter-name').val(filter_name);
 			$('#custom-filter-form').trigger('submit');
@@ -806,7 +806,7 @@ jQuery(function($){
 		var message = '<?php
 		echo esc_js(
 			html_entity_decode(
-				__( "You are about to delete the current filter.\n'Cancel' to stop, 'OK' to delete", 'avpvh-link-checker' ),
+				__( "You are about to delete the current filter.\n'Cancel' to stop, 'OK' to delete", 'avpvh-broken-link-checker' ),
 				ENT_QUOTES,
 				get_bloginfo( 'charset' )
 			)
@@ -830,7 +830,7 @@ jQuery(function($){
 			message = '<?php
 				echo esc_js(
 					html_entity_decode(
-						__( "Are you sure you want to delete all posts, bookmarks or other items that contain any of the selected links? This action can't be undone.\n'Cancel' to stop, 'OK' to delete", 'avpvh-link-checker' ),
+						__( "Are you sure you want to delete all posts, bookmarks or other items that contain any of the selected links? This action can't be undone.\n'Cancel' to stop, 'OK' to delete", 'avpvh-broken-link-checker' ),
 						ENT_QUOTES,
 						get_bloginfo( 'charset' )
 					)
@@ -844,7 +844,7 @@ jQuery(function($){
 			message = '<?php
 				echo esc_js(
 					html_entity_decode(
-						__( "Are you sure you want to remove the selected links? This action can't be undone.\n'Cancel' to stop, 'OK' to remove", 'avpvh-link-checker' ),
+						__( "Are you sure you want to remove the selected links? This action can't be undone.\n'Cancel' to stop, 'OK' to remove", 'avpvh-broken-link-checker' ),
 						ENT_QUOTES,
 						get_bloginfo( 'charset' )
 					)
@@ -938,7 +938,7 @@ jQuery(function($){
 		$('#adv-settings').trigger('submit');
 	});
 
-	$('#avpvh_lnkc_links_per_page').on('keypress', function(e){
+	$('#avpvh_brkn_links_per_page').on('keypress', function(e){
 		if ((e.which && e.which == 13) || (e.keyCode && e.keyCode == 13)) {
 			$('#adv-settings').trigger('submit');
 		}
@@ -974,14 +974,14 @@ jQuery(function($){
 	//Minimal input validation for the bulk edit form
 	$('#bulk-edit input[type="submit"]').on('click', function(e){
 		if( $('#bulk-edit input[name="search"]').val() == '' ){
-			alert('<?php echo esc_js( __( 'Enter a search string first.', 'avpvh-link-checker' ) ); ?>');
+			alert('<?php echo esc_js( __( 'Enter a search string first.', 'avpvh-broken-link-checker' ) ); ?>');
 			$('#bulk-edit input[name="search"]').trigger('focus');
 			e.preventDefault();
 			return;
 		}
 
 		if ($('tbody th.check-column input:checked').length == 0){
-			alert('<?php echo esc_js( __( 'Select one or more links to edit.', 'avpvh-link-checker' ) ); ?>');
+			alert('<?php echo esc_js( __( 'Select one or more links to edit.', 'avpvh-broken-link-checker' ) ); ?>');
 			e.preventDefault();
 		}
 	});

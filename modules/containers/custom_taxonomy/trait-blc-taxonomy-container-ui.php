@@ -1,6 +1,6 @@
 <?php
 /**
- * UI trait for Avpvh_Lnkc_Taxonomy_Container.
+ * UI trait for Avpvh_Brkn_Taxonomy_Container.
  *
  * @package Broken Link Checker
  */
@@ -14,7 +14,7 @@
  * @package Broken Link Checker
  * @access public
  */
-trait Avpvh_Lnkc_Taxonomy_Container_Ui {
+trait Avpvh_Brkn_Taxonomy_Container_Ui {
 
 	/**
 	 * Returns the HTML for the "Source" column shown in the broken-links list.
@@ -40,7 +40,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 		return sprintf(
 			'<a class="row-title" href="%s" title="%s">%s</a>',
 			esc_url( $this->get_edit_url() ),
-			esc_attr( __( 'Edit this post', 'avpvh-link-checker' ) ),
+			esc_attr( __( 'Edit this post', 'avpvh-broken-link-checker' ) ),
 			esc_html( get_the_title( $this->container_id ) )
 		);
 	}
@@ -70,7 +70,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 				'<span class="edit"><a href="%s" title="%s">%s</a></span>',
 				esc_url( $this->get_edit_url() ),
 				esc_attr( $post_type_object->labels->edit_item ),
-				esc_html__( 'Edit', 'avpvh-link-checker' )
+				esc_html__( 'Edit', 'avpvh-broken-link-checker' )
 			);
 		}
 
@@ -85,8 +85,8 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 				'<span class="trash"><a href="%s" title="%s">%s</a></span>',
 				esc_url( get_delete_post_link( $this->container_id, '', false ) ),
 				// translators: %s: post title.
-				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ),
-				esc_html__( 'Trash', 'avpvh-link-checker' )
+				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'avpvh-broken-link-checker' ), get_the_title( $this->container_id ) ) ),
+				esc_html__( 'Trash', 'avpvh-broken-link-checker' )
 			);
 		}
 
@@ -94,8 +94,8 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 			'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a></span>',
 			esc_url( get_permalink( $this->container_id ) ),
 			// translators: %s: post title.
-			esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ),
-			esc_html__( 'View', 'avpvh-link-checker' )
+			esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'avpvh-broken-link-checker' ), get_the_title( $this->container_id ) ) ),
+			esc_html__( 'View', 'avpvh-broken-link-checker' )
 		);
 
 		return $actions;

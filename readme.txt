@@ -1,4 +1,4 @@
-=== AV-PvH Link Checker ===
+=== AV-PvH Broken Link Checker ===
 Contributors: grmt
 Tags: links, broken links, link checker
 Requires at least: 7.1

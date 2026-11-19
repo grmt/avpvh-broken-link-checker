@@ -39,10 +39,10 @@ jobs:
     needs: build
     uses: grmt/wp-plugin-ci/.github/workflows/plugin-checks.yml@main
     with:
-      slug: avpvh-link-checker
+      slug: avpvh-broken-link-checker
       artifact: build-artifact
       prefixes: |
-        avpvh_lnkc
+        avpvh_brkn
       # outdated_tested_upto_header and plugin_updater_detected: the plugin is
       # not on WordPress.org (Update URI points at GitHub).
       ignore-codes: |

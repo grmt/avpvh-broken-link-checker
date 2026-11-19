@@ -12,11 +12,11 @@
  * @author Janis Elsts
  * @access public
  */
-class Avpvh_Lnkc_Module {
+class Avpvh_Brkn_Module {
 
 	var $module_id;      //The ID of this module. Usually a lowercase string.
 	var $cached_header;  //An associative array containing the header data of the module file.
-	/** @var Avpvh_Lnkc_Configuration_Manager $plugin__conf */
+	/** @var Avpvh_Brkn_Configuration_Manager $plugin__conf */
 	var $plugin_conf;    //A reference to the plugin's global configuration object.
 	var $module_manager; //A reference to the module manager.
 
@@ -25,8 +25,8 @@ class Avpvh_Lnkc_Module {
 	 *
 	 * @param string $module_id
 	 * @param array $cached_header
-	 * @param Avpvh_Lnkc_Configuration_Manager $plugin_conf
-	 * @param Avpvh_Lnkc_Module_Manager $module_manager
+	 * @param Avpvh_Brkn_Configuration_Manager $plugin_conf
+	 * @param Avpvh_Brkn_Module_Manager $module_manager
 	 * @return void
 	 */
 	function __construct( $module_id, $cached_header, &$plugin_conf, &$module_manager ) {

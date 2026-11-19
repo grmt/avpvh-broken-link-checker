@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="AV-PvH Link Checker">
+<ruleset name="AV-PvH Broken Link Checker">
 	<description>WordPress security, API and PHP compatibility checks.</description>
 
 	<file>.</file>
@@ -30,7 +30,7 @@
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
-				<element value="avpvh-link-checker"/>
+				<element value="avpvh-broken-link-checker"/>
 			</property>
 		</properties>
 	</rule>

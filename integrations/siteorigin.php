@@ -3,24 +3,24 @@ defined( 'ABSPATH' ) || exit;
 /**
  * SiteOrigin Page Builder Integration
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
-if ( ! class_exists( 'Avpvh_Lnkc_Site_Origin' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Site_Origin' ) ) {
 
 	/**
 	 * SiteOrigin Page Builder Integration
 	 */
-	class Avpvh_Lnkc_Site_Origin {
+	class Avpvh_Brkn_Site_Origin {
 
 		/**
 		 * Constructor
 		 */
 		protected function __construct() {
 
-			add_filter( 'avpvh_lnkc_parser_html_link_content', array( $this, 'decode_html_widget' ) );
-			add_filter( 'avpvh_lnkc_parser_html_link_pre_content', array( $this, 'decode_html_widget' ) );
-			add_filter( 'avpvh_lnkc_parser_html_link_post_content', array( $this, 'encode_back_html_widget' ) );
+			add_filter( 'avpvh_brkn_parser_html_link_content', array( $this, 'decode_html_widget' ) );
+			add_filter( 'avpvh_brkn_parser_html_link_pre_content', array( $this, 'decode_html_widget' ) );
+			add_filter( 'avpvh_brkn_parser_html_link_post_content', array( $this, 'encode_back_html_widget' ) );
 		}
 
 		/**

@@ -6,7 +6,7 @@
  * Author: Andrey @ WPMU DEV
  * ModuleID: taxonomy_reference
  * ModuleCategory: parser
- * ModuleClassName: Avpvh_Lnkc_Taxonomy_Ref_Parser
+ * ModuleClassName: Avpvh_Brkn_Taxonomy_Ref_Parser
  * ModuleContext: on-demand
  * ModuleLazyInit: true
  * ModuleAlwaysActive: true
@@ -17,12 +17,12 @@
  * Parser for fields whose value is a single taxonomy slug.
  *
  * The parser converts the slug into a taxonomy:// pseudo-URL so that the
- * Avpvh_Lnkc_Taxonomy_Checker can verify whether the taxonomy is still registered.
+ * Avpvh_Brkn_Taxonomy_Checker can verify whether the taxonomy is still registered.
  *
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Taxonomy_Ref_Parser extends Avpvh_Lnkc_Parser {
+class Avpvh_Brkn_Taxonomy_Ref_Parser extends Avpvh_Brkn_Parser {
 
 	/**
 	 * Supported containers and parsers.
@@ -43,7 +43,7 @@ class Avpvh_Lnkc_Taxonomy_Ref_Parser extends Avpvh_Lnkc_Parser {
 	 * @param string $content        The taxonomy slug.
 	 * @param string $base_url       Unused.
 	 * @param string $default_link_text The taxonomy slug is also used as the link text.
-	 * @return Avpvh_Lnkc_Link_Instance[]
+	 * @return Avpvh_Brkn_Link_Instance[]
 	 */
 	public function parse( $content, $base_url = '', $default_link_text = '' ) {
 		$instances = array();
@@ -56,12 +56,12 @@ class Avpvh_Lnkc_Taxonomy_Ref_Parser extends Avpvh_Lnkc_Parser {
 		// Build the pseudo-URL: taxonomy://<taxonomy_slug>.
 		$url = 'taxonomy://' . rawurlencode( $taxonomy );
 
-		$instance            = new Avpvh_Lnkc_Link_Instance();
+		$instance            = new Avpvh_Brkn_Link_Instance();
 		$instance->set_parser( $this );
 		$instance->raw_url   = $taxonomy;
 		$instance->link_text = '' !== $default_link_text ? $default_link_text : $taxonomy;
 
-		$link_obj = new Avpvh_Lnkc_Link( $url );
+		$link_obj = new Avpvh_Brkn_Link( $url );
 		$instance->set_link( $link_obj );
 
 		$instances[] = $instance;

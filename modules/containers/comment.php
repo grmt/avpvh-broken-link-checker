@@ -8,10 +8,10 @@ Author: Janis Elsts
 
 ModuleID: comment
 ModuleCategory: container
-ModuleClassName: Avpvh_Lnkc_Comment_Manager
+ModuleClassName: Avpvh_Brkn_Comment_Manager
 */
 
-class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
+class Avpvh_Brkn_Comment extends Avpvh_Brkn_Container {
 
 	/**
 	 * Retrieve the comment wrapped by this container.
@@ -40,7 +40,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		if ( is_null( $this->wrapped_object ) ) {
 			return new WP_Error(
 				'no_wrapped_object',
-				__( 'Nothing to update', 'avpvh-link-checker' )
+				__( 'Nothing to update', 'avpvh-broken-link-checker' )
 			);
 		}
 
@@ -50,7 +50,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		} else {
 			return new WP_Error(
 				'update_failed',
-				sprintf( /* translators: %d: item ID. */ __( 'Updating comment %d failed', 'avpvh-link-checker' ), $this->container_id )
+				sprintf( /* translators: %d: item ID. */ __( 'Updating comment %d failed', 'avpvh-broken-link-checker' ), $this->container_id )
 			);
 		}
 	}
@@ -71,7 +71,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 				return new WP_Error(
 					'delete_failed',
 					sprintf(
-						/* translators: %d: comment ID. */ __( 'Failed to delete comment %d', 'avpvh-link-checker' ),
+						/* translators: %d: comment ID. */ __( 'Failed to delete comment %d', 'avpvh-broken-link-checker' ),
 						$this->container_id
 					)
 				);
@@ -92,7 +92,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_failed',
 				sprintf(
-					/* translators: %d: comment ID. */ __( 'Can\'t move comment %d to the trash', 'avpvh-link-checker' ),
+					/* translators: %d: comment ID. */ __( 'Can\'t move comment %d to the trash', 'avpvh-broken-link-checker' ),
 					$this->container_id
 				)
 			);
@@ -165,20 +165,20 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		//Display Edit & Delete/Trash links only if the user has the right caps.
 		$user_can = current_user_can( 'edit_post', $comment->comment_post_ID );
 		if ( $user_can ) {
-			$actions['edit'] = "<a href='" . esc_url( $this->get_edit_url() ) . "' title='" . esc_attr__( 'Edit comment', 'avpvh-link-checker' ) . "'>" . esc_html__( 'Edit', 'avpvh-link-checker' ) . '</a>';
+			$actions['edit'] = "<a href='" . esc_url( $this->get_edit_url() ) . "' title='" . esc_attr__( 'Edit comment', 'avpvh-broken-link-checker' ) . "'>" . esc_html__( 'Edit', 'avpvh-broken-link-checker' ) . '</a>';
 
 			$del_nonce  = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$comment->comment_ID" ) );
 			$trash_url  = esc_url( admin_url( "comment.php?action=trashcomment&p=$post->ID&c=$comment->comment_ID&$del_nonce" ) );
 			$delete_url = esc_url( admin_url( "comment.php?action=deletecomment&p=$post->ID&c=$comment->comment_ID&$del_nonce" ) );
 
 			if ( ! constant( 'EMPTY_TRASH_DAYS' ) ) {
-				$actions['delete'] = "<a href='$delete_url' class='delete:the-comment-list:comment-$comment->comment_ID::delete=1 delete vim-d vim-destructive submitdelete'>" . esc_html__( 'Delete Permanently', 'avpvh-link-checker' ) . '</a>';
+				$actions['delete'] = "<a href='$delete_url' class='delete:the-comment-list:comment-$comment->comment_ID::delete=1 delete vim-d vim-destructive submitdelete'>" . esc_html__( 'Delete Permanently', 'avpvh-broken-link-checker' ) . '</a>';
 			} else {
-				$actions['trash'] = "<a href='$trash_url' class='delete:the-comment-list:comment-$comment->comment_ID::trash=1 delete vim-d vim-destructive submitdelete' title='" . esc_attr__( 'Move this comment to the trash', 'avpvh-link-checker' ) . "'>" . esc_html_x( 'Trash', 'verb', 'avpvh-link-checker' ) . '</a>';
+				$actions['trash'] = "<a href='$trash_url' class='delete:the-comment-list:comment-$comment->comment_ID::trash=1 delete vim-d vim-destructive submitdelete' title='" . esc_attr__( 'Move this comment to the trash', 'avpvh-broken-link-checker' ) . "'>" . esc_html_x( 'Trash', 'verb', 'avpvh-broken-link-checker' ) . '</a>';
 			}
 		}
 
-		$actions['view'] = '<span class="view"><a href="' . esc_url( get_comment_link( $this->container_id ) ) . '" title="' . esc_attr( __( 'View comment', 'avpvh-link-checker' ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-link-checker' ) . '</a>';
+		$actions['view'] = '<span class="view"><a href="' . esc_url( get_comment_link( $this->container_id ) ) . '" title="' . esc_attr( __( 'View comment', 'avpvh-broken-link-checker' ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-broken-link-checker' ) . '</a>';
 
 		return $actions;
 	}
@@ -193,20 +193,20 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 
 		$image = sprintf(
 			'<img src="%1$s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
-			esc_url( plugins_url( 'images/' . $image, AVPVH_LNKC_PLUGIN_FILE ) ),
-			esc_attr__( 'Comment', 'avpvh-link-checker' )
+			esc_url( plugins_url( 'images/' . $image, AVPVH_BRKN_PLUGIN_FILE ) ),
+			esc_attr__( 'Comment', 'avpvh-broken-link-checker' )
 		);
 
 		$comment = $this->get_wrapped_object();
 
 		//Display a small text sample from the comment
 		$text_sample = wp_strip_all_tags( $comment->comment_content );
-		$text_sample = Avpvh_Lnkc_Utility::truncate( $text_sample, 65 );
+		$text_sample = Avpvh_Brkn_Utility::truncate( $text_sample, 65 );
 
 		$html = sprintf(
 			'<a href="%s" title="%s"><b>%s</b> &mdash; %s</a>',
 			esc_url( $this->get_edit_url() ),
-			esc_attr__( 'Edit comment', 'avpvh-link-checker' ),
+			esc_attr__( 'Edit comment', 'avpvh-broken-link-checker' ),
 			esc_html( $comment->comment_author ),
 			esc_html( $text_sample )
 		);
@@ -229,8 +229,8 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 	}
 }
 
-class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
-	var $container_class_name = 'Avpvh_Lnkc_Comment';
+class Avpvh_Brkn_Comment_Manager extends Avpvh_Brkn_Container_Manager {
+	var $container_class_name = 'Avpvh_Brkn_Comment';
 
 	var $fields = array(
 		'comment_author_url' => 'url_field',
@@ -250,14 +250,14 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 
 	function hook_post_comment( $comment_id, $comment_status ) {
 		if ( '1' == $comment_status ) {
-			$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
+			$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
 			$container->mark_as_unsynched();
 		}
 	}
 
 	function hook_edit_comment( $comment_id ) {
 		if ( 'approved' == wp_get_comment_status( $comment_id ) ) {
-			$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
+			$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
 			$container->mark_as_unsynched();
 		}
 	}
@@ -265,12 +265,12 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 	function hook_comment_status( $new_status, $old_status, $comment ) {
 		//We only care about approved comments.
 		if ( ( 'approved' == $new_status ) || ( 'approved' == $old_status ) ) {
-			$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $comment->comment_ID ) );
+			$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, $comment->comment_ID ) );
 			if ( 'approved' == $new_status ) {
 				$container->mark_as_unsynched();
 			} else {
 				$container->delete();
-				avpvh_lnkc_cleanup_links();
+				avpvh_brkn_cleanup_links();
 			}
 		}
 	}
@@ -278,11 +278,11 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 	function hook_trashed_post_comments( /** @noinspection PhpUnusedParameterInspection */$post_id, $statuses ) {
 		foreach ( $statuses as $comment_id => $comment_status ) {
 			if ( '1' == $comment_status ) {
-				$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
+				$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
 				$container->delete();
 			}
 		}
-		avpvh_lnkc_cleanup_links();
+		avpvh_brkn_cleanup_links();
 	}
 
 	function hook_untrash_post_comments( $post_id ) {
@@ -296,7 +296,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 
 		foreach ( $statuses as $comment_id => $comment_status ) {
 			if ( '1' == $comment_status ) { //if approved
-				$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
+				$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, $comment_id ) );
 				$container->mark_as_unsynched();
 			}
 		}
@@ -316,7 +316,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 			//Create new synchronization records for all comments.
 			$blclog->log( '...... Creating synch. records for comments' );
 			$start = microtime( true );
-			$q     = "INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
+			$q     = "INSERT INTO {$wpdb->prefix}avpvh_brkn_synch(container_id, container_type, synched)
 				  SELECT comment_ID, '{$this->container_type}', 0
 				  FROM {$wpdb->comments}
 				  WHERE
@@ -330,7 +330,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 			$start = microtime( true );
 			$q     = "DELETE synch.*
 				  FROM
-					 {$wpdb->prefix}avpvh_lnkc_synch AS synch LEFT JOIN {$wpdb->comments} AS comments
+					 {$wpdb->prefix}avpvh_brkn_synch AS synch LEFT JOIN {$wpdb->comments} AS comments
 					 ON comments.comment_ID = synch.container_id
 				  WHERE
 					 synch.container_type = '{$this->container_type}'
@@ -341,10 +341,10 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 			//Create synch. records for comments that don't have them.
 			$blclog->log( '...... Creating synch. records for new comments' );
 			$start = microtime( true );
-			$q     = "INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
+			$q     = "INSERT INTO {$wpdb->prefix}avpvh_brkn_synch(container_id, container_type, synched)
 				  SELECT comment_ID, '{$this->container_type}', 0
 				  FROM
-				    {$wpdb->comments} AS comments LEFT JOIN {$wpdb->prefix}avpvh_lnkc_synch AS synch
+				    {$wpdb->comments} AS comments LEFT JOIN {$wpdb->prefix}avpvh_brkn_synch AS synch
 					ON (synch.container_id = comments.comment_ID and synch.container_type='{$this->container_type}')
 				  WHERE
 				  	comments.comment_approved = '1'
@@ -375,7 +375,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 					'%d comment has been deleted.',
 					'%d comments have been deleted.',
 					$n,
-					'avpvh-link-checker'
+					'avpvh-broken-link-checker'
 				),
 				$n
 			);
@@ -394,7 +394,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 				'%d comment moved to the Trash.',
 				'%d comments moved to the Trash.',
 				$n,
-				'avpvh-link-checker'
+				'avpvh-broken-link-checker'
 			),
 			$n
 		);
@@ -415,10 +415,10 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 		$containers = $this->make_containers( $containers );
 
 		//Preload comment data if it is likely to be useful later
-		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY, AVPVH_LNKC_FOR_PARSING ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_BRKN_FOR_DISPLAY, AVPVH_BRKN_FOR_PARSING ) );
 		if ( $preload ) {
 			$comment_ids = array();
-			foreach ( $containers as $container ) { /* @var Avpvh_Lnkc_Container $container */
+			foreach ( $containers as $container ) { /* @var Avpvh_Brkn_Container $container */
 				$comment_ids[] = $container->container_id;
 			}
 

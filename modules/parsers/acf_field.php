@@ -6,14 +6,14 @@
  * Author: Janne Aalto
  * ModuleID: acf
  * ModuleCategory: parser
- * ModuleClassName: Avpvh_Lnkc_Acf_Parser
+ * ModuleClassName: Avpvh_Brkn_Acf_Parser
  * ModuleContext: on-demand
  * ModuleLazyInit: true
  * ModuleAlwaysActive: true
  * ModuleHidden: true
 */
 
-class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
+class Avpvh_Brkn_Acf_Parser extends Avpvh_Brkn_Parser {
 
 	var $supported_formats    = array( 'acf_field' );
 	var $supported_containers = array();
@@ -24,7 +24,7 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 	 * @param string|array $content ACF value(s).
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If ommitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	*/
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		$instances = array();
@@ -61,13 +61,13 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 			}
 
 			//The URL is okay, create and populate a new link instance.
-			$instance = new Avpvh_Lnkc_Link_Instance();
+			$instance = new Avpvh_Brkn_Link_Instance();
 
 			$instance->set_parser( $this );
 			$instance->raw_url   = $raw_url;
 			$instance->link_text = $default_link_text;
 
-			$link_obj = new Avpvh_Lnkc_Link( $url ); //Creates or loads the link
+			$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 			$instance->set_link( $link_obj );
 
 			$instances[] = $instance;
@@ -84,7 +84,7 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 	 * acf values) and use the old raw_url that we stored when parsing the field(s)
 	 * instead.
 	 *
-	 * @see Avpvh_Lnkc_Acf_Parser::parse()
+	 * @see Avpvh_Brkn_Acf_Parser::parse()
 	 *
 	 * @param string $content Ignored.
 	 * @param string $new_url The new URL.
@@ -109,15 +109,15 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 	/**
 	 * Get the link text for printing in the "Broken Links" table.
 	 *
-	 * @param Avpvh_Lnkc_Link_Instance $instance
+	 * @param Avpvh_Brkn_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
 	function ui_get_link_text( $instance, $context = 'display' ) {
 		$image_html = sprintf(
 			'<img src="%s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
-			esc_attr( plugins_url( '/images/font-awesome/font-awesome-code.png', AVPVH_LNKC_PLUGIN_FILE ) ),
-			esc_attr__( 'Custom field', 'avpvh-link-checker' )
+			esc_attr( plugins_url( '/images/font-awesome/font-awesome-code.png', AVPVH_BRKN_PLUGIN_FILE ) ),
+			esc_attr__( 'Custom field', 'avpvh-broken-link-checker' )
 		);
 
 		$field_html = sprintf(

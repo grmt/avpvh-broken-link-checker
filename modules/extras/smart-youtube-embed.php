@@ -7,18 +7,18 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: Avpvh_Lnkc_Smart_Youtube_Url
+ModuleClassName: Avpvh_Brkn_Smart_Youtube_Url
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 100
 */
 
-if ( ! class_exists( 'Avpvh_Lnkc_Plaintext_Url_Base' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Plaintext_Url_Base' ) ) {
 	require_once 'plaintext-url-parser-base.php';
 }
 
-class Avpvh_Lnkc_Smart_Youtube_Url extends Avpvh_Lnkc_Plaintext_Url_Base {
+class Avpvh_Brkn_Smart_Youtube_Url extends Avpvh_Brkn_Plaintext_Url_Base {
 
 	protected function validate_url( $url ) {
 		//Ignore invalid URLs.

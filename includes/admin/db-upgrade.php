@@ -1,6 +1,6 @@
 <?php
 
-class Avpvh_Lnkc_Database_Upgrader {
+class Avpvh_Brkn_Database_Upgrader {
 
 	/**
 	 * Create and/or upgrade the plugin's database tables.
@@ -16,26 +16,26 @@ class Avpvh_Lnkc_Database_Upgrader {
 		// mid-upgrade - so it can't get stuck "locked" forever. A non-blocking
 		// (0 second) attempt means a request that loses the race just skips the
 		// upgrade instead of queuing behind it.
-		$lock_name = $wpdb->prefix . 'avpvh_lnkc_db_upgrade';
+		$lock_name = $wpdb->prefix . 'avpvh_brkn_db_upgrade';
 		if ( 1 !== (int) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 0)', $lock_name ) ) ) {
 			return false;
 		}
 
 		try {
-			$conf    = avpvh_lnkc_get_configuration();
+			$conf    = avpvh_brkn_get_configuration();
 			$current = $conf->options['current_db_version'];
 
 			if ( ( 0 != $current ) && ( $current < 4 ) ) {
 				//The 4th DB version makes a lot of backwards-incompatible changes to the main
 				//BLC tables, so instead of upgrading we just throw them away and recreate.
-				if ( ! Avpvh_Lnkc_Database_Upgrader::drop_tables() ) {
+				if ( ! Avpvh_Brkn_Database_Upgrader::drop_tables() ) {
 					return false;
 				};
 				$current = 0;
 			}
 
 			//Create/update the plugin's tables
-			if ( ! Avpvh_Lnkc_Database_Upgrader::make_schema_current() ) {
+			if ( ! Avpvh_Brkn_Database_Upgrader::make_schema_current() ) {
 				return false;
 			}
 
@@ -43,20 +43,20 @@ class Avpvh_Lnkc_Database_Upgrader {
 			// for why this isn't part of the declarative schema). Runs unconditionally,
 			// not just when $current < 18, so fresh installs (current == 0) get the
 			// constraint too, not just upgrades.
-			Avpvh_Lnkc_Database_Upgrader::upgrade_url_hash();
+			Avpvh_Brkn_Database_Upgrader::upgrade_url_hash();
 
 			if ( 0 != $current ) {
 
 				if ( $current < 5 ) {
-					Avpvh_Lnkc_Database_Upgrader::upgrade_095();
+					Avpvh_Brkn_Database_Upgrader::upgrade_095();
 				}
 
 				if ( $current == 16 ) {
-					Avpvh_Lnkc_Database_Upgrader::upgrade_3_2_3();
+					Avpvh_Brkn_Database_Upgrader::upgrade_3_2_3();
 				}
 			}
 
-			$conf->options['current_db_version'] = AVPVH_LNKC_DATABASE_VERSION;
+			$conf->options['current_db_version'] = AVPVH_BRKN_DATABASE_VERSION;
 			$conf->save_options();
 			$blclog->info( 'Database successfully upgraded.' );
 
@@ -75,10 +75,10 @@ class Avpvh_Lnkc_Database_Upgrader {
 		global $blclog;
 
 		$start = microtime( true );
-		if ( ! function_exists( 'avpvh_lnkc_get_db_schema' ) ) {
+		if ( ! function_exists( 'avpvh_brkn_get_db_schema' ) ) {
 			require 'db-schema.php';
 		}
-		list($dummy, $query_log) = Avpvh_Lnkc_Table_Delta::delta( avpvh_lnkc_get_db_schema() );
+		list($dummy, $query_log) = Avpvh_Brkn_Table_Delta::delta( avpvh_brkn_get_db_schema() );
 
 		$have_errors = false;
 		foreach ( $query_log as $item ) {
@@ -106,11 +106,11 @@ class Avpvh_Lnkc_Database_Upgrader {
 
 		$blclog->info( 'Deleting the plugin\'s database tables' );
 		$tables = array(
-			$wpdb->prefix . 'avpvh_lnkc_linkdata',
-			$wpdb->prefix . 'avpvh_lnkc_postdata',
-			$wpdb->prefix . 'avpvh_lnkc_instances',
-			$wpdb->prefix . 'avpvh_lnkc_synch',
-			$wpdb->prefix . 'avpvh_lnkc_links',
+			$wpdb->prefix . 'avpvh_brkn_linkdata',
+			$wpdb->prefix . 'avpvh_brkn_postdata',
+			$wpdb->prefix . 'avpvh_brkn_instances',
+			$wpdb->prefix . 'avpvh_brkn_synch',
+			$wpdb->prefix . 'avpvh_brkn_links',
 		);
 
 		$q   = 'DROP TABLE IF EXISTS ' . implode( ', ', $tables );
@@ -118,7 +118,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 
 		if ( false === $rez ) {
 			$error = sprintf(
-				/* translators: %s: database error message. */ __( 'Failed to delete old DB tables. Database error : %s', 'avpvh-link-checker' ),
+				/* translators: %s: database error message. */ __( 'Failed to delete old DB tables. Database error : %s', 'avpvh-broken-link-checker' ),
 				$wpdb->last_error
 			);
 
@@ -152,24 +152,24 @@ class Avpvh_Lnkc_Database_Upgrader {
 		global $wpdb, $blclog;
 
 		$wpdb->query( //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			"UPDATE {$wpdb->prefix}avpvh_lnkc_links SET url_hash = MD5(url) WHERE url_hash = ''"
+			"UPDATE {$wpdb->prefix}avpvh_brkn_links SET url_hash = MD5(url) WHERE url_hash = ''"
 		);
 
 		$existing_key = $wpdb->get_results( //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"SHOW INDEX FROM {$wpdb->prefix}avpvh_lnkc_links WHERE Key_name = 'url_hash'"
+			"SHOW INDEX FROM {$wpdb->prefix}avpvh_brkn_links WHERE Key_name = 'url_hash'"
 		);
 
 		if ( ! empty( $existing_key ) ) {
 			return;
 		}
 
-		$added = $wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_lnkc_links ADD UNIQUE KEY `url_hash` (`url_hash`)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$added = $wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_brkn_links ADD UNIQUE KEY `url_hash` (`url_hash`)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( false === $added ) {
 			// Most likely cause: genuine duplicate URLs already in the table (distinct
 			// from the guaranteed-duplicate-'' case backfilled above). Don't let that
 			// block the rest of the upgrade from completing - log it and move on.
-			$blclog->error( "Could not add the url_hash UNIQUE KEY on {$wpdb->prefix}avpvh_lnkc_links: " . $wpdb->last_error );
+			$blclog->error( "Could not add the url_hash UNIQUE KEY on {$wpdb->prefix}avpvh_brkn_links: " . $wpdb->last_error );
 		}
 	}
 
@@ -183,7 +183,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 		//Update synch records and instances to reflect this change
 		$q = "
 			UPDATE
-				{$wpdb->prefix}avpvh_lnkc_synch AS synch
+				{$wpdb->prefix}avpvh_brkn_synch AS synch
 				LEFT JOIN {$wpdb->posts} AS posts ON (posts.ID = synch.container_id)
 			SET
 			 synch.container_type = posts.post_type
@@ -193,7 +193,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 
 		$q = "
 			UPDATE
-				{$wpdb->prefix}avpvh_lnkc_instances AS instances
+				{$wpdb->prefix}avpvh_brkn_instances AS instances
 				LEFT JOIN {$wpdb->posts} AS posts ON (posts.ID = instances.container_id)
 			SET
 			 instances.container_type = posts.post_type
@@ -221,7 +221,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 			$wpdb->prepare(
 				'SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = %s) AND (TABLE_NAME = %s)',
 				$db_name,
-				$wpdb->prefix . 'avpvh_lnkc_links'
+				$wpdb->prefix . 'avpvh_brkn_links'
 			)
 		);
 
@@ -230,7 +230,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 		}
 
 		// Then lets check if `last_check_attempt` field is already indexed to avoid getting the `Duplicate key name` db error.
-		$columns_data = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}avpvh_lnkc_links LIKE '%last_check_attempt'" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$columns_data = $wpdb->get_results( "SHOW COLUMNS FROM {$wpdb->prefix}avpvh_brkn_links LIKE '%last_check_attempt'" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! empty( $columns_data ) ) {
 			$column_data = $columns_data[0];
@@ -239,15 +239,15 @@ class Avpvh_Lnkc_Database_Upgrader {
 				return;
 			}
 
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_lnkc_links ADD INDEX last_check_attempt(last_check_attempt)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_lnkc_links ADD INDEX may_recheck(may_recheck)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_lnkc_links ADD INDEX check_count(check_count)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_brkn_links ADD INDEX last_check_attempt(last_check_attempt)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_brkn_links ADD INDEX may_recheck(may_recheck)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}avpvh_brkn_links ADD INDEX check_count(check_count)" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		}
 	}
 
 }
 
-class Avpvh_Lnkc_Table_Delta {
+class Avpvh_Brkn_Table_Delta {
 
 	/**
 	 * Parse one or more CREATE TABLE queries and generate a list of SQL queries that need
@@ -321,7 +321,7 @@ class Avpvh_Lnkc_Table_Delta {
 
 					// For every field line specified in the query
 					foreach ( $flds as $fld ) {
-						$definition = Avpvh_Lnkc_Table_Delta::parse_create_definition( $fld );
+						$definition = Avpvh_Brkn_Table_Delta::parse_create_definition( $fld );
 
 						if ( $definition ) {
 							if ( $definition['index'] ) {
@@ -350,7 +350,7 @@ class Avpvh_Lnkc_Table_Delta {
 
 							// Is actual field definition different from that in the query?
 							$different =
-								( Avpvh_Lnkc_Table_Delta::normalize_data_type( $tablefield->Type ) !== Avpvh_Lnkc_Table_Delta::normalize_data_type( $definition['data_type'] ) ) ||
+								( Avpvh_Brkn_Table_Delta::normalize_data_type( $tablefield->Type ) !== Avpvh_Brkn_Table_Delta::normalize_data_type( $definition['data_type'] ) ) ||
 								( $definition['collation'] && ( $tablefield->Collation != $definition['collation'] ) ) ||
 								( $definition['null_allowed'] && ( 'NO' == $tablefield->Null ) ) ||
 								( $tablefield->Default !== $definition['default'] );
@@ -414,7 +414,7 @@ class Avpvh_Lnkc_Table_Delta {
 						// For each actual index in the index array
 						foreach ( $index_ary as $index_name => $index_data ) {
 							// Build a create string to compare to the query
-							$index_string = Avpvh_Lnkc_Table_Delta::generate_index_string( $index_data );
+							$index_string = Avpvh_Brkn_Table_Delta::generate_index_string( $index_data );
 							if ( array_key_exists( $index_string, $indices ) ) {
 								//echo "Found index $index_string<br>";
 								unset( $indices[ $index_string ] );
@@ -521,7 +521,7 @@ class Avpvh_Lnkc_Table_Delta {
 		//Parse the rest of the line
 		$remainder = implode( ' ', $pieces );
 		if ( $index ) {
-			$definition['columns'] = Avpvh_Lnkc_Table_Delta::parse_index_column_list( $remainder );
+			$definition['columns'] = Avpvh_Brkn_Table_Delta::parse_index_column_list( $remainder );
 
 			//If the index doesn't have a name, use the name of the first column
 			//(this is what MySQL does, but only when there isn't already an index with that name).
@@ -529,10 +529,10 @@ class Avpvh_Lnkc_Table_Delta {
 				$definition['name'] = $definition['columns'][0]['column_name'];
 			}
 			//Rebuild the index def. in a normalized form
-			$definition['index_definition'] = Avpvh_Lnkc_Table_Delta::generate_index_string( $definition );
+			$definition['index_definition'] = Avpvh_Brkn_Table_Delta::generate_index_string( $definition );
 
 		} else {
-			$column_def = Avpvh_Lnkc_Table_Delta::parse_column_definition( $remainder );
+			$column_def = Avpvh_Brkn_Table_Delta::parse_column_definition( $remainder );
 			$definition = array_merge( $definition, $column_def );
 		}
 
@@ -687,7 +687,7 @@ class Avpvh_Lnkc_Table_Delta {
 	/**
 	 * Generate an index's definition string from its parsed representation.
 	 *
-	 * @param array $definition The return value of Avpvh_Lnkc_Table_Delta::parse_create_definition()
+	 * @param array $definition The return value of Avpvh_Brkn_Table_Delta::parse_create_definition()
 	 * @return string
 	 */
 	static function generate_index_string( $definition ) {

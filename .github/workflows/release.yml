@@ -50,12 +50,12 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: build-artifact
-          path: avpvh-link-checker
+          path: avpvh-broken-link-checker
 
-      - name: Package avpvh-link-checker.zip
+      - name: Package avpvh-broken-link-checker.zip
         run: |
-          zip -r -q "$GITHUB_WORKSPACE/avpvh-link-checker.zip" avpvh-link-checker
-          ls -lh avpvh-link-checker.zip
+          zip -r -q "$GITHUB_WORKSPACE/avpvh-broken-link-checker.zip" avpvh-broken-link-checker
+          ls -lh avpvh-broken-link-checker.zip
 
       - name: Create or Update GitHub Release
         env:
@@ -65,9 +65,9 @@ jobs:
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" avpvh-link-checker.zip --clobber
+            gh release upload "$TAG" avpvh-broken-link-checker.zip --clobber
           else
-            gh release create "$TAG" avpvh-link-checker.zip \
-              --title "AV-PvH Link Checker ${VERSION}" \
+            gh release create "$TAG" avpvh-broken-link-checker.zip \
+              --title "AV-PvH Broken Link Checker ${VERSION}" \
               --generate-notes
           fi

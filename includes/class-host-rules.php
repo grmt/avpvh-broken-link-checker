@@ -2,7 +2,7 @@
 /**
  * Per-host request rules.
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
  * minimum time between two requests, the HTTP codes that count as working,
  * or skips the host altogether.
  *
- * @phpstan-type Avpvh_Lnkc_Host_Rule array{host: string, user_agent: string, min_interval: int, ok_codes: list<int>, skip: bool}
+ * @phpstan-type Avpvh_Brkn_Host_Rule array{host: string, user_agent: string, min_interval: int, ok_codes: list<int>, skip: bool}
  */
-final class Avpvh_Lnkc_Host_Rules {
+final class Avpvh_Brkn_Host_Rules {
 
 	/**
 	 * The user agent sent when no rule or setting names another: a current
@@ -40,7 +40,7 @@ final class Avpvh_Lnkc_Host_Rules {
 	/**
 	 * Rules, most specific (longest host) first.
 	 *
-	 * @var list<Avpvh_Lnkc_Host_Rule>
+	 * @var list<Avpvh_Brkn_Host_Rule>
 	 */
 	private array $rules;
 
@@ -80,7 +80,7 @@ final class Avpvh_Lnkc_Host_Rules {
 	 */
 	public static function instance(): self {
 		if ( null === self::$instance ) {
-			$conf             = avpvh_lnkc_get_configuration();
+			$conf             = avpvh_brkn_get_configuration();
 			$user_agent       = $conf->get( 'default_user_agent', '' );
 			self::$instance = new self(
 				$conf->get( 'host_rules', array() ),
@@ -105,7 +105,7 @@ final class Avpvh_Lnkc_Host_Rules {
 	 * as is a second row for the same host.
 	 *
 	 * @param mixed $raw List of rule arrays.
-	 * @return list<Avpvh_Lnkc_Host_Rule>
+	 * @return list<Avpvh_Brkn_Host_Rule>
 	 */
 	public static function normalize_rules( mixed $raw ): array {
 		if ( ! is_array( $raw ) ) {
@@ -162,7 +162,7 @@ final class Avpvh_Lnkc_Host_Rules {
 		$host = trim( (string) preg_replace( '~^\*\.~', '', $host ), '.' );
 
 		if ( preg_match( '/[^\x00-\x7F]/', $host ) ) {
-			$host = strtolower( Avpvh_Lnkc_Utility::idn_to_ascii( $host, 'UTF-8' ) );
+			$host = strtolower( Avpvh_Brkn_Utility::idn_to_ascii( $host, 'UTF-8' ) );
 		}
 
 		return 1 === preg_match( '/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/', $host ) ? $host : '';
@@ -190,7 +190,7 @@ final class Avpvh_Lnkc_Host_Rules {
 	/**
 	 * All rules, most specific first.
 	 *
-	 * @return list<Avpvh_Lnkc_Host_Rule>
+	 * @return list<Avpvh_Brkn_Host_Rule>
 	 */
 	public function rules(): array {
 		return $this->rules;
@@ -201,7 +201,7 @@ final class Avpvh_Lnkc_Host_Rules {
 	 * parent domain.
 	 *
 	 * @param string $url URL or host name.
-	 * @return Avpvh_Lnkc_Host_Rule|null
+	 * @return Avpvh_Brkn_Host_Rule|null
 	 */
 	public function find( string $url ): ?array {
 		$host = self::host_of( $url );
@@ -270,7 +270,7 @@ final class Avpvh_Lnkc_Host_Rules {
 		}
 
 		$rule = $this->find( $url );
-		$key  = 'avpvh_lnkc_host_' . md5( null === $rule ? self::host_of( $url ) : $rule['host'] );
+		$key  = 'avpvh_brkn_host_' . md5( null === $rule ? self::host_of( $url ) : $rule['host'] );
 		$last = get_transient( $key );
 		$wait = is_numeric( $last ) ? (float) $last + $interval - microtime( true ) : 0.0;
 		$wait = max( 0.0, min( (float) self::MAX_WAIT, $wait ) );
@@ -304,15 +304,15 @@ final class Avpvh_Lnkc_Host_Rules {
 
 		$note = sprintf(
 			/* translators: 1: HTTP status code, 2: host name. */
-			__( 'HTTP %1$d counts as working: host rule for %2$s.', 'avpvh-link-checker' ),
+			__( 'HTTP %1$d counts as working: host rule for %2$s.', 'avpvh-broken-link-checker' ),
 			$code,
 			$rule['host']
 		);
 
 		$result['broken']      = false;
 		$result['warning']     = false;
-		$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
-		$result['status_text'] = __( 'Accepted by host rule', 'avpvh-link-checker' );
+		$result['status_code'] = AVPVH_BRKN_LINK_STATUS_OK;
+		$result['status_text'] = __( 'Accepted by host rule', 'avpvh-broken-link-checker' );
 		$result['log']         = $note . "\n\n" . ( is_string( $result['log'] ?? null ) ? $result['log'] : '' );
 		$final_url             = is_string( $result['final_url'] ?? null ) ? $result['final_url'] : $url;
 		$result['result_hash'] = implode(
@@ -321,7 +321,7 @@ final class Avpvh_Lnkc_Host_Rules {
 				is_scalar( $result['http_code'] ?? null ) ? (string) $result['http_code'] : '0',
 				'0',
 				'0',
-				class_exists( 'Avpvh_Lnkc_Link' ) ? Avpvh_Lnkc_Link::remove_query_string( $final_url ) : $final_url,
+				class_exists( 'Avpvh_Brkn_Link' ) ? Avpvh_Brkn_Link::remove_query_string( $final_url ) : $final_url,
 			)
 		);
 

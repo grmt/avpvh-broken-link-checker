@@ -15,14 +15,14 @@
  * container class will look up the parsers that support the relevant format or the container's type,
  * and apply them to the to-be-parsed string.
  *
- * All sub-classes of Avpvh_Lnkc_Parser should override at least the Avpvh_Lnkc_Parser::parse() method.
+ * All sub-classes of Avpvh_Brkn_Parser should override at least the Avpvh_Brkn_Parser::parse() method.
  *
- * @see Avpvh_Lnkc_Container::$fields
+ * @see Avpvh_Brkn_Container::$fields
  *
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
+class Avpvh_Brkn_Parser extends Avpvh_Brkn_Module {
 
 	var $parser_type;
 	var $supported_formats    = array();
@@ -71,7 +71,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	/**
 	 * Mark containers that this parser might be interested in as unparsed.
 	 *
-	 * @uses Avpvh_Lnkc_Container_Helper::mark_as_unsynched_where()
+	 * @uses Avpvh_Brkn_Container_Helper::mark_as_unsynched_where()
 	 *
 	 * @param bool $only_return If true, just return the list of formats and container types without actually modifying any synch. records.
 	 * @return void|array Either nothing or an array in the form [ [format1=>timestamp1, ...], [container_type1=>timestamp1, ...] ]
@@ -95,7 +95,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 		if ( $only_return ) {
 			return array( $formats, $container_types );
 		} else {
-			Avpvh_Lnkc_Container_Helper::mark_as_unsynched_where( $formats, $container_types );
+			Avpvh_Brkn_Container_Helper::mark_as_unsynched_where( $formats, $container_types );
 		}
 	}
 
@@ -105,7 +105,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If ommitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		return array();
@@ -121,7 +121,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	 * @param string $base_url The base URL to use for normalizing relative URLs.
 	 * @param string $default_link_text Link text to use when the link has none.
 	 * @param bool   $allow_url_shortcodes Whether the content comes from a trusted, site-authored source.
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	 */
 	public function parse_container_field( $content, $base_url = '', $default_link_text = '', $allow_url_shortcodes = false ) {
 		$previous                     = $this->url_shortcodes_allowed;
@@ -181,7 +181,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	function edit( $content, $new_url, $old_url, $old_raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( /* translators: %s: parser type. */ __( "Editing is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
+			sprintf( /* translators: %s: parser type. */ __( "Editing is not implemented in the '%s' parser", 'avpvh-broken-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -196,7 +196,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	function unlink( $content, $url, $raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( /* translators: %s: parser type. */ __( "Unlinking is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
+			sprintf( /* translators: %s: parser type. */ __( "Unlinking is not implemented in the '%s' parser", 'avpvh-broken-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -204,7 +204,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	 * Get the link text for printing in the "Broken Links" table.
 	 * Sub-classes should override this method and display the link text in a way appropriate for the link type.
 	 *
-	 * @param Avpvh_Lnkc_Link_Instance $instance
+	 * @param Avpvh_Brkn_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
@@ -366,7 +366,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	 * This method is currently only used internally, so sub-classes are not required
 	 * to implement it.
 	 *
-	 * @see Avpvh_Lnkc_Parser::map()
+	 * @see Avpvh_Brkn_Parser::map()
 	 *
 	 * @param string $content A text string containing the links to edit.
 	 * @param callback $callback Callback function used to modify the links.
@@ -381,23 +381,23 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 /**
  * A helper class for working with parsers. All its methods should be called statically.
  *
- * @see Avpvh_Lnkc_Parser
+ * @see Avpvh_Brkn_Parser
  *
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Parser_Helper {
+class Avpvh_Brkn_Parser_Helper {
 
 	/**
 	 * Get the parser matching a parser type ID.
 	 *
-	 * @uses Avpvh_Lnkc_Module_Manager::get_module()
+	 * @uses Avpvh_Brkn_Module_Manager::get_module()
 	 *
 	 * @param string $parser_type
-	 * @return Avpvh_Lnkc_Parser|null
+	 * @return Avpvh_Brkn_Parser|null
 	 */
 	static function get_parser( $parser_type ) {
-		$manager = Avpvh_Lnkc_Module_Manager::getInstance();
+		$manager = Avpvh_Brkn_Module_Manager::getInstance();
 		return $manager->get_module( $parser_type, true, 'parser' );
 	}
 
@@ -407,13 +407,13 @@ class Avpvh_Lnkc_Parser_Helper {
 	 *
 	 * @param string $format
 	 * @param string $container_type
-	 * @return Avpvh_Lnkc_Parser[]
+	 * @return Avpvh_Brkn_Parser[]
 	 */
 	static function get_parsers( $format, $container_type ) {
 		$found = array();
 
 		//Retrieve a list of active parsers
-		$manager        = Avpvh_Lnkc_Module_Manager::getInstance();
+		$manager        = Avpvh_Brkn_Module_Manager::getInstance();
 		$active_parsers = $manager->get_modules_by_category( 'parser' );
 
 		//Try each one

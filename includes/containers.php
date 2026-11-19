@@ -8,11 +8,11 @@
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
+class Avpvh_Brkn_Container_Manager extends Avpvh_Brkn_Module {
 
 	var $container_type       = '';
 	var $fields               = array();
-	var $container_class_name = 'Avpvh_Lnkc_Container';
+	var $container_class_name = 'Avpvh_Brkn_Container';
 	var $updating_urls        = '';
 
 	/**
@@ -33,7 +33,7 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
 	 * Instantiate a link container.
 	 *
 	 * @param array $container An associative array of container data.
-	 * @return Avpvh_Lnkc_Container
+	 * @return Avpvh_Brkn_Container
 	 */
 	function get_container( $container ) {
 		$container['fields'] = $this->get_parseable_fields();
@@ -47,18 +47,18 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
 	 *
 	 * Sub-classes should, if possible, use the $purpose argument to pre-load any extra data required for
 	 * the specified task right away, instead of making multiple DB roundtrips later. For example, if
-	 * $purpose is set to the AVPVH_LNKC_FOR_DISPLAY constant, you might want to preload any DB data that the
-	 * container will need in Avpvh_Lnkc_Container::ui_get_source().
+	 * $purpose is set to the AVPVH_BRKN_FOR_DISPLAY constant, you might want to preload any DB data that the
+	 * container will need in Avpvh_Brkn_Container::ui_get_source().
 	 *
-	 * @see Avpvh_Lnkc_Container::make_containers()
-	 * @see Avpvh_Lnkc_Container::ui_get_source()
-	 * @see Avpvh_Lnkc_Container::ui_get_action_links()
+	 * @see Avpvh_Brkn_Container::make_containers()
+	 * @see Avpvh_Brkn_Container::ui_get_source()
+	 * @see Avpvh_Brkn_Container::ui_get_action_links()
 	 *
 	 * @param array $containers Array of assoc. arrays containing container data.
 	 * @param string $purpose An optional code indicating how the retrieved containers will be used.
 	 * @param bool $load_wrapped_objects Preload wrapped objects regardless of purpose.
 	 *
-	 * @return array of Avpvh_Lnkc_Container indexed by "container_type|container_id"
+	 * @return array of Avpvh_Brkn_Container indexed by "container_type|container_id"
 	 */
 	function get_containers( $containers, $purpose = '', $load_wrapped_objects = false ) {
 		return $this->make_containers( $containers );
@@ -68,7 +68,7 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
 	 * Instantiate multiple containers of the container type managed by this class
 	 *
 	 * @param array $containers Array of assoc. arrays containing container data.
-	 * @return array of Avpvh_Lnkc_Container indexed by "container_type|container_id"
+	 * @return array of Avpvh_Brkn_Container indexed by "container_type|container_id"
 	 */
 	function make_containers( $containers ) {
 		$results = array();
@@ -88,19 +88,19 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
 	 * @return void
 	 */
 	function resynch( $forced = false ) {
-		trigger_error( 'Function Avpvh_Lnkc_Container_Manager::resynch() must be over-ridden in a sub-class', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Container_Manager::resynch() must be over-ridden in a sub-class', E_USER_ERROR );
 	}
 
 	/**
 	 * Resynch when activated.
 	 *
-	 * @uses Avpvh_Lnkc_Container_Manager::resynch()
+	 * @uses Avpvh_Brkn_Container_Manager::resynch()
 	 *
 	 * @return void
 	 */
 	function activated() {
 		$this->resynch();
-		avpvh_lnkc_got_unsynched_items();
+		avpvh_brkn_got_unsynched_items();
 	}
 
 	/**
@@ -124,7 +124,7 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
 				"%1\$d '%2\$s' has been deleted",
 				"%1\$d '%2\$s' have been deleted",
 				$n,
-				'avpvh-link-checker'
+				'avpvh-broken-link-checker'
 			),
 			$n,
 			$this->container_type
@@ -148,7 +148,7 @@ class Avpvh_Lnkc_Container_Manager extends Avpvh_Lnkc_Module {
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Container {
+class Avpvh_Brkn_Container {
 
 	var $fields        = array();
 	var $default_field = '';
@@ -241,7 +241,7 @@ class Avpvh_Lnkc_Container {
 	 * @return object The wrapped object.
 	 */
 	function get_wrapped_object( $ensure_consistency = false ) {
-		trigger_error( 'Function Avpvh_Lnkc_Container::get_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Container::get_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
 	}
 
 	/**
@@ -252,7 +252,7 @@ class Avpvh_Lnkc_Container {
 	 * @return bool|WP_Error True on success, an error if something went wrong.
 	 */
 	function update_wrapped_object() {
-		trigger_error( 'Function Avpvh_Lnkc_Container::update_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Container::update_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
 	}
 
 	/**
@@ -284,7 +284,7 @@ class Avpvh_Lnkc_Container {
 			//FB::log($name, "Parsing field");
 
 			//Get all parsers applicable to this field
-			$parsers = Avpvh_Lnkc_Parser_Helper::get_parsers( $format, $this->container_type );
+			$parsers = Avpvh_Brkn_Parser_Helper::get_parsers( $format, $this->container_type );
 			//FB::log($parsers, "Applicable parsers");
 
 			if ( empty( $parsers ) ) {
@@ -300,7 +300,7 @@ class Avpvh_Lnkc_Container {
 				$found_instances = $parser->parse_container_field( $value, $base_url, $default_link_text, $allow_url_shortcodes );
 				//FB::log($found_instances, "Found instances");
 
-				$transactionManager = Avpvh_Lnkc_Transaction_Manager::getInstance();
+				$transactionManager = Avpvh_Brkn_Transaction_Manager::getInstance();
 				$transactionManager->start();
 
 				//Complete the link instances by adding container info, then save them to the DB.
@@ -329,7 +329,7 @@ class Avpvh_Lnkc_Container {
 
 		$rez = $wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch( container_id, container_type, synched, last_synch)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch( container_id, container_type, synched, last_synch)
 				VALUES( %d, %s, %d, NOW() )
 				ON DUPLICATE KEY UPDATE synched = VALUES(synched), last_synch = VALUES(last_synch)",
 				$this->container_id,
@@ -342,7 +342,7 @@ class Avpvh_Lnkc_Container {
 	}
 
 	/**
-	 * Avpvh_Lnkc_Container::mark_as_unsynched()
+	 * Avpvh_Brkn_Container::mark_as_unsynched()
 	 * Mark the container as not synchronized (not parsed, or modified since the last parse).
 	 * The plugin will attempt to (re)parse the container at the earliest opportunity.
 	 *
@@ -353,7 +353,7 @@ class Avpvh_Lnkc_Container {
 
 		$rez = $wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch( container_id, container_type, synched, last_synch)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch( container_id, container_type, synched, last_synch)
 			  	VALUES( %d, %s, %d, '0000-00-00 00:00:00' )
 			  	ON DUPLICATE KEY UPDATE synched = VALUES(synched)",
 				$this->container_id,
@@ -362,7 +362,7 @@ class Avpvh_Lnkc_Container {
 			)
 		);
 
-		avpvh_lnkc_got_unsynched_items();
+		avpvh_brkn_got_unsynched_items();
 
 		return ( false !== $rez );
 	}
@@ -427,7 +427,7 @@ class Avpvh_Lnkc_Container {
 		//Now delete the container record.
 		$q = $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}avpvh_lnkc_synch
+				"DELETE FROM {$wpdb->prefix}avpvh_brkn_synch
 				WHERE container_id = %d AND container_type = %s",
 				$this->container_id,
 				$this->container_type
@@ -452,7 +452,7 @@ class Avpvh_Lnkc_Container {
 
 		$q = $wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->prefix}avpvh_lnkc_instances
+				"DELETE FROM {$wpdb->prefix}avpvh_brkn_instances
 			  	WHERE container_id = %d AND container_type = %s",
 				$this->container_id,
 				$this->container_type
@@ -475,7 +475,7 @@ class Avpvh_Lnkc_Container {
 	 * @return bool|WP_Error
 	 */
 	function delete_wrapped_object() {
-		trigger_error( 'Function Avpvh_Lnkc_Container::delete_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Container::delete_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
 	}
 
 	/**
@@ -486,7 +486,7 @@ class Avpvh_Lnkc_Container {
 	 * @return bool|WP_Error
 	 */
 	function trash_wrapped_object() {
-		trigger_error( 'Function Avpvh_Lnkc_Container::trash_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Container::trash_wrapped_object() must be over-ridden in a sub-class', E_USER_ERROR );
 	}
 
 	/**
@@ -535,7 +535,7 @@ class Avpvh_Lnkc_Container {
 	 * Change all links with the specified URL to a new URL.
 	 *
 	 * @param string $field_name
-	 * @param Avpvh_Lnkc_Parser $parser
+	 * @param Avpvh_Brkn_Parser $parser
 	 * @param string $new_url
 	 * @param string $old_url
 	 * @param string $old_raw_url
@@ -599,7 +599,7 @@ class Avpvh_Lnkc_Container {
 	 * Remove all links with the specified URL, leaving their anchor text intact.
 	 *
 	 * @param string $field_name
-	 * @param Avpvh_Lnkc_Parser $parser
+	 * @param Avpvh_Brkn_Parser $parser
 	 * @param string $url
 	 * @param string $raw_url
 	 * @return bool|WP_Error True on success, or an error object if something went wrong.
@@ -627,14 +627,14 @@ class Avpvh_Lnkc_Container {
 	 *
 	 * @access public
 	 *
-	 * @return array of Avpvh_Lnkc_Link
+	 * @return array of Avpvh_Brkn_Link
 	 */
 	function get_links() {
 		$params = array(
 			's_container_type' => $this->container_type,
 			's_container_id'   => $this->container_id,
 		);
-		return avpvh_lnkc_get_links( $params );
+		return avpvh_brkn_get_links( $params );
 	}
 
 
@@ -683,17 +683,17 @@ class Avpvh_Lnkc_Container {
  *
  * @package Broken Link Checker
  */
-class Avpvh_Lnkc_Container_Helper {
+class Avpvh_Brkn_Container_Helper {
 
 	/**
 	 * Get the manager associated with a container type.
 	 *
 	 * @param string $container_type
 	 * @param string $fallback If there is no manager associated with $container_type, return the manager of this container type instead.
-	 * @return Avpvh_Lnkc_Container_Manager|null
+	 * @return Avpvh_Brkn_Container_Manager|null
 	 */
 	static function get_manager( $container_type, $fallback = '' ) {
-		$module_manager    = Avpvh_Lnkc_Module_Manager::getInstance();
+		$module_manager    = Avpvh_Brkn_Module_Manager::getInstance();
 		$container_manager = null;
 		$container_manager = $module_manager->get_module( $container_type, true, 'container' );
 
@@ -717,7 +717,7 @@ class Avpvh_Lnkc_Container_Helper {
 	 * from the data in the array.
 	 *
 	 * @param array $container Either [container_type, container_id], or an assoc. array of container data.
-	 * @return Avpvh_Lnkc_Container|null
+	 * @return Avpvh_Brkn_Container|null
 	 */
 	static function get_container( $container ) {
 		global $wpdb; /* @var wpdb $wpdb */
@@ -731,7 +731,7 @@ class Avpvh_Lnkc_Container_Helper {
 			//Fetch the container's synch record.
 			$rez = $wpdb->get_row(
 				$wpdb->prepare(
-					"SELECT * FROM {$wpdb->prefix}avpvh_lnkc_synch
+					"SELECT * FROM {$wpdb->prefix}avpvh_brkn_synch
 					WHERE container_type = %s AND container_id = %d",
 					$container[0],
 					$container[1]
@@ -750,7 +750,7 @@ class Avpvh_Lnkc_Container_Helper {
 			}
 		}
 
-		$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container['container_type'] );
+		$manager = Avpvh_Brkn_Container_Helper::get_manager( $container['container_type'] );
 		if ( ! $manager ) {
 			return null;
 		}
@@ -765,13 +765,13 @@ class Avpvh_Lnkc_Container_Helper {
 	 * Each input array entry should be an array and consist either of a container type (string)
 	 * and container ID (int), or name => value pairs describing a container object.
 	 *
-	 * @see Avpvh_Lnkc_Container_Helper::get_container()
+	 * @see Avpvh_Brkn_Container_Helper::get_container()
 	 *
 	 * @param array $containers
 	 * @param string $purpose Optional code indicating how the retrieved containers will be used.
 	 * @param string $fallback The fallback container type to use for unrecognized containers.
 	 * @param bool $load_wrapped_objects Preload wrapped objects regardless of purpose.
-	 * @return Avpvh_Lnkc_Container[] Array of Avpvh_Lnkc_Container indexed by "container_type|container_id"
+	 * @return Avpvh_Brkn_Container[] Array of Avpvh_Brkn_Container indexed by "container_type|container_id"
 	 */
 	static function get_containers( $containers, $purpose = '', $fallback = '', $load_wrapped_objects = false ) {
 		global $wpdb; /* @var wpdb $wpdb */
@@ -801,7 +801,7 @@ class Avpvh_Lnkc_Container_Helper {
 
 			//Build the SQL to fetch all the specified containers
 			$q = "SELECT *
-			      FROM {$wpdb->prefix}avpvh_lnkc_synch
+			      FROM {$wpdb->prefix}avpvh_brkn_synch
 				  WHERE";
 
 			$pieces = array();
@@ -832,7 +832,7 @@ class Avpvh_Lnkc_Container_Helper {
 
 		$results = array();
 		foreach ( $by_type as $container_type => $entries ) {
-			$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container_type, $fallback );
+			$manager = Avpvh_Brkn_Container_Helper::get_manager( $container_type, $fallback );
 			if ( ! is_null( $manager ) ) {
 				$partial_results = $manager->get_containers( $entries, $purpose, $load_wrapped_objects );
 				$results         = array_merge( $results, $partial_results );
@@ -846,7 +846,7 @@ class Avpvh_Lnkc_Container_Helper {
 	 * Retrieve link containers that need to be synchronized (parsed).
 	 *
 	 * @param integer $max_results The maximum number of containers to return. Defaults to returning all unsynched containers.
-	 * @return Avpvh_Lnkc_Container[]
+	 * @return Avpvh_Brkn_Container[]
 	 */
 	static function get_unsynched_containers( $max_results = 0 ) {
 		global $wpdb; /* @var wpdb $wpdb */
@@ -854,7 +854,7 @@ class Avpvh_Lnkc_Container_Helper {
 		// A loose comparison does not constrain this to an integer on its own.
 		$max_results = absint( $max_results );
 
-		$q = "SELECT * FROM {$wpdb->prefix}avpvh_lnkc_synch WHERE synched = 0";
+		$q = "SELECT * FROM {$wpdb->prefix}avpvh_brkn_synch WHERE synched = 0";
 		if ( $max_results > 0 ) {
 			$q .= $wpdb->prepare( ' LIMIT %d', $max_results );
 		}
@@ -865,7 +865,7 @@ class Avpvh_Lnkc_Container_Helper {
 			return array();
 		}
 
-		$containers = Avpvh_Lnkc_Container_Helper::get_containers( $container_data, AVPVH_LNKC_FOR_PARSING, 'dummy' );
+		$containers = Avpvh_Brkn_Container_Helper::get_containers( $container_data, AVPVH_BRKN_FOR_PARSING, 'dummy' );
 		return $containers;
 	}
 
@@ -879,7 +879,7 @@ class Avpvh_Lnkc_Container_Helper {
 	static function resynch( $forced = false ) {
 		global $wpdb;
 
-		$module_manager  = Avpvh_Lnkc_Module_Manager::getInstance();
+		$module_manager  = Avpvh_Brkn_Module_Manager::getInstance();
 		$active_managers = $module_manager->get_active_by_category( 'container' );
 		foreach ( $active_managers as $module_id => $module_data ) {
 			$manager = $module_manager->get_module( $module_id );
@@ -906,7 +906,7 @@ class Avpvh_Lnkc_Container_Helper {
 
 		//Find containers that match any of the specified formats and add them to
 		//the list of container types that need to be marked as unsynched.
-		$module_manager = Avpvh_Lnkc_Module_Manager::getInstance();
+		$module_manager = Avpvh_Brkn_Module_Manager::getInstance();
 		$containers     = $module_manager->get_active_by_category( 'container' );
 
 		foreach ( $containers as $module_id => $module_data ) {
@@ -933,7 +933,7 @@ class Avpvh_Lnkc_Container_Helper {
 
 		//Build the query to update all synch. records that match one of the specified
 		//container types and have been parsed after the specified time.
-		$q = "UPDATE {$wpdb->prefix}avpvh_lnkc_synch SET synched = 0 WHERE ";
+		$q = "UPDATE {$wpdb->prefix}avpvh_brkn_synch SET synched = 0 WHERE ";
 
 		$pieces = array();
 		foreach ( $container_types as $container_type => $timestamp ) {
@@ -951,7 +951,7 @@ class Avpvh_Lnkc_Container_Helper {
 		$rez        = ( $wpdb->query( $q ) !== false ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		$blclog->log( sprintf( '...... %d rows affected, %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start_time ) );
 
-		avpvh_lnkc_got_unsynched_items();
+		avpvh_brkn_got_unsynched_items();
 
 		return $rez;
 	}
@@ -965,12 +965,12 @@ class Avpvh_Lnkc_Container_Helper {
 		global $wpdb; /* @var wpdb $wpdb */
 		global $blclog;
 
-		$module_manager = Avpvh_Lnkc_Module_Manager::getInstance();
+		$module_manager = Avpvh_Brkn_Module_Manager::getInstance();
 
 		$start             = microtime( true );
 		$active_containers = $module_manager->get_escaped_ids( 'container' );
 		$q                 = "DELETE synch.*
-		      FROM {$wpdb->prefix}avpvh_lnkc_synch AS synch
+		      FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 		      WHERE
 	      	    synch.container_type NOT IN ({$active_containers})";
 		$rez               = $wpdb->query( $q ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -988,9 +988,9 @@ class Avpvh_Lnkc_Container_Helper {
 	 * @return string A delete confirmation message, e.g. "5 posts were moved to trash"
 	 */
 	static function ui_bulk_delete_message( $container_type, $n ) {
-		$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container_type );
+		$manager = Avpvh_Brkn_Container_Helper::get_manager( $container_type );
 		if ( is_null( $manager ) ) {
-			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
+			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-broken-link-checker' ), $container_type );
 		} else {
 			return $manager->ui_bulk_delete_message( $n );
 		}
@@ -999,16 +999,16 @@ class Avpvh_Lnkc_Container_Helper {
 	/**
 	 * Get the message to display after $n containers of a specific type have been moved to the trash.
 	 *
-	 * @see Avpvh_Lnkc_Container_Helper::ui_bulk_delete_message()
+	 * @see Avpvh_Brkn_Container_Helper::ui_bulk_delete_message()
 	 *
 	 * @param string $container_type
 	 * @param int $n
 	 * @return string
 	 */
 	static function ui_bulk_trash_message( $container_type, $n ) {
-		$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container_type );
+		$manager = Avpvh_Brkn_Container_Helper::get_manager( $container_type );
 		if ( is_null( $manager ) ) {
-			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
+			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-broken-link-checker' ), $container_type );
 		} else {
 			return $manager->ui_bulk_trash_message( $n );
 		}

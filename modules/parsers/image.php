@@ -6,14 +6,14 @@
  * Author: Janis Elsts
  * ModuleID: image
  * ModuleCategory: parser
- * ModuleClassName: Avpvh_Lnkc_Html_Image
+ * ModuleClassName: Avpvh_Brkn_Html_Image
  * ModuleContext: on-demand
  * ModuleLazyInit: true
  * ModulePriority: 900
 */
 
 //TODO: Update image parser to use the same HTML tag parsing routine as the HTML link parser.
-class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
+class Avpvh_Brkn_Html_Image extends Avpvh_Brkn_Parser {
 	var $supported_formats = array( 'html' );
 
 	//                    \1                        \2      \3 URL    \4
@@ -30,7 +30,7 @@ class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If omitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		global $blclog;
@@ -98,13 +98,13 @@ class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
 
 				$blclog->info( 'Final URL: "' . $url . '"' );
 				//The URL is okay, create and populate a new link instance.
-				$instance = new Avpvh_Lnkc_Link_Instance();
+				$instance = new Avpvh_Brkn_Link_Instance();
 
 				$instance->set_parser( $this );
 				$instance->raw_url   = $raw_url;
 				$instance->link_text = '';
 
-				$link_obj = new Avpvh_Lnkc_Link( $url ); //Creates or loads the link
+				$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 				$instance->set_link( $link_obj );
 
 				$instances[] = $instance;
@@ -188,16 +188,16 @@ class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
 	 * Get the link text for printing in the "Broken Links" table.
 	 * Sub-classes should override this method and display the link text in a way appropriate for the link type.
 	 *
-	 * @param Avpvh_Lnkc_Link_Instance $instance
+	 * @param Avpvh_Brkn_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
 	function ui_get_link_text( $instance, $context = 'display' ) {
-		$text = __( 'Image', 'avpvh-link-checker' );
+		$text = __( 'Image', 'avpvh-broken-link-checker' );
 
 		$image = sprintf(
 			'<img src="%s" class="blc-small-image" alt="%2$s" title="%2$s"> ',
-			esc_attr( plugins_url( '/images/font-awesome/font-awesome-picture.png', AVPVH_LNKC_PLUGIN_FILE ) ),
+			esc_attr( plugins_url( '/images/font-awesome/font-awesome-picture.png', AVPVH_BRKN_PLUGIN_FILE ) ),
 			esc_attr( $text )
 		);
 

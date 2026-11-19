@@ -1,6 +1,6 @@
 <?php
 
-class Avpvh_Lnkc_Plaintext_Url_Base extends Avpvh_Lnkc_Parser {
+class Avpvh_Brkn_Plaintext_Url_Base extends Avpvh_Brkn_Parser {
 	var $supported_formats = array( 'html', 'plaintext' );
 
 	//Regexp for detecting plaintext URLs lifted from make_clickable()
@@ -16,7 +16,7 @@ class Avpvh_Lnkc_Plaintext_Url_Base extends Avpvh_Lnkc_Parser {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL. Ignored.
 	 * @param string $default_link_text Default link text.
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		//Don't want to detect URLs inside links or tag attributes -
@@ -49,13 +49,13 @@ class Avpvh_Lnkc_Plaintext_Url_Base extends Avpvh_Lnkc_Parser {
 				}
 
 				//Create a new link instance.
-				$instance = new Avpvh_Lnkc_Link_Instance();
+				$instance = new Avpvh_Brkn_Link_Instance();
 
 				$instance->set_parser( $this );
 				$instance->raw_url   = $match;
 				$instance->link_text = $match;
 
-				$link_obj = new Avpvh_Lnkc_Link( $url ); //Creates or loads the link
+				$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 				$instance->set_link( $link_obj );
 
 				$instances[] = $instance;

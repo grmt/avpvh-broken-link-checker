@@ -8,9 +8,9 @@ defined( 'ABSPATH' ) || exit;
  */
 
 
-if ( ! class_exists( 'Avpvh_Lnkc_Screen_Meta_Links' ) ) :
+if ( ! class_exists( 'Avpvh_Brkn_Screen_Meta_Links' ) ) :
 
-	class Avpvh_Lnkc_Screen_Meta_Links {
+	class Avpvh_Brkn_Screen_Meta_Links {
 		var $registered_links; //List of meta links registered for each page.
 
 		/**
@@ -28,7 +28,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Screen_Meta_Links' ) ) :
 		/**
 		 * Add a new link to the screen meta area.
 		 *
-		 * Do not call this method directly. Instead, use the global avpvh_lnkc_add_screen_meta_link() function.
+		 * Do not call this method directly. Instead, use the global avpvh_brkn_add_screen_meta_link() function.
 		 *
 		 * @param string $id Link ID. Should be unique and a valid value for a HTML ID attribute.
 		 * @param string $text Link text.
@@ -37,7 +37,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Screen_Meta_Links' ) ) :
 		 * @param array $attributes Optional. Additional attributes for the link tag.
 		 * @return void
 		 */
-		function avpvh_lnkc_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
+		function avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
 			if ( ! is_array( $page ) ) {
 				$page = array( $page );
 			}
@@ -248,7 +248,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Screen_Meta_Links' ) ) :
 	if ( ! isset( $ws_screen_meta_links_versions ) ) {
 		$ws_screen_meta_links_versions = array();
 	}
-	$ws_screen_meta_links_versions['1.1'] = 'Avpvh_Lnkc_Screen_Meta_Links';
+	$ws_screen_meta_links_versions['1.1'] = 'Avpvh_Brkn_Screen_Meta_Links';
 
 endif;
 
@@ -262,7 +262,7 @@ endif;
  * @param array $attributes Optional. Additional attributes for the link tag.
  * @return void
  */
-function avpvh_lnkc_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
+function avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
 	global $ws_screen_meta_links_versions;
 
 	static $instance = null;
@@ -273,7 +273,7 @@ function avpvh_lnkc_add_screen_meta_link( $id, $text, $href, $page, $attributes 
 		$instance  = new $className;
 	}
 
-	$instance->avpvh_lnkc_add_screen_meta_link( $id, $text, $href, $page, $attributes );
+	$instance->avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes );
 }
 
 ?>

@@ -1,6 +1,6 @@
-# AV-PvH Link Checker
+# AV-PvH Broken Link Checker
 
-WordPress plugin that checks posts, pages, comments and custom fields for broken links. Based on the local engine of [Broken Link Checker](https://wordpress.org/plugins/broken-link-checker/) 2.4.15.1 (GPL-2.0-or-later), without the WPMU DEV cloud service, with every global name prefixed `avpvh_lnkc_`.
+WordPress plugin that checks posts, pages, comments and custom fields for broken links. Based on the local engine of [Broken Link Checker](https://wordpress.org/plugins/broken-link-checker/) 2.4.15.1 (GPL-2.0-or-later), without the WPMU DEV cloud service, with every global name prefixed `avpvh_brkn_`.
 
 Additions:
 

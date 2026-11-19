@@ -12,7 +12,7 @@ require 'containers.php';
 require 'checkers.php';
 require 'parsers.php';
 
-$avpvh_lnkc_module_manager = Avpvh_Lnkc_Module_Manager::getInstance(
+$avpvh_brkn_module_manager = Avpvh_Brkn_Module_Manager::getInstance(
 	array(
 		//List of modules active by default
 		'http',             //Link checker for the HTTP(s) protocol
@@ -36,4 +36,4 @@ $avpvh_lnkc_module_manager = Avpvh_Lnkc_Module_Manager::getInstance(
 require 'any-post.php';
 
 //Let other plugins register virtual modules.
-do_action( 'avpvh_lnkc_register_modules', $avpvh_lnkc_module_manager );
+do_action( 'avpvh_brkn_register_modules', $avpvh_brkn_module_manager );

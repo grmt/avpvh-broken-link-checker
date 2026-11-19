@@ -1,9 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'Avpvh_Lnkc_Mutex' ) ) :
+if ( ! class_exists( 'Avpvh_Brkn_Mutex' ) ) :
 
-	class Avpvh_Lnkc_Mutex {
+	class Avpvh_Brkn_Mutex {
 		/**
 		 * Get an exclusive named lock.
 		 *
@@ -15,7 +15,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Mutex' ) ) :
 		static function acquire( $name, $timeout = 0, $network_wide = false ) {
 			global $wpdb; /* @var wpdb $wpdb */
 			if ( ! $network_wide ) {
-				$name = Avpvh_Lnkc_Mutex::get_private_name( $name );
+				$name = Avpvh_Brkn_Mutex::get_private_name( $name );
 			}
 			$state = $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, %d)', $name, $timeout ) );
 			return 1 == $state;
@@ -31,7 +31,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Mutex' ) ) :
 		static function release( $name, $network_wide = false ) {
 			global $wpdb; /* @var wpdb $wpdb */
 			if ( ! $network_wide ) {
-				$name = Avpvh_Lnkc_Mutex::get_private_name( $name );
+				$name = Avpvh_Brkn_Mutex::get_private_name( $name );
 			}
 			$released = $wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $name ) );
 			return 1 == $released;

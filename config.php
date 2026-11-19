@@ -3,47 +3,47 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Load and initialize the plugin's configuration managers
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 // Load and initialize the plugin's configuration.
-require AVPVH_LNKC_DIRECTORY . '/includes/config-manager.php';
+require AVPVH_BRKN_DIRECTORY . '/includes/config-manager.php';
 
-require AVPVH_LNKC_DIRECTORY . '/includes/config-store.php';
+require AVPVH_BRKN_DIRECTORY . '/includes/config-store.php';
 
 // Create the global configuration manager instance.
-require AVPVH_LNKC_DIRECTORY . '/includes/configuration-registry.php';
+require AVPVH_BRKN_DIRECTORY . '/includes/configuration-registry.php';
 
 /**
  * Initialize configuration registry and register configurations
  *
  * @return void
  */
-function avpvh_lnkc_init_configuration() {
-	if ( ! Avpvh_Lnkc_Configuration_Registry::initialized() ) {
-		$avpvh_lnkc_configuration_registry = Avpvh_Lnkc_Configuration_Registry::create();
+function avpvh_brkn_init_configuration() {
+	if ( ! Avpvh_Brkn_Configuration_Registry::initialized() ) {
+		$avpvh_brkn_configuration_registry = Avpvh_Brkn_Configuration_Registry::create();
 	} else {
-		$avpvh_lnkc_configuration_registry = Avpvh_Lnkc_Configuration_Registry::get_instance();
+		$avpvh_brkn_configuration_registry = Avpvh_Brkn_Configuration_Registry::get_instance();
 	}
 
-	$avpvh_lnkc_configuration_registry->register( avpvh_lnkc_create_frontend_configuration() );
-	$avpvh_lnkc_configuration_registry->register( avpvh_lnkc_create_admin_configuration() );
-	$avpvh_lnkc_configuration_registry->register( avpvh_lnkc_create_general_configuration() );
-	$avpvh_lnkc_configuration_registry->register( avpvh_lnkc_create_modules_configuration() );
+	$avpvh_brkn_configuration_registry->register( avpvh_brkn_create_frontend_configuration() );
+	$avpvh_brkn_configuration_registry->register( avpvh_brkn_create_admin_configuration() );
+	$avpvh_brkn_configuration_registry->register( avpvh_brkn_create_general_configuration() );
+	$avpvh_brkn_configuration_registry->register( avpvh_brkn_create_modules_configuration() );
 
-	$avpvh_lnkc_configuration_registry->set_default_manager( 'general' );
+	$avpvh_brkn_configuration_registry->set_default_manager( 'general' );
 }
 
 	/**
 	 * Create configuration manager for frontend settings
 	 *
-	 * @return Avpvh_Lnkc_Configuration_Manager
+	 * @return Avpvh_Brkn_Configuration_Manager
 	 */
-function avpvh_lnkc_create_frontend_configuration() {
-	return new Avpvh_Lnkc_Configuration_Manager(
+function avpvh_brkn_create_frontend_configuration() {
+	return new Avpvh_Brkn_Configuration_Manager(
 		'frontend',
 		// Save the plugin frontend configuration into this DB option.
-		'avpvh_lnkc_frontend_options',
+		'avpvh_brkn_frontend_options',
 		// Initialize default frontend settings.
 		array(
 			'mark_broken_links'     => true, // Whether to add the broken_link class to broken links in posts.
@@ -64,13 +64,13 @@ function avpvh_lnkc_create_frontend_configuration() {
 	/**
 	 * Create configuration manager for admin settings
 	 *
-	 * @return Avpvh_Lnkc_Configuration_Manager
+	 * @return Avpvh_Brkn_Configuration_Manager
 	 */
-function avpvh_lnkc_create_admin_configuration() {
-	return new Avpvh_Lnkc_Configuration_Manager(
+function avpvh_brkn_create_admin_configuration() {
+	return new Avpvh_Brkn_Configuration_Manager(
 		'admin',
 		// Save the plugin's scheduling configuration into this DB option.
-		'avpvh_lnkc_admin_options',
+		'avpvh_brkn_admin_options',
 		// Initialize default scheduling settings.
 		array(
 			'autoexpand_widget'            => true, // Autoexpand the Dashboard widget if broken links are detected.
@@ -91,13 +91,13 @@ function avpvh_lnkc_create_admin_configuration() {
 	/**
 	 * Create configuration manager for general settings
 	 *
-	 * @return Avpvh_Lnkc_Configuration_Manager
+	 * @return Avpvh_Brkn_Configuration_Manager
 	 */
-function avpvh_lnkc_create_general_configuration() {
-	return new Avpvh_Lnkc_Configuration_Manager(
+function avpvh_brkn_create_general_configuration() {
+	return new Avpvh_Brkn_Configuration_Manager(
 		'general',
 		// Save the plugin's general configuration into this DB option.
-		'avpvh_lnkc_general_options',
+		'avpvh_brkn_general_options',
 		// Initialize default general settings.
 		array(
 			'send_email_notifications'         => true, // Whether to send the admin email notifications about broken links.
@@ -106,7 +106,7 @@ function avpvh_lnkc_create_general_configuration() {
 			'warnings_enabled'                 => true, // Try to automatically detect temporary problems and false positives, and report them as "Warnings" instead of broken links.
 			'enable_load_limit'                => true, // Enable/disable load monitoring.
 			'exclusion_list'                   => array(), // Links matching an entry (text, * wildcard or /regex/) won't be checked.
-			'host_rules'                       => array(), // Per-host user agent, minimum interval, accepted codes or skip; see Avpvh_Lnkc_Host_Rules.
+			'host_rules'                       => array(), // Per-host user agent, minimum interval, accepted codes or skip; see Avpvh_Brkn_Host_Rules.
 			'default_user_agent'               => '', // User agent for hosts without a rule; empty for a desktop browser.
 			'need_resynch'                     => false, // [Internal flag] True if there are unparsed items.
 			'max_execution_time'               => 7 * 60, // (in seconds) How long the worker instance may run, at most.
@@ -118,11 +118,11 @@ function avpvh_lnkc_create_general_configuration() {
 			'server_load_limit'                => null, // Stop parsing stuff & checking links if the 1-minute load average goes over this value. Only works on Linux servers. 0 = no limit.
 			'failure_duration_threshold'       => 3, // (days) Assume a link is permanently broken if it still hasn't recovered after this many days.
 			'incorrect_path'                   => false,
-			'avpvh_lnkc_post_modified'                => '',
+			'avpvh_brkn_post_modified'                => '',
 			'youtube_api_key'                  => '',
 			'last_notification_sent'           => 0, // When the last email notification was sent (Unix timestamp).
 			'notification_email_address'       => '', // If set, send email notifications to this address instead of the admin.
-			'notification_schedule'            => apply_filters( 'avpvh_lnkc_notification_schedule_filter', 'daily' ), // How often (at most) notifications will be sent. Possible values : 'daily', 'weekly'. There is no option for this so we've added a fitler for it.
+			'notification_schedule'            => apply_filters( 'avpvh_brkn_notification_schedule_filter', 'daily' ), // How often (at most) notifications will be sent. Possible values : 'daily', 'weekly'. There is no option for this so we've added a fitler for it.
 			'custom_fields'                    => array(), // List of custom fields that can contain URLs and should be checked.
 			'acf_fields'                       => array(), // List of custom fields that can contain URLs and should be checked.
 			'highlight_permanent_failures'     => false, // Highlight links that have appear to be permanently broken (in Tools -> Broken Links).
@@ -135,13 +135,13 @@ function avpvh_lnkc_create_general_configuration() {
 /**
  * Create configuration manager for modules settings
  *
- * @return Avpvh_Lnkc_Configuration_Manager
+ * @return Avpvh_Brkn_Configuration_Manager
  */
-function avpvh_lnkc_create_modules_configuration() {
-	return new Avpvh_Lnkc_Configuration_Manager(
+function avpvh_brkn_create_modules_configuration() {
+	return new Avpvh_Brkn_Configuration_Manager(
 		'modules',
 		// Save the plugin's modules configuration into this DB option.
-		'avpvh_lnkc_modules_options',
+		'avpvh_brkn_modules_options',
 		// Initialize default modules settings.
 		array(
 			'all_modules'    => array(),
@@ -152,11 +152,11 @@ function avpvh_lnkc_create_modules_configuration() {
 /**
  * Get the global configuration registry instance
  *
- * @return Avpvh_Lnkc_Configuration_Registry
+ * @return Avpvh_Brkn_Configuration_Registry
  */
-function avpvh_lnkc_get_configuration() {
-	$avpvh_lnkc_configuration_registry = Avpvh_Lnkc_Configuration_Registry::get_instance();
-	return $avpvh_lnkc_configuration_registry;
+function avpvh_brkn_get_configuration() {
+	$avpvh_brkn_configuration_registry = Avpvh_Brkn_Configuration_Registry::get_instance();
+	return $avpvh_brkn_configuration_registry;
 }
 
 /**
@@ -164,8 +164,8 @@ function avpvh_lnkc_get_configuration() {
  *
  * @return bool
  */
-function avpvh_lnkc_config_initialized() {
-	return Avpvh_Lnkc_Configuration_Registry::initialized();
+function avpvh_brkn_config_initialized() {
+	return Avpvh_Brkn_Configuration_Registry::initialized();
 }
 
 /**
@@ -173,18 +173,18 @@ function avpvh_lnkc_config_initialized() {
  *
  * @return void
  */
-function avpvh_lnkc_maybe_migrate_configuration() {
+function avpvh_brkn_maybe_migrate_configuration() {
 
-	$migrated = get_option( 'avpvh_lnkc_configuration_migrated', false );
+	$migrated = get_option( 'avpvh_brkn_configuration_migrated', false );
 	if ( $migrated ) {
 		return false;
 	}
 
-	if ( ! avpvh_lnkc_config_initialized() ) {
-		avpvh_lnkc_init_configuration();
+	if ( ! avpvh_brkn_config_initialized() ) {
+		avpvh_brkn_init_configuration();
 	}
 
-	$old_option = get_option( 'avpvh_lnkc_options', false );
+	$old_option = get_option( 'avpvh_brkn_options', false );
 	if ( false === $old_option ) {
 		return false;
 	}
@@ -198,7 +198,7 @@ function avpvh_lnkc_maybe_migrate_configuration() {
 		return;
 	}
 
-	$config   = avpvh_lnkc_get_configuration();
+	$config   = avpvh_brkn_get_configuration();
 	$managers = $config->options->get_managers();
 
 	foreach ( $managers as $manager ) {
@@ -230,13 +230,13 @@ function avpvh_lnkc_maybe_migrate_configuration() {
 
 	if ( isset( $old_data['active_modules'] ) ) {
 		$frontend_manager = $config->options->get_manager( 'frontend' );
-		if ( $frontend_manager instanceof Avpvh_Lnkc_Configuration_Manager ) {
+		if ( $frontend_manager instanceof Avpvh_Brkn_Configuration_Manager ) {
 			$frontend_manager->set( 'active_modules', array_keys( $old_data['active_modules'] ) );
 			$frontend_manager->save_options();
 		}
 
 		$modules_manager = $config->options->get_manager( 'modules' );
-		if ( $modules_manager instanceof Avpvh_Lnkc_Configuration_Manager ) {
+		if ( $modules_manager instanceof Avpvh_Brkn_Configuration_Manager ) {
 			$modules_manager->set( 'all_modules', $old_data['active_modules'] );
 			$modules_manager->save_options();
 		}
@@ -250,7 +250,7 @@ function avpvh_lnkc_maybe_migrate_configuration() {
 		$default_manager->save_options();
 	}
 
-	update_option( 'avpvh_lnkc_configuration_migrated', 1 );
+	update_option( 'avpvh_brkn_configuration_migrated', 1 );
 
 	return true;
 }

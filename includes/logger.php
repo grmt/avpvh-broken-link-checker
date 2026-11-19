@@ -10,31 +10,31 @@ defined( 'ABSPATH' ) || exit;
  * any filesystem access of their own.
  */
 
-if ( ! function_exists( 'avpvh_lnkc_get_log_directory' ) ) {
+if ( ! function_exists( 'avpvh_brkn_get_log_directory' ) ) {
 	/**
 	 * The single directory the plugin writes its log into.
 	 *
 	 * @return string Absolute path, with no trailing slash.
 	 */
-	function avpvh_lnkc_get_log_directory() {
+	function avpvh_brkn_get_log_directory() {
 		$uploads = wp_upload_dir();
 
-		return untrailingslashit( wp_normalize_path( $uploads['basedir'] ) ) . '/avpvh-link-checker';
+		return untrailingslashit( wp_normalize_path( $uploads['basedir'] ) ) . '/avpvh-broken-link-checker';
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_get_default_log_basename' ) ) {
+if ( ! function_exists( 'avpvh_brkn_get_default_log_basename' ) ) {
 	/**
 	 * The default log file name.
 	 *
 	 * @return string
 	 */
-	function avpvh_lnkc_get_default_log_basename() {
+	function avpvh_brkn_get_default_log_basename() {
 		return 'blc-log.txt';
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_sanitize_log_path' ) ) {
+if ( ! function_exists( 'avpvh_brkn_sanitize_log_path' ) ) {
 	/**
 	 * Reduce a configured log path to one inside the plugin's own log directory.
 	 *
@@ -50,9 +50,9 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_log_path' ) ) {
 	 * @param string $requested The configured path.
 	 * @return string An absolute path inside the plugin log directory.
 	 */
-	function avpvh_lnkc_sanitize_log_path( $requested ) {
-		$directory = avpvh_lnkc_get_log_directory();
-		$default   = $directory . '/' . avpvh_lnkc_get_default_log_basename();
+	function avpvh_brkn_sanitize_log_path( $requested ) {
+		$directory = avpvh_brkn_get_log_directory();
+		$default   = $directory . '/' . avpvh_brkn_get_default_log_basename();
 
 		$name = sanitize_file_name( wp_basename( str_replace( '\\', '/', strval( $requested ) ) ) );
 
@@ -70,86 +70,86 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_log_path' ) ) {
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_get_log_path_error_messages' ) ) {
+if ( ! function_exists( 'avpvh_brkn_get_log_path_error_messages' ) ) {
 	/**
 	 * The messages shown to the administrator when a log path is refused, by error code.
 	 *
 	 * @return string[]
 	 */
-	function avpvh_lnkc_get_log_path_error_messages() {
+	function avpvh_brkn_get_log_path_error_messages() {
 		return array(
-			'avpvh_lnkc_log_path_traversal' => __( 'The log file path was not accepted because it contains "..". The default log file location is used instead.', 'avpvh-link-checker' ),
-			'avpvh_lnkc_log_path_outside'   => __( 'The log file path was not accepted because the log file has to be inside the plugin log directory. The default log file location is used instead.', 'avpvh-link-checker' ),
-			'avpvh_lnkc_log_path_name'      => __( 'The log file name was not accepted. Use a file name ending in .txt. The default log file location is used instead.', 'avpvh-link-checker' ),
-			'avpvh_lnkc_log_dir_unusable'   => __( 'The log file could not be used because the plugin log directory is a symbolic link, or it or the log file is not writable. Logging has been turned off.', 'avpvh-link-checker' ),
+			'avpvh_brkn_log_path_traversal' => __( 'The log file path was not accepted because it contains "..". The default log file location is used instead.', 'avpvh-broken-link-checker' ),
+			'avpvh_brkn_log_path_outside'   => __( 'The log file path was not accepted because the log file has to be inside the plugin log directory. The default log file location is used instead.', 'avpvh-broken-link-checker' ),
+			'avpvh_brkn_log_path_name'      => __( 'The log file name was not accepted. Use a file name ending in .txt. The default log file location is used instead.', 'avpvh-broken-link-checker' ),
+			'avpvh_brkn_log_dir_unusable'   => __( 'The log file could not be used because the plugin log directory is a symbolic link, or it or the log file is not writable. Logging has been turned off.', 'avpvh-broken-link-checker' ),
 		);
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_resolve_requested_log_path' ) ) {
+if ( ! function_exists( 'avpvh_brkn_resolve_requested_log_path' ) ) {
 	/**
 	 * Validate a log path submitted on the settings page.
 	 *
-	 * Unlike avpvh_lnkc_sanitize_log_path(), which quietly reduces whatever it is given, this
+	 * Unlike avpvh_brkn_sanitize_log_path(), which quietly reduces whatever it is given, this
 	 * refuses a value that tries to leave the log directory so that the administrator
 	 * can be told. A bare file name, or a full path that is already inside the log
 	 * directory (which is what the settings page displays), is accepted.
 	 *
 	 * @param string $requested The submitted path. Empty means the default log file.
 	 * @return string|WP_Error An absolute path inside the plugin log directory, or an
-	 *                         error whose code is a key of avpvh_lnkc_get_log_path_error_messages().
+	 *                         error whose code is a key of avpvh_brkn_get_log_path_error_messages().
 	 */
-	function avpvh_lnkc_resolve_requested_log_path( $requested ) {
+	function avpvh_brkn_resolve_requested_log_path( $requested ) {
 		$requested = trim( strval( $requested ) );
-		$messages  = avpvh_lnkc_get_log_path_error_messages();
+		$messages  = avpvh_brkn_get_log_path_error_messages();
 
 		if ( '' === $requested ) {
-			return avpvh_lnkc_sanitize_log_path( '' );
+			return avpvh_brkn_sanitize_log_path( '' );
 		}
 
 		$normalized = str_replace( '\\', '/', $requested );
 
 		foreach ( explode( '/', $normalized ) as $segment ) {
 			if ( '..' === $segment ) {
-				return new WP_Error( 'avpvh_lnkc_log_path_traversal', $messages['avpvh_lnkc_log_path_traversal'] );
+				return new WP_Error( 'avpvh_brkn_log_path_traversal', $messages['avpvh_brkn_log_path_traversal'] );
 			}
 		}
 
 		// Stream wrappers such as phar:// are never a place to put the log.
 		if ( false !== strpos( $normalized, '://' ) || false !== strpos( $normalized, "\0" ) ) {
-			return new WP_Error( 'avpvh_lnkc_log_path_outside', $messages['avpvh_lnkc_log_path_outside'] );
+			return new WP_Error( 'avpvh_brkn_log_path_outside', $messages['avpvh_brkn_log_path_outside'] );
 		}
 
 		if ( false !== strpos( $normalized, '/' ) ) {
 			$directory = untrailingslashit( wp_normalize_path( dirname( $normalized ) ) );
 
-			if ( $directory !== untrailingslashit( wp_normalize_path( avpvh_lnkc_get_log_directory() ) ) ) {
-				return new WP_Error( 'avpvh_lnkc_log_path_outside', $messages['avpvh_lnkc_log_path_outside'] );
+			if ( $directory !== untrailingslashit( wp_normalize_path( avpvh_brkn_get_log_directory() ) ) ) {
+				return new WP_Error( 'avpvh_brkn_log_path_outside', $messages['avpvh_brkn_log_path_outside'] );
 			}
 		}
 
-		$resolved = avpvh_lnkc_sanitize_log_path( $normalized );
+		$resolved = avpvh_brkn_sanitize_log_path( $normalized );
 
-		// avpvh_lnkc_sanitize_log_path() falls back to the default for a name it cannot accept.
-		if ( basename( $resolved ) === avpvh_lnkc_get_default_log_basename() && basename( $normalized ) !== avpvh_lnkc_get_default_log_basename() ) {
-			return new WP_Error( 'avpvh_lnkc_log_path_name', $messages['avpvh_lnkc_log_path_name'] );
+		// avpvh_brkn_sanitize_log_path() falls back to the default for a name it cannot accept.
+		if ( basename( $resolved ) === avpvh_brkn_get_default_log_basename() && basename( $normalized ) !== avpvh_brkn_get_default_log_basename() ) {
+			return new WP_Error( 'avpvh_brkn_log_path_name', $messages['avpvh_brkn_log_path_name'] );
 		}
 
 		return $resolved;
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_log_directory_is_safe' ) ) {
+if ( ! function_exists( 'avpvh_brkn_log_directory_is_safe' ) ) {
 	/**
 	 * Whether the log directory can be trusted to be a real directory inside uploads.
 	 *
 	 * A directory that is missing is fine: it has not been created yet, and creating it
-	 * is done by avpvh_lnkc_prepare_log_directory().
+	 * is done by avpvh_brkn_prepare_log_directory().
 	 *
 	 * @return bool
 	 */
-	function avpvh_lnkc_log_directory_is_safe() {
-		$directory = avpvh_lnkc_get_log_directory();
+	function avpvh_brkn_log_directory_is_safe() {
+		$directory = avpvh_brkn_get_log_directory();
 
 		if ( is_link( $directory ) ) {
 			return false;
@@ -179,25 +179,25 @@ if ( ! function_exists( 'avpvh_lnkc_log_directory_is_safe' ) ) {
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_log_path_is_safe' ) ) {
+if ( ! function_exists( 'avpvh_brkn_log_path_is_safe' ) ) {
 	/**
 	 * Whether the plugin may write to a log path.
 	 *
 	 * Catches the case where the log file, or the directory holding it, has been
 	 * replaced by a symlink pointing somewhere else on the filesystem.
 	 *
-	 * @param string $path Absolute path, as returned by avpvh_lnkc_sanitize_log_path().
+	 * @param string $path Absolute path, as returned by avpvh_brkn_sanitize_log_path().
 	 * @return bool
 	 */
-	function avpvh_lnkc_log_path_is_safe( $path ) {
-		if ( ! avpvh_lnkc_log_directory_is_safe() || is_link( $path ) ) {
+	function avpvh_brkn_log_path_is_safe( $path ) {
+		if ( ! avpvh_brkn_log_directory_is_safe() || is_link( $path ) ) {
 			return false;
 		}
 
-		$real_directory = realpath( avpvh_lnkc_get_log_directory() );
+		$real_directory = realpath( avpvh_brkn_get_log_directory() );
 
 		if ( false === $real_directory ) {
-			// Nothing created yet; avpvh_lnkc_sanitize_log_path() has already fixed the location.
+			// Nothing created yet; avpvh_brkn_sanitize_log_path() has already fixed the location.
 			return true;
 		}
 
@@ -207,7 +207,7 @@ if ( ! function_exists( 'avpvh_lnkc_log_path_is_safe' ) ) {
 	}
 }
 
-if ( ! function_exists( 'avpvh_lnkc_prepare_log_directory' ) ) {
+if ( ! function_exists( 'avpvh_brkn_prepare_log_directory' ) ) {
 	/**
 	 * Create the log directory, and an .htaccess and index.php for it only when none
 	 * is present.
@@ -217,10 +217,10 @@ if ( ! function_exists( 'avpvh_lnkc_prepare_log_directory' ) ) {
 	 *
 	 * @return bool Whether the directory exists and is usable.
 	 */
-	function avpvh_lnkc_prepare_log_directory() {
-		$directory = avpvh_lnkc_get_log_directory();
+	function avpvh_brkn_prepare_log_directory() {
+		$directory = avpvh_brkn_get_log_directory();
 
-		if ( ! avpvh_lnkc_log_directory_is_safe() ) {
+		if ( ! avpvh_brkn_log_directory_is_safe() ) {
 			return false;
 		}
 
@@ -258,12 +258,12 @@ if ( ! function_exists( 'avpvh_lnkc_prepare_log_directory' ) ) {
 	}
 }
 
-if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
+if ( ! class_exists( 'Avpvh_Brkn_Logger' ) ) :
 
-	define( 'AVPVH_LNKC_LEVEL_DEBUG', 0 );
-	define( 'AVPVH_LNKC_LEVEL_INFO', 1 );
-	define( 'AVPVH_LNKC_LEVEL_WARNING', 2 );
-	define( 'AVPVH_LNKC_LEVEL_ERROR', 3 );
+	define( 'AVPVH_BRKN_LEVEL_DEBUG', 0 );
+	define( 'AVPVH_BRKN_LEVEL_INFO', 1 );
+	define( 'AVPVH_BRKN_LEVEL_WARNING', 2 );
+	define( 'AVPVH_BRKN_LEVEL_ERROR', 3 );
 
 	/**
 	 * Base class for loggers. Doesn't actually log anything anywhere.
@@ -271,39 +271,39 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 	 * @package Broken Link Checker
 	 * @author Janis Elsts
 	 */
-	class Avpvh_Lnkc_Logger {
-		protected $log_level = AVPVH_LNKC_LEVEL_DEBUG;
+	class Avpvh_Brkn_Logger {
+		protected $log_level = AVPVH_BRKN_LEVEL_DEBUG;
 
 		function __construct( $param = '' ) {
 
 		}
 
 
-		function log( $message, $object = null, $level = AVPVH_LNKC_LEVEL_INFO ) {
+		function log( $message, $object = null, $level = AVPVH_BRKN_LEVEL_INFO ) {
 
 		}
 
 		function debug( $message, $object = null ) {
-			$this->log( $message, $object, AVPVH_LNKC_LEVEL_DEBUG );
+			$this->log( $message, $object, AVPVH_BRKN_LEVEL_DEBUG );
 		}
 
 		function info( $message, $object = null ) {
-			$this->log( $message, $object, AVPVH_LNKC_LEVEL_INFO );
+			$this->log( $message, $object, AVPVH_BRKN_LEVEL_INFO );
 		}
 
 		function warn( $message, $object = null ) {
-			$this->log( $message, $object, AVPVH_LNKC_LEVEL_WARNING );
+			$this->log( $message, $object, AVPVH_BRKN_LEVEL_WARNING );
 		}
 
 		function error( $message, $object = null ) {
-			$this->log( $message, $object, AVPVH_LNKC_LEVEL_ERROR );
+			$this->log( $message, $object, AVPVH_BRKN_LEVEL_ERROR );
 		}
 
-		function get_messages( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_messages( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			return array();
 		}
 
-		function get_log( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_log( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			return array();
 		}
 
@@ -320,15 +320,15 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 	 * A basic logger that uses WP options for permanent storage.
 	 *
 	 * Log entries are initially stored in memory and need to explicitly
-	 * flushed to the database by calling Avpvh_Lnkc_Cached_Option_Logger::save().
+	 * flushed to the database by calling Avpvh_Brkn_Cached_Option_Logger::save().
 	 *
 	 * @package Broken Link Checker
 	 * @author Janis Elsts
 	 */
-	class Avpvh_Lnkc_Cached_Option_Logger extends Avpvh_Lnkc_Logger {
+	class Avpvh_Brkn_Cached_Option_Logger extends Avpvh_Brkn_Logger {
 		var $option_name = '';
 		var $log;
-		var $filter_level = AVPVH_LNKC_LEVEL_DEBUG;
+		var $filter_level = AVPVH_BRKN_LEVEL_DEBUG;
 
 		function __construct( $option_name = '' ) {
 			$this->option_name = $option_name;
@@ -340,12 +340,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 			}
 		}
 
-		function log( $message, $object = null, $level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function log( $message, $object = null, $level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			$new_entry = array( $level, $message, $object );
 			array_push( $this->log, $new_entry );
 		}
 
-		function get_log( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_log( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			$this->filter_level = $min_level;
 			return array_filter( $this->log, array( $this, 'filter_log' ) );
 		}
@@ -354,7 +354,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 			return ( $entry[0] >= $this->filter_level );
 		}
 
-		function get_messages( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_messages( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			$messages = $this->get_log( $min_level );
 			return array_map( array( $this, 'get_log_message' ), $messages );
 		}
@@ -376,19 +376,19 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 	/**
 	 * A dummy logger that doesn't log anything.
 	 */
-	class Avpvh_Lnkc_Dummy_Logger extends Avpvh_Lnkc_Logger { }
+	class Avpvh_Brkn_Dummy_Logger extends Avpvh_Brkn_Logger { }
 
 	/**
 	 * A basic logger that logs messages to a file.
 	 */
-	class Avpvh_Lnkc_File_Logger extends Avpvh_Lnkc_Logger {
+	class Avpvh_Brkn_File_Logger extends Avpvh_Brkn_Logger {
 		protected $fileName; //phpcs:ignore WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase
 
 		public function __construct( $fileName = '' ) {
 			$this->fileName = $fileName;
 		}
 
-		function log( $message, $object = null, $level = AVPVH_LNKC_LEVEL_INFO ) {
+		function log( $message, $object = null, $level = AVPVH_BRKN_LEVEL_INFO ) {
 			if ( $level < $this->log_level ) {
 				return;
 			}
@@ -409,11 +409,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 			error_log( $line, 3, $this->fileName );
 		}
 
-		function get_messages( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_messages( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			return array( __CLASS__ . ':get_messages() is not implemented' );
 		}
 
-		function get_log( $min_level = AVPVH_LNKC_LEVEL_DEBUG ) {
+		function get_log( $min_level = AVPVH_BRKN_LEVEL_DEBUG ) {
 			return array( __CLASS__ . ':get_log() is not implemented' );
 		}
 
@@ -425,13 +425,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 
 		protected function get_level_string( $level ) {
 			switch ( $level ) {
-				case AVPVH_LNKC_LEVEL_DEBUG:
+				case AVPVH_BRKN_LEVEL_DEBUG:
 					return 'DEBUG:';
-				case AVPVH_LNKC_LEVEL_ERROR:
+				case AVPVH_BRKN_LEVEL_ERROR:
 					return 'ERROR:';
-				case AVPVH_LNKC_LEVEL_WARNING:
+				case AVPVH_BRKN_LEVEL_WARNING:
 					return 'WARN:';
-				case AVPVH_LNKC_LEVEL_INFO:
+				case AVPVH_BRKN_LEVEL_INFO:
 					return 'INFO:';
 			}
 			return 'LOG:';

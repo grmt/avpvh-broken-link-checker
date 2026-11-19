@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
  * @author Janis Elsts
  * @access private
  */
-class Avpvh_Lnkc_Post_Type_Overlord {
+class Avpvh_Brkn_Post_Type_Overlord {
 	public $enabled_post_types    = array();  //Post types currently selected for link checking
 	public $enabled_post_statuses = array( 'publish' ); //Only posts that have one of these statuses shall be checked
 
@@ -34,14 +34,14 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 	 * @return void
 	 */
 	function init() {
-		$this->plugin_conf = avpvh_lnkc_get_configuration();
+		$this->plugin_conf = avpvh_brkn_get_configuration();
 
 		if ( isset( $this->plugin_conf->options['enabled_post_statuses'] ) ) {
 			$this->enabled_post_statuses = $this->plugin_conf->options['enabled_post_statuses'];
 		}
 
 		//Register a virtual container module for each enabled post type
-		$module_manager = Avpvh_Lnkc_Module_Manager::getInstance();
+		$module_manager = Avpvh_Brkn_Module_Manager::getInstance();
 
 		$post_types = get_post_types( array(), 'objects' );
 		$exceptions = array( 'revision', 'nav_menu_item', 'attachment' );
@@ -59,7 +59,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 					'Name'            => $data->labels->name,
 					'ModuleCategory'  => 'container',
 					'ModuleContext'   => 'all',
-					'ModuleClassName' => 'Avpvh_Lnkc_Any_Post_Container_Manager',
+					'ModuleClassName' => 'Avpvh_Brkn_Any_Post_Container_Manager',
 				)
 			);
 		}
@@ -90,12 +90,12 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 	/**
 	 * Retrieve an instance of the overlord class.
 	 *
-	 * @return Avpvh_Lnkc_Post_Type_Overlord
+	 * @return Avpvh_Brkn_Post_Type_Overlord
 	 */
 	static function getInstance() {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
-			$instance = new Avpvh_Lnkc_Post_Type_Overlord;
+			$instance = new Avpvh_Brkn_Post_Type_Overlord;
 			$instance->init();
 		}
 		return $instance;
@@ -104,7 +104,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 	/**
 	 * Notify the overlord that a post type is active.
 	 *
-	 * Called by individual instances of Avpvh_Lnkc_Any_Post_Container_Manager to let
+	 * Called by individual instances of Avpvh_Brkn_Any_Post_Container_Manager to let
 	 * the overlord know that they've been created. Since a module instance
 	 * is only created if the module is active, this event indicates that
 	 * the user has enabled the corresponding post type for link checking.
@@ -135,7 +135,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		}
 		//Get the associated container object
 		$post_type      = get_post_type( $post );
-		$post_container = Avpvh_Lnkc_Container_Helper::get_container( array( $post_type, $post_id ) );
+		$post_container = Avpvh_Brkn_Container_Helper::get_container( array( $post_type, $post_id ) );
 
 		if ( $post_container ) {
 			//Delete the container
@@ -143,7 +143,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 
 			// Firstly: See if we have any current instances
 			$q_current_instance_ids = $wpdb->prepare(
-				'SELECT instance_id FROM `' . $wpdb->prefix . 'avpvh_lnkc_instances` WHERE container_id = %d AND container_type = %s',
+				'SELECT instance_id FROM `' . $wpdb->prefix . 'avpvh_brkn_instances` WHERE container_id = %d AND container_type = %s',
 				$post_id,
 				$post_type
 			);
@@ -161,18 +161,18 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 			// Secondly: Get all link_ids used in our current instances
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %d placeholders and table names are interpolated.
 			$q_current_link_ids_results = $wpdb->get_results(
-				$wpdb->prepare( "SELECT DISTINCT link_id FROM `{$wpdb->prefix}avpvh_lnkc_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ),
+				$wpdb->prepare( "SELECT DISTINCT link_id FROM `{$wpdb->prefix}avpvh_brkn_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ),
 				ARRAY_A
 			);
 
 			$current_link_ids = wp_list_pluck( $q_current_link_ids_results, 'link_id' );
 
-			// Go ahead and remove avpvh_lnkc_instances for this container, avpvh_lnkc_cleanup_links( $current_link_ids ) will find and remove any dangling links in the avpvh_lnkc_links table
-			$wpdb->query( $wpdb->prepare( "DELETE FROM `{$wpdb->prefix}avpvh_lnkc_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ) );
+			// Go ahead and remove avpvh_brkn_instances for this container, avpvh_brkn_cleanup_links( $current_link_ids ) will find and remove any dangling links in the avpvh_brkn_links table
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `{$wpdb->prefix}avpvh_brkn_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ) );
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			//Clean up any dangling links
-			avpvh_lnkc_cleanup_links( $current_link_ids );
+			avpvh_brkn_cleanup_links( $current_link_ids );
 		}
 	}
 
@@ -201,7 +201,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 
 		//Get the container & mark it as unparsed
 		$args           = array( $post->post_type, intval( $post_id ) );
-		$post_container = Avpvh_Lnkc_Container_Helper::get_container( $args );
+		$post_container = Avpvh_Brkn_Container_Helper::get_container( $args );
 
 		$post_container->mark_as_unsynched();
 	}
@@ -297,7 +297,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
-			"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
+			"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch(container_id, container_type, synched)
 			  SELECT posts.id, posts.post_type, 0
 			  FROM {$wpdb->posts} AS posts
 			  WHERE posts.post_status IN ({$status_placeholders})
@@ -328,10 +328,10 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
-			"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
+			"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch(container_id, container_type, synched)
 			  SELECT posts.id, posts.post_type, 0
 			  FROM {$wpdb->posts} AS posts
-			    LEFT JOIN {$wpdb->prefix}avpvh_lnkc_synch AS synch
+			    LEFT JOIN {$wpdb->prefix}avpvh_brkn_synch AS synch
 			           ON synch.container_id   = posts.ID
 			          AND synch.container_type = posts.post_type
 			  WHERE posts.post_status IN ({$status_placeholders})
@@ -375,7 +375,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
 			"DELETE synch.*
-			      FROM {$wpdb->prefix}avpvh_lnkc_synch AS synch
+			      FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 			      LEFT JOIN {$wpdb->posts} AS posts
 			             ON posts.ID          = synch.container_id
 			            AND posts.post_type   IN ({$type_placeholders})
@@ -408,7 +408,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		global $wpdb;
 		$wpdb->query(
 			"UPDATE
-				{$wpdb->prefix}avpvh_lnkc_synch AS synch
+				{$wpdb->prefix}avpvh_brkn_synch AS synch
 				JOIN {$wpdb->posts} AS posts ON (synch.container_id = posts.ID and synch.container_type=posts.post_type)
 					SET synched = 0
 				WHERE
@@ -436,7 +436,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		$links = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT instances.raw_url
-				FROM {$wpdb->prefix}avpvh_lnkc_instances AS instances JOIN {$wpdb->prefix}avpvh_lnkc_links AS links
+				FROM {$wpdb->prefix}avpvh_brkn_instances AS instances JOIN {$wpdb->prefix}avpvh_brkn_links AS links
 					ON instances.link_id = links.link_id
 				WHERE
 					instances.container_type = %s
@@ -461,7 +461,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		}
 
 		//Iterate over all HTML links and modify the broken ones
-		$parser = Avpvh_Lnkc_Parser_Helper::get_parser( 'link' );
+		$parser = Avpvh_Brkn_Parser_Helper::get_parser( 'link' );
 		if ( $parser ) {
 			$content = $parser->multi_edit( $content, array( &$this, 'highlight_broken_link' ), $broken_link_urls );
 		}
@@ -519,13 +519,13 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 	 * @return void
 	 */
 	function hook_wp_head() {
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- avpvh_lnkc_sanitize_custom_css() leaves no tags and no "</style".
-		echo '<style>', avpvh_lnkc_sanitize_custom_css( $this->plugin_conf->options['broken_link_css'] ), '</style>';
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- avpvh_brkn_sanitize_custom_css() leaves no tags and no "</style".
+		echo '<style>', avpvh_brkn_sanitize_custom_css( $this->plugin_conf->options['broken_link_css'] ), '</style>';
 	}
 }
 
 //Start up the post overlord
-Avpvh_Lnkc_Post_Type_Overlord::getInstance();
+Avpvh_Brkn_Post_Type_Overlord::getInstance();
 
 
 /**
@@ -535,7 +535,7 @@ Avpvh_Lnkc_Post_Type_Overlord::getInstance();
  * @author Janis Elsts
  * @access public
  */
-class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
+class Avpvh_Brkn_Any_Post_Container extends Avpvh_Brkn_Container {
 	var $default_field = 'post_content';
 
 	public $updating_urls = null;
@@ -585,7 +585,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				'<span class="edit"><a href="%s" title="%s">%s</a>',
 				esc_url( $this->get_edit_url() ),
 				esc_attr( $post_type_object->labels->edit_item ),
-				esc_html__( 'Edit', 'avpvh-link-checker' )
+				esc_html__( 'Edit', 'avpvh-broken-link-checker' )
 			);
 
 			//Trash/Delete link
@@ -599,16 +599,16 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				if ( $this->can_be_trashed() ) {
 					$actions['trash'] = sprintf(
 						"<span class='trash'><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Move this item to the Trash', 'avpvh-link-checker' ) ),
+						esc_attr( __( 'Move this item to the Trash', 'avpvh-broken-link-checker' ) ),
 						esc_url( get_delete_post_link( $this->container_id, '', false ) ),
-						esc_html__( 'Trash', 'avpvh-link-checker' )
+						esc_html__( 'Trash', 'avpvh-broken-link-checker' )
 					);
 				} else {
 					$actions['delete'] = sprintf(
 						"<span><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Delete this item permanently', 'avpvh-link-checker' ) ),
+						esc_attr( __( 'Delete this item permanently', 'avpvh-broken-link-checker' ) ),
 						esc_url( get_delete_post_link( $this->container_id, '', true ) ),
-						esc_html__( 'Delete', 'avpvh-link-checker' )
+						esc_html__( 'Delete', 'avpvh-broken-link-checker' )
 					);
 				}
 			}
@@ -622,16 +622,16 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				$actions['view'] = sprintf(
 					'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 					esc_url( add_query_arg( 'preview', 'true', get_permalink( $this->container_id ) ) ),
-					esc_attr( sprintf( /* translators: %s: post title. */ __( 'Preview &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
-					esc_html__( 'Preview', 'avpvh-link-checker' )
+					esc_attr( sprintf( /* translators: %s: post title. */ __( 'Preview &#8220;%s&#8221;', 'avpvh-broken-link-checker' ), $title ) ),
+					esc_html__( 'Preview', 'avpvh-broken-link-checker' )
 				);
 			}
 		} elseif ( 'trash' != $post->post_status ) {
 			$actions['view'] = sprintf(
 				'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 				esc_url( get_permalink( $this->container_id ) ),
-				esc_attr( sprintf( /* translators: %s: post title. */ __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
-				esc_html__( 'View', 'avpvh-link-checker' )
+				esc_attr( sprintf( /* translators: %s: post title. */ __( 'View &#8220;%s&#8221;', 'avpvh-broken-link-checker' ), $title ) ),
+				esc_html__( 'View', 'avpvh-broken-link-checker' )
 			);
 		}
 
@@ -651,14 +651,14 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			$source = sprintf(
 				$source,
 				esc_url( get_the_permalink( $this->container_id ) ),
-				esc_attr( __( 'View this item', 'avpvh-link-checker' ) ),
+				esc_attr( __( 'View this item', 'avpvh-broken-link-checker' ) ),
 				esc_html( get_the_title( $this->container_id ) )
 			);
 		} else {
 			$source = sprintf(
 				$source,
 				esc_url( $this->get_edit_url() ),
-				esc_attr( __( 'Edit this item', 'avpvh-link-checker' ) ),
+				esc_attr( __( 'Edit this item', 'avpvh-broken-link-checker' ) ),
 				esc_html( get_the_title( $this->container_id ) )
 			);
 		}
@@ -739,13 +739,13 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 		if ( is_null( $this->wrapped_object ) ) {
 			return new WP_Error(
 				'no_wrapped_object',
-				__( 'Nothing to update', 'avpvh-link-checker' )
+				__( 'Nothing to update', 'avpvh-broken-link-checker' )
 			);
 		}
 
 		$post                        = $this->wrapped_object;
-		$post->avpvh_lnkc_post_modified     = $post->post_modified;
-		$post->avpvh_lnkc_post_modified_gmt = $post->post_modified_gmt;
+		$post->avpvh_brkn_post_modified     = $post->post_modified;
+		$post->avpvh_brkn_post_modified_gmt = $post->post_modified_gmt;
 		$post_id                     = wp_update_post( $post, true );
 
 		if ( is_wp_error( $post_id ) ) {
@@ -753,7 +753,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 		} elseif ( $post_id == 0 ) {
 			return new WP_Error(
 				'update_failed',
-				sprintf( /* translators: %d: item ID. */ __( 'Updating post %d failed', 'avpvh-link-checker' ), $this->container_id )
+				sprintf( /* translators: %d: item ID. */ __( 'Updating post %d failed', 'avpvh-broken-link-checker' ), $this->container_id )
 			);
 		} else {
 			$this->update_pagebuilders( $post_id );
@@ -778,7 +778,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 					// Editing case.
 					$old_url = $this->updating_urls['old_url'];
 					$new_url = $this->updating_urls['new_url'];
-					Avpvh_Lnkc_Elementor::instance()->update_blc_links( $old_url, $new_url, $post_id );
+					Avpvh_Brkn_Elementor::instance()->update_blc_links( $old_url, $new_url, $post_id );
 				} else { // Unlinking case.
 					foreach ( $this->updating_urls as $key => $link_info ) {
 						$old_url = $link_info['#raw'];
@@ -788,7 +788,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 							continue;
 						}
 
-						Avpvh_Lnkc_Elementor::instance()->update_blc_links( $old_url, $new_url, $post_id );
+						Avpvh_Brkn_Elementor::instance()->update_blc_links( $old_url, $new_url, $post_id );
 					}
 				}
 			}
@@ -801,7 +801,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 					// Editing case.
 					$old_url = $this->updating_urls['old_url'];
 					$new_url = $this->updating_urls['new_url'];
-					Avpvh_Lnkc_Site_Origin::instance()->update_blc_links( $old_url, $new_url, $post_id );
+					Avpvh_Brkn_Site_Origin::instance()->update_blc_links( $old_url, $new_url, $post_id );
 				} else { // Unlinking case.
 					foreach ( $this->updating_urls as $key => $link_info ) {
 						$old_url = $link_info['#raw'];
@@ -811,7 +811,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 							continue;
 						}
 
-						Avpvh_Lnkc_Site_Origin::instance()->update_blc_links( $old_url, $new_url, $post_id );
+						Avpvh_Brkn_Site_Origin::instance()->update_blc_links( $old_url, $new_url, $post_id );
 					}
 				}
 			}
@@ -849,7 +849,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				return new WP_Error(
 					'delete_failed',
 					sprintf(
-						/* translators: 1: post title, 2: post ID. */ __( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
+						/* translators: 1: post title, 2: post ID. */ __( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-broken-link-checker' ),
 						esc_html( get_the_title( $this->container_id ) ),
 						$this->container_id
 					)
@@ -868,7 +868,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_disabled',
 				sprintf(
-					/* translators: 1: post title, 2: post ID. */ __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-broken-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)
@@ -888,7 +888,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_failed',
 				sprintf(
-					/* translators: 1: post title, 2: post ID. */ __( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-broken-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)
@@ -941,8 +941,8 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager {
-	var $container_class_name = 'Avpvh_Lnkc_Any_Post_Container';
+class Avpvh_Brkn_Any_Post_Container_Manager extends Avpvh_Brkn_Container_Manager {
+	var $container_class_name = 'Avpvh_Brkn_Any_Post_Container';
 	var $fields               = array( 'post_content' => 'html', 'post_excerpt' => 'html' );
 
 	function init() {
@@ -950,7 +950,7 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 
 		//Notify the overlord that the post/container type that this instance is
 		//responsible for is enabled.
-		$overlord = Avpvh_Lnkc_Post_Type_Overlord::getInstance();
+		$overlord = Avpvh_Brkn_Post_Type_Overlord::getInstance();
 		$overlord->post_type_enabled( $this->container_type );
 	}
 
@@ -968,7 +968,7 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$containers = $this->make_containers( $containers );
 
 		//Preload post data if it is likely to be useful later
-		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY, AVPVH_LNKC_FOR_PARSING ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_BRKN_FOR_DISPLAY, AVPVH_BRKN_FOR_PARSING ) );
 		if ( $preload ) {
 			$post_ids = array();
 			foreach ( $containers as $container ) {
@@ -996,7 +996,7 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @return void
 	 */
 	function resynch( $forced = false ) {
-		$overlord = Avpvh_Lnkc_Post_Type_Overlord::getInstance();
+		$overlord = Avpvh_Brkn_Post_Type_Overlord::getInstance();
 		$overlord->resynch( $this->container_type, $forced );
 	}
 
@@ -1012,7 +1012,7 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		//just moves it to the trash. So we pick the message accordingly.
 		//(If possible, BLC *always* moves to trash instead of deleting permanently.)
 		if ( function_exists( 'wp_trash_post' ) && EMPTY_TRASH_DAYS ) {
-			return Avpvh_Lnkc_Any_Post_Container_Manager::ui_bulk_trash_message( $n );
+			return Avpvh_Brkn_Any_Post_Container_Manager::ui_bulk_trash_message( $n );
 		} else {
 			$post_type_object = get_post_type_object( $this->container_type );
 
@@ -1046,13 +1046,13 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 
 		if ( 'post' === $container_type || null === $post_type_object ) {
 			// translators: %d is the number of deleted posts.
-			$msg = _n( '%d post deleted.', '%d posts deleted.', $n, 'avpvh-link-checker' );
+			$msg = _n( '%d post deleted.', '%d posts deleted.', $n, 'avpvh-broken-link-checker' );
 		} elseif ( 'page' === $container_type ) {
 			// translators: %d is the number of deleted pages.
-			$msg = _n( '%d page deleted.', '%d pages deleted.', $n, 'avpvh-link-checker' );
+			$msg = _n( '%d page deleted.', '%d pages deleted.', $n, 'avpvh-broken-link-checker' );
 		} else {
 			// translators: %1$d is the number of deleted items, %2$s is the item type.
-			$msg       = _n( '%1$d "%2$s" deleted.', '%1$d "%2$s" deleted.', $n, 'avpvh-link-checker' );
+			$msg       = _n( '%1$d "%2$s" deleted.', '%1$d "%2$s" deleted.', $n, 'avpvh-broken-link-checker' );
 			$type_name = ( 1 === (int) $n ? $post_type_object->labels->singular_name : $post_type_object->labels->name );
 		}
 
@@ -1070,13 +1070,13 @@ class Avpvh_Lnkc_Any_Post_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	public static function build_trash_action_message( $n, $container_type, $post_type_object ) {
 		if ( 'post' === $container_type || null === $post_type_object ) {
 			// translators: %d is the number of posts moved to the Trash.
-			$msg = _n( '%d post moved to the Trash.', '%d posts moved to the Trash.', $n, 'avpvh-link-checker' );
+			$msg = _n( '%d post moved to the Trash.', '%d posts moved to the Trash.', $n, 'avpvh-broken-link-checker' );
 		} elseif ( 'page' === $container_type ) {
 			// translators: %d is the number of pages moved to the Trash.
-			$msg = _n( '%d page moved to the Trash.', '%d pages moved to the Trash.', $n, 'avpvh-link-checker' );
+			$msg = _n( '%d page moved to the Trash.', '%d pages moved to the Trash.', $n, 'avpvh-broken-link-checker' );
 		} else {
 			// translators: %1$d is the number of trashed items, %2$s is the item type.
-			$msg       = _n( '%1$d "%2$s" moved to the Trash.', '%1$d "%2$s" moved to the Trash.', $n, 'avpvh-link-checker' );
+			$msg       = _n( '%1$d "%2$s" moved to the Trash.', '%1$d "%2$s" moved to the Trash.', $n, 'avpvh-broken-link-checker' );
 			$type_name = ( 1 === (int) $n ? $post_type_object->labels->singular_name : $post_type_object->labels->name );
 		}
 

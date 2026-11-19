@@ -7,11 +7,11 @@ defined( 'ABSPATH' ) || exit;
  */
 
 
-if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
-	class Avpvh_Lnkc_Utility {
+if ( ! class_exists( 'Avpvh_Brkn_Utility' ) ) {
+	class Avpvh_Brkn_Utility {
 		/**
 		 * Checks if PHP is running in safe mode
-		 * Avpvh_Lnkc_Utility::is_safe_mode()
+		 * Avpvh_Brkn_Utility::is_safe_mode()
 		 *
 		 * @return bool
 		 */
@@ -32,7 +32,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 		}
 
 		/**
-		* Avpvh_Lnkc_Utility::is_open_basedir()
+		* Avpvh_Brkn_Utility::is_open_basedir()
 		* Checks if open_basedir is enabled
 		*
 		* @return bool
@@ -208,24 +208,24 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 
 			$templates = array(
 				'seconds' => array(
-					'default' => /* translators: %d: number of time units. */ _n_noop( '%d second', '%d seconds', 'avpvh-link-checker' ),
-					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d second ago', '%d seconds ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d second', '%d seconds', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d second ago', '%d seconds ago', 'avpvh-broken-link-checker' ),
 				),
 				'minutes' => array(
-					'default' => /* translators: %d: number of time units. */ _n_noop( '%d minute', '%d minutes', 'avpvh-link-checker' ),
-					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d minute', '%d minutes', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-broken-link-checker' ),
 				),
 				'hours'   => array(
-					'default' => /* translators: %d: number of time units. */ _n_noop( '%d hour', '%d hours', 'avpvh-link-checker' ),
-					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d hour ago', '%d hours ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d hour', '%d hours', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d hour ago', '%d hours ago', 'avpvh-broken-link-checker' ),
 				),
 				'days'    => array(
-					'default' => /* translators: %d: number of time units. */ _n_noop( '%d day', '%d days', 'avpvh-link-checker' ),
-					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d day ago', '%d days ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d day', '%d days', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d day ago', '%d days ago', 'avpvh-broken-link-checker' ),
 				),
 				'months'  => array(
-					'default' => /* translators: %d: number of time units. */ _n_noop( '%d month', '%d months', 'avpvh-link-checker' ),
-					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d month ago', '%d months ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d month', '%d months', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d month ago', '%d months ago', 'avpvh-broken-link-checker' ),
 				),
 			);
 
@@ -254,7 +254,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 					$templates[ $units ][ $template ][0], //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralSingle
 					$templates[ $units ][ $template ][1], //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralPlural
 					$delta,
-					'avpvh-link-checker'
+					'avpvh-broken-link-checker'
 				),
 				$delta
 			);
@@ -268,7 +268,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 		static function optimize_database() {
 			global $wpdb; /** @var wpdb $wpdb */
 
-			$wpdb->query( "OPTIMIZE TABLE {$wpdb->prefix}avpvh_lnkc_links, {$wpdb->prefix}avpvh_lnkc_instances, {$wpdb->prefix}avpvh_lnkc_synch" );
+			$wpdb->query( "OPTIMIZE TABLE {$wpdb->prefix}avpvh_brkn_links, {$wpdb->prefix}avpvh_brkn_instances, {$wpdb->prefix}avpvh_brkn_synch" );
 		}
 
 		/**

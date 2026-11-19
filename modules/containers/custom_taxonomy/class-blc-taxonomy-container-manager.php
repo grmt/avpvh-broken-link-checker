@@ -10,14 +10,14 @@
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager {
+class Avpvh_Brkn_Taxonomy_Container_Manager extends Avpvh_Brkn_Container_Manager {
 
 	/**
 	 * The name of the container class this manager handles.
 	 *
 	 * @var string
 	 */
-	public $container_class_name = 'Avpvh_Lnkc_Taxonomy_Container';
+	public $container_class_name = 'Avpvh_Brkn_Taxonomy_Container';
 
 	/**
 	 * Built-in WordPress taxonomies that are always registered and therefore
@@ -114,10 +114,10 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @return void
 	 */
 	public function on_post_deleted( $post_id ) {
-		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		if ( $container ) {
 			$container->delete();
-			avpvh_lnkc_cleanup_links();
+			avpvh_brkn_cleanup_links();
 		}
 	}
 
@@ -128,7 +128,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @return void
 	 */
 	public function mark_post_unsynched( $post_id ) {
-		$container = Avpvh_Lnkc_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		if ( $container ) {
 			$container->mark_as_unsynched();
 		}
@@ -144,12 +144,12 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @param array  $containers           Array of container identifiers (container_type, container_id).
 	 * @param string $purpose              Optional context for which the containers will be loaded; may be used to determine whether to preload the wrapped posts.
 	 * @param bool   $load_wrapped_objects Whether to preload the wrapped posts.
-	 * @return Avpvh_Lnkc_Taxonomy_Container[]
+	 * @return Avpvh_Brkn_Taxonomy_Container[]
 	 */
 	public function get_containers( $containers, $purpose = '', $load_wrapped_objects = false ) {
 		$containers = $this->make_containers( $containers );
 
-		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_LNKC_FOR_DISPLAY ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_BRKN_FOR_DISPLAY ) );
 		if ( $preload ) {
 			$post_ids = array();
 			foreach ( $containers as $container ) {
@@ -201,7 +201,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch (container_id, container_type, synched)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch (container_id, container_type, synched)
 				SELECT DISTINCT tr.object_id, %s, 0
 				FROM {$wpdb->term_relationships} AS tr
 				INNER JOIN {$wpdb->posts} AS p ON p.ID = tr.object_id AND p.post_status = 'publish'
@@ -233,7 +233,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE synch.*
-				FROM {$wpdb->prefix}avpvh_lnkc_synch AS synch
+				FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 				LEFT JOIN {$wpdb->posts} AS p ON p.ID = synch.container_id AND p.post_status = 'publish'
 				WHERE synch.container_type = %s
 				  AND p.ID IS NULL",
@@ -251,7 +251,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE synch.*
-				FROM {$wpdb->prefix}avpvh_lnkc_synch AS synch
+				FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 				WHERE synch.container_type = %s
 				  AND NOT EXISTS (
 					SELECT 1
@@ -281,7 +281,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}avpvh_lnkc_synch AS synch
+				"UPDATE {$wpdb->prefix}avpvh_brkn_synch AS synch
 		      JOIN {$wpdb->posts} AS p ON p.ID = synch.container_id
 		      SET synch.synched = 0
 		      WHERE synch.container_type = %s
@@ -308,13 +308,13 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch (container_id, container_type, synched)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch (container_id, container_type, synched)
 				SELECT DISTINCT tr.object_id, %s, 0
 				FROM {$wpdb->term_relationships} AS tr
 				INNER JOIN {$wpdb->posts} AS p ON p.ID = tr.object_id AND p.post_status = 'publish'
 				INNER JOIN {$wpdb->term_taxonomy} AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
 					AND tt.taxonomy NOT IN ({$placeholders})
-				LEFT JOIN {$wpdb->prefix}avpvh_lnkc_synch AS synch
+				LEFT JOIN {$wpdb->prefix}avpvh_brkn_synch AS synch
 					ON synch.container_id = tr.object_id AND synch.container_type = %s
 				WHERE synch.container_id IS NULL",
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies, array( $this->container_type ) )
@@ -335,7 +335,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @return string
 	 */
 	public function ui_bulk_delete_message( $amount_of_posts ) {
-		return Avpvh_Lnkc_Any_Post_Container_Manager::build_delete_action_message(
+		return Avpvh_Brkn_Any_Post_Container_Manager::build_delete_action_message(
 			$amount_of_posts,
 			'post',
 			null
@@ -349,7 +349,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 	 * @return string
 	 */
 	public function ui_bulk_trash_message( $amount_of_posts ) {
-		return Avpvh_Lnkc_Any_Post_Container_Manager::build_trash_action_message(
+		return Avpvh_Brkn_Any_Post_Container_Manager::build_trash_action_message(
 			$amount_of_posts,
 			'post',
 			null

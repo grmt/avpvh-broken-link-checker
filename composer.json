@@ -1,6 +1,6 @@
 {
-    "name": "grmt/avpvh-link-checker",
-    "description": "AV-PvH Link Checker: checks posts, pages, comments and custom fields for broken links, with per-host request rules. Based on the local engine of Broken Link Checker 2.4.15.1.",
+    "name": "grmt/avpvh-broken-link-checker",
+    "description": "AV-PvH Broken Link Checker: checks posts, pages, comments and custom fields for broken links, with per-host request rules. Based on the local engine of Broken Link Checker 2.4.15.1.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "require": {

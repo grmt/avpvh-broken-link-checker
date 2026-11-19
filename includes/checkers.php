@@ -8,7 +8,7 @@
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Checker extends Avpvh_Lnkc_Module {
+class Avpvh_Brkn_Checker extends Avpvh_Brkn_Module {
 
 	/**
 	 * Priority determines the order in which the plugin will try all registered checkers
@@ -53,28 +53,28 @@ class Avpvh_Lnkc_Checker extends Avpvh_Lnkc_Module {
 	 *    'log' (string) - Free-form log of the performed check. It will be displayed in the "Details" section of the checked link.
 	 *    'result_hash' (string) - A free-form hash or code uniquely identifying the detected link status. See sub-classes for examples. Max 200 characters.
 	 *
-	 * @see Avpvh_Lnkc_Link:check()
+	 * @see Avpvh_Brkn_Link:check()
 	 *
 	 * @param string $url
 	 * @return array
 	 */
 	function check( $url ) {
-		trigger_error( 'Function Avpvh_Lnkc_Checker::check() must be over-ridden in a subclass', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Checker::check() must be over-ridden in a subclass', E_USER_ERROR );
 	}
 }
 
-class Avpvh_Lnkc_Checker_Helper {
+class Avpvh_Brkn_Checker_Helper {
 
 	/**
 	 * Get a reference to a specific checker.
 	 *
-	 * @uses Avpvh_Lnkc_Module_Manager::get_module()
+	 * @uses Avpvh_Brkn_Module_Manager::get_module()
 	 *
 	 * @param string $checker_id
-	 * @return Avpvh_Lnkc_Checker
+	 * @return Avpvh_Brkn_Checker
 	 */
 	static function get_checker( $checker_id ) {
-		$manager = Avpvh_Lnkc_Module_Manager::getInstance();
+		$manager = Avpvh_Brkn_Module_Manager::getInstance();
 		return $manager->get_module( $checker_id, true, 'checker' );
 	}
 
@@ -82,12 +82,12 @@ class Avpvh_Lnkc_Checker_Helper {
 	 * Get a checker object that can check the specified URL.
 	 *
 	 * @param string $url
-	 * @return Avpvh_Lnkc_Checker|null
+	 * @return Avpvh_Brkn_Checker|null
 	 */
 	static function get_checker_for( $url ) {
 		$parsed = wp_parse_url( $url );
 
-		$manager         = Avpvh_Lnkc_Module_Manager::getInstance();
+		$manager         = Avpvh_Brkn_Module_Manager::getInstance();
 		$active_checkers = $manager->get_active_by_category( 'checker' );
 		foreach ( $active_checkers as $module_id => $module_data ) {
 			//Try the URL pattern in the header first. If it doesn't match,

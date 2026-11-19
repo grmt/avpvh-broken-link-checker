@@ -6,13 +6,13 @@
  * Author: Janis Elsts
  * ModuleID: link
  * ModuleCategory: parser
- * ModuleClassName: Avpvh_Lnkc_Html_Link
+ * ModuleClassName: Avpvh_Brkn_Html_Link
  * ModuleContext: on-demand
  * ModuleLazyInit: true
  * ModulePriority: 1000
 */
 
-class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
+class Avpvh_Brkn_Html_Link extends Avpvh_Brkn_Parser {
 	var $supported_formats = array( 'html' );
 
 	/**
@@ -26,10 +26,10 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If ommitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new Avpvh_Lnkc_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects. The objects will include info about the links found, but not about the corresponding container entity.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
-		$content = apply_filters( 'avpvh_lnkc_parser_html_link_content', $content );
+		$content = apply_filters( 'avpvh_brkn_parser_html_link_content', $content );
 
 		//remove all <code></code> blocks first
 		$content = preg_replace( '/<code[^>]*>.+?<\/code>/si', ' ', $content );
@@ -50,13 +50,13 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	}
 
 	/**
-	 * Avpvh_Lnkc_Html_Link::parser_callback()
+	 * Avpvh_Brkn_Html_Link::parser_callback()
 	 *
 	 * @access private
 	 *
 	 * @param array $link
 	 * @param array $params
-	 * @return Avpvh_Lnkc_Link_Instance|null
+	 * @return Avpvh_Brkn_Link_Instance|null
 	 */
 	function parser_callback( $link, $params ) {
 		global $blclog;
@@ -104,13 +104,13 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 		$text = $link['#link_text'];
 
 		//The URL is okay, create and populate a new link instance.
-		$instance = new Avpvh_Lnkc_Link_Instance();
+		$instance = new Avpvh_Brkn_Link_Instance();
 
 		$instance->set_parser( $this );
 		$instance->raw_url   = $raw_url;
 		$instance->link_text = $text;
 
-		$link_obj = new Avpvh_Lnkc_Link( $url ); //Creates or loads the link
+		$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 		$instance->set_link( $link_obj );
 
 		return $instance;
@@ -204,7 +204,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	}
 
 	/**
-	 * Avpvh_Lnkc_Html_Link::unlink_callback()
+	 * Avpvh_Brkn_Html_Link::unlink_callback()
 	 *
 	 * @access private
 	 *
@@ -218,7 +218,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 			return $link['#raw'];
 		}
 
-		$config = avpvh_lnkc_get_configuration();
+		$config = avpvh_brkn_get_configuration();
 		if ( $config->options['mark_removed_links'] ) {
 			//Leave only the anchor text + the removed_link CSS class
 			return sprintf(
@@ -236,7 +236,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 * Get the link text for printing in the "Broken Links" table.
 	 * Sub-classes should override this method and display the link text in a way appropriate for the link type.
 	 *
-	 * @param Avpvh_Lnkc_Link_Instance $instance
+	 * @param Avpvh_Brkn_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
@@ -256,7 +256,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 * Any attributes of the link tag will also be included in the returned array as attr_name => attr_value
 	 * pairs. This function will also automatically decode any HTML entities found in attribute values.
 	 *
-	 * @see Avpvh_Lnkc_Parser::map()
+	 * @see Avpvh_Brkn_Parser::map()
 	 *
 	 * @param string $content A text string to parse for links.
 	 * @param callback $callback Callback function to apply to all found links.
@@ -267,7 +267,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 		$results = array();
 
 		//Find all links
-		$links = Avpvh_Lnkc_Utility::extract_tags( $content, 'a', false, true );
+		$links = Avpvh_Brkn_Utility::extract_tags( $content, 'a', false, true );
 
 		//Iterate over the links and apply $callback to each
 		foreach ( $links as $link ) {
@@ -307,7 +307,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 *
 	 * htmlentities() will be automatically applied to attribute values (but not to #link_text).
 	 *
-	 * @see Avpvh_Lnkc_Parser::multi_edit()
+	 * @see Avpvh_Brkn_Parser::multi_edit()
 	 *
 	 * @param string $content A text string containing the links to edit.
 	 * @param callback $callback Callback function used to modify the links.
@@ -316,7 +316,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 */
 	function multi_edit( $content, $callback, $extra = null ) {
 
-		$content = apply_filters( 'avpvh_lnkc_parser_html_link_pre_content', $content );
+		$content = apply_filters( 'avpvh_brkn_parser_html_link_pre_content', $content );
 
 		//Just reuse map() + a little helper func. to apply the callback to all links and get modified links
 		$this->modified_links = $this->map( $content, array( &$this, 'execute_edit_callback' ), array( $callback, $extra ) );
@@ -346,7 +346,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 			$offset += ( strlen( $new_html ) - strlen( $link['#raw'] ) );
 		}
 
-		$content = apply_filters( 'avpvh_lnkc_parser_html_link_post_content', $content );
+		$content = apply_filters( 'avpvh_brkn_parser_html_link_post_content', $content );
 
 		return $content;
 	}

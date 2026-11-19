@@ -8,7 +8,7 @@ Author: Janis Elsts
 
 ModuleID: dummy
 ModuleCategory: container
-ModuleClassName: Avpvh_Lnkc_Dummy_Manager
+ModuleClassName: Avpvh_Brkn_Dummy_Manager
 ModuleAlwaysActive: true
 ModuleHidden: true
 */
@@ -20,7 +20,7 @@ ModuleHidden: true
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Dummy_Container extends Avpvh_Lnkc_Container {
+class Avpvh_Brkn_Dummy_Container extends Avpvh_Brkn_Container {
 
 	function synch() {
 		//Just mark it as synched so that it doesn't bother us anymore.
@@ -31,7 +31,7 @@ class Avpvh_Lnkc_Dummy_Container extends Avpvh_Lnkc_Container {
 		return new WP_Error(
 			'container_not_found',
 			sprintf(
-				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-link-checker' ),
+				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-broken-link-checker' ),
 				$this->container_type,
 				$this->container_id
 			)
@@ -42,7 +42,7 @@ class Avpvh_Lnkc_Dummy_Container extends Avpvh_Lnkc_Container {
 		return new WP_Error(
 			'container_not_found',
 			sprintf(
-				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-link-checker' ),
+				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-broken-link-checker' ),
 				$this->container_type,
 				$this->container_id
 			)
@@ -65,9 +65,9 @@ class Avpvh_Lnkc_Dummy_Container extends Avpvh_Lnkc_Container {
  * @package Broken Link Checker
  * @access public
  */
-class Avpvh_Lnkc_Dummy_Manager extends Avpvh_Lnkc_Container_Manager {
+class Avpvh_Brkn_Dummy_Manager extends Avpvh_Brkn_Container_Manager {
 
-	var $container_class_name = 'Avpvh_Lnkc_Dummy_Container';
+	var $container_class_name = 'Avpvh_Brkn_Dummy_Container';
 
 	function resynch( $forced = false ) {
 		//Do nothing.

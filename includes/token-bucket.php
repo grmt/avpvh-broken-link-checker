@@ -3,7 +3,7 @@
 /**
  * This class implements a variant of the popular token bucket algorithm.
  */
-class Avpvh_Lnkc_Token_Bucket_List {
+class Avpvh_Brkn_Token_Bucket_List {
 	const MICROSECONDS_PER_SECOND = 1000000;
 
 	/** @var float How many tokens each bucket can hold. */

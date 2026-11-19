@@ -6,14 +6,14 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 	/**
 	 * Class for adding new panels to the "Screen Options" box.
 	 *
-	 * Do not access this class directly. Instead, use the avpvh_lnkc_add_screen_options_panel() function.
+	 * Do not access this class directly. Instead, use the avpvh_brkn_add_screen_options_panel() function.
 	 *
 	 * @author Janis Elsts
 	 * @copyright 2014
 	 * @version 1.3
 	 * @access public
 	 */
-	class Avpvh_Lnkc_Screen_Options {
+	class Avpvh_Brkn_Screen_Options {
 		var $registered_panels; //List of custom "Screen Options" panels
 		var $page_panels;       //Index of panels registered for each page ($page => array of panel ids).
 
@@ -42,7 +42,7 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 		 * @param bool $autosave Optional. If set, settings will be automatically saved (via AJAX) when the value of any input element in the panel changes. Defaults to false.
 		 * @return void
 		 */
-		function avpvh_lnkc_add_screen_options_panel( $id, $title, $callback, $page, $save_callback = null, $autosave = false ) {
+		function avpvh_brkn_add_screen_options_panel( $id, $title, $callback, $page, $save_callback = null, $autosave = false ) {
 			if ( ! is_array( $page ) ) {
 				$page = array( $page );
 			}
@@ -183,7 +183,7 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 				wp_die(
 					json_encode(
 						array(
-							'error' => __( "You're not allowed to do that!", 'avpvh-link-checker' ),
+							'error' => __( "You're not allowed to do that!", 'avpvh-broken-link-checker' ),
 						)
 					),
 					403
@@ -240,7 +240,7 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 			if ( $got_autosave ) {
 				//Enqueue the script itself
 				$url = plugins_url( 'screen-options.js', __FILE__ );
-				wp_enqueue_script( 'avpvh-link-checker-screen-options', $url, array( 'jquery' ) );
+				wp_enqueue_script( 'avpvh-broken-link-checker-screen-options', $url, array( 'jquery' ) );
 			}
 		}
 
@@ -273,16 +273,16 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 	if ( ! isset( $ws_screen_options_versions ) ) {
 		$ws_screen_options_versions = array();
 	}
-	$ws_screen_options_versions['1.3'] = 'Avpvh_Lnkc_Screen_Options';
+	$ws_screen_options_versions['1.3'] = 'Avpvh_Brkn_Screen_Options';
 
 endif;
 
-if ( ! function_exists( 'avpvh_lnkc_add_screen_options_panel' ) ) {
+if ( ! function_exists( 'avpvh_brkn_add_screen_options_panel' ) ) {
 
 	/**
 	 * Add a new settings panel to the "Screen Options" box.
 	 *
-	 * @see wsScreenOptions10::avpvh_lnkc_add_screen_options_panel()
+	 * @see wsScreenOptions10::avpvh_brkn_add_screen_options_panel()
 	 *
 	 * @param string $id String to use in the 'id' attribute of the settings panel. Should be unique.
 	 * @param string $title Title of the settings panel. Set to an empty string to omit title.
@@ -292,10 +292,10 @@ if ( ! function_exists( 'avpvh_lnkc_add_screen_options_panel' ) ) {
 	 * @param bool $autosave Optional. If set, settings will be automatically saved (via AJAX) when the value of any input element in the panel changes. Defaults to false.
 	 * @return void
 	 */
-	function avpvh_lnkc_add_screen_options_panel( $id, $title, $callback, $page, $save_callback = null, $autosave = false ) {
+	function avpvh_brkn_add_screen_options_panel( $id, $title, $callback, $page, $save_callback = null, $autosave = false ) {
 		global $ws_screen_options_versions;
 
-		static $instance = null; /** @var Avpvh_Lnkc_Screen_Options $instance */
+		static $instance = null; /** @var Avpvh_Brkn_Screen_Options $instance */
 		if ( is_null( $instance ) ) {
 			//Instantiate the latest version of the wsScreenOptions class
 			uksort( $ws_screen_options_versions, 'version_compare' );
@@ -304,7 +304,7 @@ if ( ! function_exists( 'avpvh_lnkc_add_screen_options_panel' ) ) {
 			$instance->init();
 		}
 
-		$instance->avpvh_lnkc_add_screen_options_panel( $id, $title, $callback, $page, $save_callback, $autosave );
+		$instance->avpvh_brkn_add_screen_options_panel( $id, $title, $callback, $page, $save_callback, $autosave );
 	}
 }
 

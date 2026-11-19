@@ -5,21 +5,21 @@
  * @package Broken Link Checker
  */
 
-if ( class_exists( 'Avpvh_Lnkc_Config_Store' ) ) {
+if ( class_exists( 'Avpvh_Brkn_Config_Store' ) ) {
 	return;
 }
 
 /**
- * Class Avpvh_Lnkc_Config_Store
+ * Class Avpvh_Brkn_Config_Store
  *
  * Implements ArrayAccess to provide array-like access to configuration data.
  */
-class Avpvh_Lnkc_Config_Store implements ArrayAccess {
+class Avpvh_Brkn_Config_Store implements ArrayAccess {
 
 	/**
 	 * Configuration managers map.
 	 *
-	 * @var array<string, Avpvh_Lnkc_Configuration_Manager>
+	 * @var array<string, Avpvh_Brkn_Configuration_Manager>
 	 */
 	private $managers = array();
 
@@ -33,7 +33,7 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	/**
 	 * Default manager key.
 	 *
-	 * @var Avpvh_Lnkc_Configuration_Manager|null
+	 * @var Avpvh_Brkn_Configuration_Manager|null
 	 */
 	private $default_manager = null;
 
@@ -102,10 +102,10 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	 * Add a configuration manager.
 	 *
 	 * @param string                  $key     The key for the manager.
-	 * @param Avpvh_Lnkc_Configuration_Manager $manager The manager to add.
+	 * @param Avpvh_Brkn_Configuration_Manager $manager The manager to add.
 	 * @return void
 	 */
-	public function add_manager( string $key, Avpvh_Lnkc_Configuration_Manager $manager ): void {
+	public function add_manager( string $key, Avpvh_Brkn_Configuration_Manager $manager ): void {
 		$this->managers[ $key ] = $manager;
 		$this->cache_available_settings( $key, $manager->get_available_settings() );
 	}
@@ -123,9 +123,9 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	/**
 	 * Get the default configuration manager.
 	 *
-	 * @return Avpvh_Lnkc_Configuration_Manager|null The default manager or null if not set.
+	 * @return Avpvh_Brkn_Configuration_Manager|null The default manager or null if not set.
 	 */
-	public function get_default_manager(): ?Avpvh_Lnkc_Configuration_Manager {
+	public function get_default_manager(): ?Avpvh_Brkn_Configuration_Manager {
 		return $this->default_manager;
 	}
 
@@ -174,7 +174,7 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	/**
 	 * Get all configuration managers.
 	 *
-	 * @return array<string, Avpvh_Lnkc_Configuration_Manager> Map of configuration managers.
+	 * @return array<string, Avpvh_Brkn_Configuration_Manager> Map of configuration managers.
 	 */
 	public function get_managers(): array {
 		return $this->managers;
@@ -184,9 +184,9 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	 * Get a specific configuration manager by key.
 	 *
 	 * @param string $key The manager key.
-	 * @return Avpvh_Lnkc_Configuration_Manager|null The manager or null if not found.
+	 * @return Avpvh_Brkn_Configuration_Manager|null The manager or null if not found.
 	 */
-	public function get_manager( string $key ): ?Avpvh_Lnkc_Configuration_Manager {
+	public function get_manager( string $key ): ?Avpvh_Brkn_Configuration_Manager {
 		return $this->managers[ $key ] ?? null;
 	}
 
@@ -206,9 +206,9 @@ class Avpvh_Lnkc_Config_Store implements ArrayAccess {
 	 * Get the manager responsible for a specific setting.
 	 *
 	 * @param string $setting The setting key.
-	 * @return Avpvh_Lnkc_Configuration_Manager|null The manager or null if not found.
+	 * @return Avpvh_Brkn_Configuration_Manager|null The manager or null if not found.
 	 */
-	public function resolve_manager( string $setting ): ?Avpvh_Lnkc_Configuration_Manager {
+	public function resolve_manager( string $setting ): ?Avpvh_Brkn_Configuration_Manager {
 		if ( isset( $this->cached_settings[ $setting ] ) ) {
 			$manager_key = $this->cached_settings[ $setting ];
 			return $this->get_manager( $manager_key );

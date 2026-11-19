@@ -10,13 +10,13 @@ ModuleID: youtube-checker
 ModuleCategory: checker
 ModuleContext: on-demand
 ModuleLazyInit: true
-ModuleClassName: Avpvh_Lnkc_Youtube_Checker
+ModuleClassName: Avpvh_Brkn_Youtube_Checker
 ModulePriority: 100
 
 ModuleCheckerUrlPattern: @^https?://(?:([\w\d]+\.)*youtube\.[^/]+/watch\?.*v=[^/#]|youtu\.be/[^/#\?]+|(?:[\w\d]+\.)*?youtube\.[^/]+/(playlist|view_play_list)\?[^/#]{15,}?)@i
 */
 
-class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
+class Avpvh_Brkn_Youtube_Checker extends Avpvh_Brkn_Checker {
 	var $api_grace_period      = 0.3; //How long to wait between YouTube API requests.
 	var $last_api_request      = 0;   //Timestamp of the last request.
 
@@ -43,7 +43,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 		$url = wp_http_validate_url( $url );
 		if ( empty( $url ) ) {
 			$result['status_text'] = 'Invalid URL';
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_UNKNOWN;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_UNKNOWN;
 			
 			return $result;
 		}
@@ -70,7 +70,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 		if ( empty( $playlist_id ) && empty( $video_id ) ) {
 			$result['status_text'] = 'Unsupported URL Syntax';
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_UNKNOWN;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_UNKNOWN;
 			return $result;
 		}
 
@@ -81,7 +81,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 			$api_url = $this->get_playlist_resource_url( $playlist_id );
 		}
 
-		$conf = avpvh_lnkc_get_configuration();
+		$conf = avpvh_brkn_get_configuration();
 		$args = array( 'timeout' => $conf->options['timeout'] );
 
 		$start                      = microtime( true );
@@ -135,19 +135,19 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 		$videoFound = ( 200 == $result['http_code'] ) && isset( $api['items'], $api['items'][0] );
 
 		if ( isset( $api['error'] ) && ( 404 !== $result['http_code'] ) ) { //404's are handled later.
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 			$result['warning']     = true;
 			if ( isset( $api['error']['errors'] ) ) {
 				$result['status_text'] = $api['error']['errors'][0]['reason'];
 			} else {
-				$result['status_text'] = __( 'Unknown Error', 'avpvh-link-checker' );
+				$result['status_text'] = __( 'Unknown Error', 'avpvh-broken-link-checker' );
 			}
 			$result['log'] .= $this->format_api_error( $response, $api );
 
 		} elseif ( $videoFound ) {
-			$result['log']        .= __( 'Video OK', 'avpvh-link-checker' );
-			$result['status_text'] = _x( 'OK', 'link status', 'avpvh-link-checker' );
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
+			$result['log']        .= __( 'Video OK', 'avpvh-broken-link-checker' );
+			$result['status_text'] = _x( 'OK', 'link status', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_OK;
 			$result['http_code']   = 0;
 
 			//Add the video title to the log, purely for information.
@@ -156,11 +156,11 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 				$result['log'] .= "\n\nTitle : \"" . htmlentities( $title ) . '"';
 			}
 		} else {
-			$result['log']        .= __( 'Video Not Found', 'avpvh-link-checker' );
+			$result['log']        .= __( 'Video Not Found', 'avpvh-broken-link-checker' );
 			$result['broken']      = true;
 			$result['http_code']   = 0;
-			$result['status_text'] = __( 'Video Not Found', 'avpvh-link-checker' );
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Video Not Found', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 		}
 
 		return $result;
@@ -178,26 +178,26 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 		if ( 404 === $result['http_code'] ) {
 			//Not found.
-			$result['log']        .= __( 'Playlist Not Found', 'avpvh-link-checker' );
+			$result['log']        .= __( 'Playlist Not Found', 'avpvh-broken-link-checker' );
 			$result['broken']      = true;
 			$result['http_code']   = 0;
-			$result['status_text'] = __( 'Playlist Not Found', 'avpvh-link-checker' );
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Playlist Not Found', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 
 		} elseif ( 403 === $result['http_code'] ) {
 			//Forbidden. We're unlikely to see this code for playlists, but lets allow it.
 			$result['log']        .= htmlentities( $response['body'] );
 			$result['broken']      = true;
-			$result['status_text'] = __( 'Playlist Restricted', 'avpvh-link-checker' );
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Playlist Restricted', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 
 		} elseif ( ( 200 === $result['http_code'] ) && isset( $api['items'] ) && is_array( $api['items'] ) ) {
 			//The playlist exists.
 			if ( empty( $api['items'] ) ) {
 				//An empty playlist. It is possible that all of the videos have been deleted.
-				$result['log']        .= __( 'This playlist has no entries or all entries have been deleted.', 'avpvh-link-checker' );
-				$result['status_text'] = _x( 'Empty Playlist', 'link status', 'avpvh-link-checker' );
-				$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+				$result['log']        .= __( 'This playlist has no entries or all entries have been deleted.', 'avpvh-broken-link-checker' );
+				$result['status_text'] = _x( 'Empty Playlist', 'link status', 'avpvh-broken-link-checker' );
+				$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 				$result['http_code']   = 0;
 				$result['broken']      = true;
 			} else {
@@ -206,14 +206,14 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 					$is_private = isset( $video['status']['privacyStatus'] ) && ( 'private' == $video['status']['privacyStatus'] );
 					if ( $is_private ) {
 						$result['log'] .= sprintf(
-							/* translators: 1: video privacy status, 2: extra detail (may be empty). */ __( 'Video status : %1$s%2$s', 'avpvh-link-checker' ),
+							/* translators: 1: video privacy status, 2: extra detail (may be empty). */ __( 'Video status : %1$s%2$s', 'avpvh-broken-link-checker' ),
 							$video['status']['privacyStatus'],
 							''
 						);
 
 						$result['broken']      = true;
-						$result['status_text'] = __( 'Video Restricted', 'avpvh-link-checker' );
-						$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+						$result['status_text'] = __( 'Video Restricted', 'avpvh-broken-link-checker' );
+						$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 						$result['http_code']   = 0;
 						break;
 					}
@@ -221,21 +221,21 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 				if ( ! $result['broken'] ) {
 					//All is well.
-					$result['log']        .= __( 'Playlist OK', 'avpvh-link-checker' );
-					$result['status_text'] = _x( 'OK', 'link status', 'avpvh-link-checker' );
-					$result['status_code'] = AVPVH_LNKC_LINK_STATUS_OK;
+					$result['log']        .= __( 'Playlist OK', 'avpvh-broken-link-checker' );
+					$result['status_text'] = _x( 'OK', 'link status', 'avpvh-broken-link-checker' );
+					$result['status_code'] = AVPVH_BRKN_LINK_STATUS_OK;
 					$result['http_code']   = 0;
 				}
 			}
 		} else {
 			//Some other error.
-			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 			$result['warning']     = true;
 
 			if ( isset( $api['error']['message'] ) ) {
 				$result['status_text'] = $api['error']['message'];
 			} else {
-				$result['status_text'] = __( 'Unknown Error', 'avpvh-link-checker' );
+				$result['status_text'] = __( 'Unknown Error', 'avpvh-broken-link-checker' );
 			}
 			$result['log'] .= $this->format_api_error( $response, $api );
 		}
@@ -266,7 +266,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 	protected function format_api_error( $response, $api ) {
 		$log  = $response['response']['code'] . ' ' . $response['response']['message'];
-		$log .= "\n" . __( 'Unknown YouTube API response received.', 'avpvh-link-checker' );
+		$log .= "\n" . __( 'Unknown YouTube API response received.', 'avpvh-broken-link-checker' );
 
 		//Log error details.
 		if ( isset( $api['error']['errors'] ) && is_array( $api['error']['errors'] ) ) {
@@ -289,11 +289,11 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 	}
 
 	public function get_youtube_api_key() {
-		$conf = avpvh_lnkc_get_configuration();
+		$conf = avpvh_brkn_get_configuration();
 
 		$api_key = ! empty( $conf->options['youtube_api_key'] ) ? $conf->options['youtube_api_key'] : '';
 
-		return apply_filters( 'avpvh_lnkc_youtube_api_key', $conf->options['youtube_api_key'] );
+		return apply_filters( 'avpvh_brkn_youtube_api_key', $conf->options['youtube_api_key'] );
 	}
 
 }
