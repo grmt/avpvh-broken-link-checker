@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 // To prevent conflicts, only one version of the plugin can be activated at any given time.
 if ( defined( 'AVPVH_LNKC_ACTIVE' ) ) {
@@ -92,7 +93,7 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_custom_css' ) ) {
 		? avpvh_lnkc_sanitize_log_path( $avpvh_lnkc_config_manager->get( 'log_file' ) )
 		: '';
 
-	if ( '' !== $avpvh_lnkc_log_file && avpvh_lnkc_log_path_is_safe( $avpvh_lnkc_log_file ) && is_writable( $avpvh_lnkc_log_file ) ) {
+	if ( '' !== $avpvh_lnkc_log_file && avpvh_lnkc_log_path_is_safe( $avpvh_lnkc_log_file ) && wp_is_writable( $avpvh_lnkc_log_file ) ) {
 		$blclog = new Avpvh_Lnkc_File_Logger( $avpvh_lnkc_log_file );
 	} else {
 		$blclog = new Avpvh_Lnkc_Dummy_Logger();

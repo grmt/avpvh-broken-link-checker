@@ -48,7 +48,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 			return $result;
 		}
 
-		$components = @parse_url( $url );
+		$components = wp_parse_url( $url );
 		if ( ! empty( $components['query'] ) && isset( $components['query'] ) ) {
 			parse_str( $components['query'], $query );
 		} else {
@@ -206,7 +206,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 					$is_private = isset( $video['status']['privacyStatus'] ) && ( 'private' == $video['status']['privacyStatus'] );
 					if ( $is_private ) {
 						$result['log'] .= sprintf(
-							__( 'Video status : %1$s%2$s', 'avpvh-link-checker' ),
+							/* translators: 1: video privacy status, 2: extra detail (may be empty). */ __( 'Video status : %1$s%2$s', 'avpvh-link-checker' ),
 							$video['status']['privacyStatus'],
 							''
 						);

@@ -1,3 +1,6 @@
+<?php
+defined( 'ABSPATH' ) || exit;
+?>
 <script type='text/javascript'>
 
 function alterLinkCounter(factor, filterId){
@@ -456,7 +459,7 @@ jQuery(function($){
 	function findReplacementSuggestions(url, suggestionList) {
 		var searchingText     = '<?php echo esc_js( _x( 'Searching...', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
 		var noSuggestionsText = '<?php echo esc_js( _x( 'No suggestions available.', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
-		var iaSuggestionName  = '<?php echo esc_js( _x( 'Archived page from %s (via the Wayback Machine)', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
+		var iaSuggestionName  = '<?php echo esc_js( /* translators: %s: archive date. */ _x( 'Archived page from %s (via the Wayback Machine)', 'link suggestions', 'avpvh-link-checker' ) ); ?>';
 
 		suggestionList.empty().append('<li>' + searchingText + '</li>');
 
@@ -560,13 +563,13 @@ jQuery(function($){
 
 			if ( response.cnt_okay > 0 ){
 				var fragment = sprintf(
-					'<?php echo esc_js( __( '%d instances of the link were successfully modified.', 'avpvh-link-checker' ) ); ?>',
+					'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully modified.', 'avpvh-link-checker' ) ); ?>',
 					response.cnt_okay
 				);
 				msg = msg + fragment + '\n';
 				if ( response.cnt_error > 0 ){
 					fragment = sprintf(
-						'<?php echo esc_js( __( "However, %d instances couldn't be edited and still point to the old URL.", 'avpvh-link-checker' ) ); ?>',
+						'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be edited and still point to the old URL.", 'avpvh-link-checker' ) ); ?>',
 						response.cnt_error
 					);
 					msg = msg + fragment + "\n";
@@ -726,13 +729,13 @@ jQuery(function($){
 
 							if ( data.cnt_okay > 0 ){
 								msg = msg + sprintf(
-									'<?php echo esc_js( __( '%d instances of the link were successfully unlinked.', 'avpvh-link-checker' ) ); ?>\n',
+									'<?php echo esc_js( /* translators: %d: number of link instances. */ __( '%d instances of the link were successfully unlinked.', 'avpvh-link-checker' ) ); ?>\n',
 									data.cnt_okay
 								);
 
 								if ( data.cnt_error > 0 ){
 									msg = msg + sprintf(
-										'<?php echo esc_js( __( "However, %d instances couldn't be removed.", 'avpvh-link-checker' ) ); ?>\n',
+										'<?php echo esc_js( /* translators: %d: number of link instances. */ __( "However, %d instances couldn't be removed.", 'avpvh-link-checker' ) ); ?>\n',
 										data.cnt_error
 									);
 								}

@@ -44,7 +44,7 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 			$url   = trim( reset( $lines ) );
 
 			//Attempt to parse the URL
-			$parts = @parse_url( $url );
+			$parts = wp_parse_url( $url );
 			if ( ! $parts ) {
 				//Ignore invalid URLs
 				return $instances;

@@ -990,7 +990,7 @@ class Avpvh_Lnkc_Container_Helper {
 	static function ui_bulk_delete_message( $container_type, $n ) {
 		$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container_type );
 		if ( is_null( $manager ) ) {
-			return sprintf( __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
+			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
 		} else {
 			return $manager->ui_bulk_delete_message( $n );
 		}
@@ -1008,7 +1008,7 @@ class Avpvh_Lnkc_Container_Helper {
 	static function ui_bulk_trash_message( $container_type, $n ) {
 		$manager = Avpvh_Lnkc_Container_Helper::get_manager( $container_type );
 		if ( is_null( $manager ) ) {
-			return sprintf( __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
+			return sprintf( /* translators: %s: container type. */ __( "Container type '%s' not recognized", 'avpvh-link-checker' ), $container_type );
 		} else {
 			return $manager->ui_bulk_trash_message( $n );
 		}

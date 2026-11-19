@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Utility class for printing the link listing table.
  *
@@ -363,7 +364,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Table_Printer' ) ) {
 			if ( $page_links ) {
 				$this->pagination_html  = '<div class="tablenav-pages">';
 				$this->pagination_html .= sprintf(
-					'<span class="displaying-num">' . __( 'Displaying %1$s&#8211;%2$s of <span class="current-link-count">%3$s</span>', 'avpvh-link-checker' ) . '</span>%4$s',
+					'<span class="displaying-num">' . /* translators: 1: first item shown, 2: last item shown, 3: total number of items. */ __( 'Displaying %1$s&#8211;%2$s of <span class="current-link-count">%3$s</span>', 'avpvh-link-checker' ) . '</span>%4$s',
 					number_format_i18n( ( $this->page - 1 ) * $this->per_page + 1 ),
 					number_format_i18n( min( $this->page * $this->per_page, $this->current_filter['count'] ) ),
 					number_format_i18n( $this->current_filter['count'] ),
@@ -603,7 +604,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Table_Printer' ) ) {
 					<li><strong><?php esc_html_e( 'Response time', 'avpvh-link-checker' ); ?>:</strong>
 					<span class='request_duration'>
 					<?php
-						printf( esc_html__( '%2.3f seconds', 'avpvh-link-checker' ), (float) $link->request_duration );
+						printf( /* translators: %2.3f: response time in seconds. */ esc_html__( '%2.3f seconds', 'avpvh-link-checker' ), (float) $link->request_duration );
 					?>
 					</span></li>
 
@@ -632,7 +633,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Table_Printer' ) ) {
 					<li><br/>
 						<?php
 						printf(
-							esc_html( _n( 'This link has failed %d time.', 'This link has failed %d times.', $link->check_count, 'avpvh-link-checker' ) ),
+							esc_html( /* translators: %d: number of failed checks. */ _n( 'This link has failed %d time.', 'This link has failed %d times.', $link->check_count, 'avpvh-link-checker' ) ),
 							(int) $link->check_count
 						);
 
@@ -640,7 +641,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Table_Printer' ) ) {
 
 						$delta = time() - $link->first_failure;
 						printf(
-							esc_html__( 'This link has been broken for %s.', 'avpvh-link-checker' ),
+							/* translators: %s: time span, such as "3 days". */ esc_html__( 'This link has been broken for %s.', 'avpvh-link-checker' ),
 							esc_html( Avpvh_Lnkc_Utility::fuzzy_delta( $delta ) )
 						);
 						?>
@@ -673,7 +674,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Table_Printer' ) ) {
 
 		function column_checkbox( $link ) {
 			?>
-			<th scope="row" class="check-column"><input type="checkbox" name="selected_links[]" value="<?php echo (int) $link->link_id; ?>" aria-label="<?php printf( esc_attr__( 'Select link %s', 'avpvh-link-checker' ), esc_attr( $link->url ) ); ?>" /></th>
+			<th scope="row" class="check-column"><input type="checkbox" name="selected_links[]" value="<?php echo (int) $link->link_id; ?>" aria-label="<?php printf( /* translators: %s: link URL. */ esc_attr__( 'Select link %s', 'avpvh-link-checker' ), esc_attr( $link->url ) ); ?>" /></th>
 			<?php
 		}
 

@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /*
 Plugin Name: Basic HTTP
@@ -64,7 +65,7 @@ class Avpvh_Lnkc_Http_Checker extends Avpvh_Lnkc_Checker {
 		global $blclog;
 
 		// Throttle requests based on the domain name.
-		$domain = @parse_url( $url, PHP_URL_HOST );
+		$domain = wp_parse_url( $url, PHP_URL_HOST );
 		if ( $domain ) {
 			$this->token_bucket_list->takeToken( $domain );
 		}
@@ -348,7 +349,7 @@ class Avpvh_Lnkc_Http_Checker_Base extends Avpvh_Lnkc_Checker {
 			return false;
 		}
 
-		$host = @parse_url( $url, PHP_URL_HOST );
+		$host = wp_parse_url( $url, PHP_URL_HOST );
 		if ( empty( $host ) ) {
 			return false;
 		}
@@ -359,7 +360,7 @@ class Avpvh_Lnkc_Http_Checker_Base extends Avpvh_Lnkc_Checker {
 		// is served from a private address, which is the case on a great many
 		// intranet and staging installs. Core makes the same exemption, and the
 		// port allow-list still applies to these URLs.
-		$home = @parse_url( get_option( 'home' ), PHP_URL_HOST );
+		$home = wp_parse_url( get_option( 'home' ), PHP_URL_HOST );
 		if ( ! empty( $home ) && strtolower( $home ) === strtolower( $host ) ) {
 			return true;
 		}
@@ -541,7 +542,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		 * it is escaped at write time like the rest of the log.
 		 */
 		if ( '' !== $blocked_url ) {
-			$blocked_host = @parse_url( $blocked_url, PHP_URL_HOST );
+			$blocked_host = wp_parse_url( $blocked_url, PHP_URL_HOST );
 
 			$result['final_url']      = $url;
 			$result['redirect_count'] = 0;
@@ -673,7 +674,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// Build the log from HTTP code and headers.
 		$log .= '=== ';
 		if ( $result['http_code'] ) {
-			$log .= sprintf( __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
+			$log .= sprintf( /* translators: %d: HTTP status code. */ __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
 		} else {
 			$log .= __( '(No response)', 'avpvh-link-checker' );
 		}
@@ -713,6 +714,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		return $result;
 	}
 
+	// phpcs:disable WordPress.WP.AlternativeFunctions -- the cURL transport: one request per redirect hop with a header callback, timing and a scheme limit that WP_Http doesn't expose. Avpvh_Lnkc_Wp_Http is the fallback without cURL.
 	/**
 	 * Pin the transport options that must not be negotiable.
 	 *
@@ -802,7 +804,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// Make CURL return a valid result even if it gets a 404 or other error.
 		curl_setopt( $ch, CURLOPT_FAILONERROR, false );
 
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( ! empty( $parts['scheme'] ) && 'https' === $parts['scheme'] ) {
 			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false ); // Required to make HTTPS URLs work.
 			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
@@ -853,7 +855,8 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// once per check, because each hop is a request in its own right.
 		apply_filters( 'avpvh_lnkc_curl_before-close', $ch, $content, $this->last_headers );
 
-		curl_close( $ch );
+		// curl_close() is a no-op since PHP 8.0 and deprecated in 8.5; the handle closes when freed.
+		unset( $ch );
 
 		return array(
 			'content'           => $content,
@@ -863,6 +866,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 			'measured_duration' => $measured_request_duration,
 		);
 	}
+	// phpcs:enable WordPress.WP.AlternativeFunctions
 
 	function read_header( /** @noinspection PhpUnusedParameterInspection */ $ch, $header ) {
 		$this->last_headers .= $header;
@@ -1022,7 +1026,7 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		 * log.
 		 */
 		if ( '' !== $blocked_url ) {
-			$blocked_host = @parse_url( $blocked_url, PHP_URL_HOST );
+			$blocked_host = wp_parse_url( $blocked_url, PHP_URL_HOST );
 
 			$result['final_url']      = $url;
 			$result['redirect_count'] = 0;
@@ -1059,7 +1063,7 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		// Build the log
 		$log .= '=== ';
 		if ( $result['http_code'] ) {
-			$log .= sprintf( __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
+			$log .= sprintf( /* translators: %d: HTTP status code. */ __( 'HTTP code : %d', 'avpvh-link-checker' ), $result['http_code'] );
 		} else {
 			$log .= __( '(No response)', 'avpvh-link-checker' );
 		}

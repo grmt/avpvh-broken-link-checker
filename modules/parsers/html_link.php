@@ -78,7 +78,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 		}
 
 		//Attempt to parse the URL
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( ! $parts ) {
 			$blclog->warn( __CLASS__ . ':' . __FUNCTION__ . ' Skipping the link (parse_url failed)', $url );
 			return null; //Skip invalid URLs

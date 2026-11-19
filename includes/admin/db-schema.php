@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 if ( ! function_exists( 'avpvh_lnkc_get_charset_collate' ) ) {
 	function avpvh_lnkc_get_charset_collate() {
@@ -56,7 +57,7 @@ if ( ! function_exists( 'avpvh_lnkc_get_db_schema' ) ) {
 		// on any site that already has more than one link, because every existing
 		// row gets the same default '' before it's backfilled. The constraint is
 		// added explicitly, after backfilling, by Avpvh_Lnkc_Database_Upgrader::upgrade_url_hash().
-		$avpvh_lnkc_db_schema = <<<EOM
+		$avpvh_lnkc_db_schema = "
 
 	CREATE TABLE IF NOT EXISTS `{$wpdb->prefix}avpvh_lnkc_filters` (
 		`id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -130,7 +131,7 @@ if ( ! function_exists( 'avpvh_lnkc_get_db_schema' ) ) {
 		KEY `synched` (`synched`)
 	) {$charset_collate};
 
-EOM;
+";
 
 		return $avpvh_lnkc_db_schema;
 	}

@@ -50,7 +50,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		} else {
 			return new WP_Error(
 				'update_failed',
-				sprintf( __( 'Updating comment %d failed', 'avpvh-link-checker' ), $this->container_id )
+				sprintf( /* translators: %d: item ID. */ __( 'Updating comment %d failed', 'avpvh-link-checker' ), $this->container_id )
 			);
 		}
 	}
@@ -71,7 +71,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 				return new WP_Error(
 					'delete_failed',
 					sprintf(
-						__( 'Failed to delete comment %d', 'avpvh-link-checker' ),
+						/* translators: %d: comment ID. */ __( 'Failed to delete comment %d', 'avpvh-link-checker' ),
 						$this->container_id
 					)
 				);
@@ -92,7 +92,7 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_failed',
 				sprintf(
-					__( 'Can\'t move comment %d to the trash', 'avpvh-link-checker' ),
+					/* translators: %d: comment ID. */ __( 'Can\'t move comment %d to the trash', 'avpvh-link-checker' ),
 					$this->container_id
 				)
 			);
@@ -371,7 +371,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 			return $this->ui_bulk_trash_message( $n );
 		} else {
 			return sprintf(
-				_n(
+				/* translators: %d: number of items. */ _n(
 					'%d comment has been deleted.',
 					'%d comments have been deleted.',
 					$n,
@@ -390,7 +390,7 @@ class Avpvh_Lnkc_Comment_Manager extends Avpvh_Lnkc_Container_Manager {
 	 */
 	function ui_bulk_trash_message( $n ) {
 		return sprintf(
-			_n(
+			/* translators: %d: number of items. */ _n(
 				'%d comment moved to the Trash.',
 				'%d comments moved to the Trash.',
 				$n,

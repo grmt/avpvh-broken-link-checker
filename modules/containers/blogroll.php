@@ -44,7 +44,7 @@ class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 		$actions = array();
 		if ( current_user_can( 'manage_links' ) ) {
 			$actions['edit']   = '<span class="edit"><a href="' . esc_url( $this->get_edit_url() ) . '" title="' . esc_attr( __( 'Edit this bookmark', 'avpvh-link-checker' ) ) . '">' . esc_html__( 'Edit', 'avpvh-link-checker' ) . '</a>';
-			$actions['delete'] = "<span class='delete'><a class='submitdelete' href='" . esc_url( $delete_url ) . "' onclick=\"if ( confirm('" . esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete.", 'avpvh-link-checker' ), $bookmark->link_name ) ) . "') ) { return true;}return false;\">" . esc_html__( 'Delete', 'avpvh-link-checker' ) . '</a>';
+			$actions['delete'] = "<span class='delete'><a class='submitdelete' href='" . esc_url( $delete_url ) . "' onclick=\"if ( confirm('" . esc_js( sprintf( /* translators: %s: bookmark name. */ __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete.", 'avpvh-link-checker' ), $bookmark->link_name ) ) . "') ) { return true;}return false;\">" . esc_html__( 'Delete', 'avpvh-link-checker' ) . '</a>';
 		}
 
 		return $actions;
@@ -94,7 +94,7 @@ class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 		} else {
 			return new WP_Error(
 				'update_failed',
-				sprintf( __( 'Updating bookmark %d failed', 'avpvh-link-checker' ), $this->container_id )
+				sprintf( /* translators: %d: item ID. */ __( 'Updating bookmark %d failed', 'avpvh-link-checker' ), $this->container_id )
 			);
 		}
 	}
@@ -125,7 +125,7 @@ class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 			}
 
 			$msg = sprintf(
-				__( 'Failed to delete blogroll link "%1$s" (%2$d)', 'avpvh-link-checker' ),
+				/* translators: 1: bookmark name, 2: bookmark ID. */ __( 'Failed to delete blogroll link "%1$s" (%2$d)', 'avpvh-link-checker' ),
 				$link_name,
 				$this->container_id
 			);
@@ -304,7 +304,7 @@ class Avpvh_Lnkc_Bookmark_Manager extends Avpvh_Lnkc_Container_Manager {
 	 */
 	function ui_bulk_delete_message( $n ) {
 		return sprintf(
-			_n(
+			/* translators: %d: number of items. */ _n(
 				'%d blogroll link deleted.',
 				'%d blogroll links deleted.',
 				$n,

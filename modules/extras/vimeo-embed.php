@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded Vimeo videos
 Description: Parse embedded videos from Vimeo
@@ -27,7 +28,7 @@ class Avpvh_Lnkc_Vimeo_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 
 	function link_url_from_src( $src ) {
 		//Extract video ID from the SRC
-		$components = @parse_url( $src );
+		$components = wp_parse_url( $src );
 		if ( empty( $components['query'] ) ) {
 			return '';
 		}

@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded YouTube videos (old embed code)
 Description: Parse embedded videos from YouTube

@@ -181,7 +181,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	function edit( $content, $new_url, $old_url, $old_raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( __( "Editing is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
+			sprintf( /* translators: %s: parser type. */ __( "Editing is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -196,7 +196,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	function unlink( $content, $url, $raw_url ) {
 		return new WP_Error(
 			'not_implemented',
-			sprintf( __( "Unlinking is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
+			sprintf( /* translators: %s: parser type. */ __( "Unlinking is not implemented in the '%s' parser", 'avpvh-link-checker' ), $this->parser_type )
 		);
 	}
 
@@ -246,7 +246,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 			$base_url = home_url();
 		}
 
-		$p = @parse_url( $url );
+		$p = wp_parse_url( $url );
 		if ( ! $p ) {
 			//URL is a malformed
 			return false;
@@ -261,7 +261,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 			return $base_url . $url;
 		}
 
-		$parts = ( parse_url( $base_url ) );
+		$parts = ( wp_parse_url( $base_url ) );
 
 		//Protocol-relative URLs start with "//". We just need to prepend the right protocol.
 		if ( '//' === substr( $url, 0, 2 ) ) {

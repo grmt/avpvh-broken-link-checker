@@ -68,7 +68,7 @@ class Avpvh_Lnkc_Metadata_Parser extends Avpvh_Lnkc_Parser {
 		$url   = trim( reset( $lines ) );
 
 		//Attempt to parse the URL
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 
 		if ( ! $parts ) {
 			return ''; //Ignore invalid URLs

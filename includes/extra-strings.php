@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 _x( 'Basic HTTP', 'module name', 'avpvh-link-checker' );
 _x( 'Blogroll items', 'module name', 'avpvh-link-checker' );
 _x( 'Comments', 'module name', 'avpvh-link-checker' );

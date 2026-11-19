@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * The manager to rule all (post) managers.
@@ -621,7 +622,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				$actions['view'] = sprintf(
 					'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 					esc_url( add_query_arg( 'preview', 'true', get_permalink( $this->container_id ) ) ),
-					esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
+					esc_attr( sprintf( /* translators: %s: post title. */ __( 'Preview &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
 					esc_html__( 'Preview', 'avpvh-link-checker' )
 				);
 			}
@@ -629,7 +630,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			$actions['view'] = sprintf(
 				'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 				esc_url( get_permalink( $this->container_id ) ),
-				esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
+				esc_attr( sprintf( /* translators: %s: post title. */ __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
 				esc_html__( 'View', 'avpvh-link-checker' )
 			);
 		}
@@ -752,7 +753,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 		} elseif ( $post_id == 0 ) {
 			return new WP_Error(
 				'update_failed',
-				sprintf( __( 'Updating post %d failed', 'avpvh-link-checker' ), $this->container_id )
+				sprintf( /* translators: %d: item ID. */ __( 'Updating post %d failed', 'avpvh-link-checker' ), $this->container_id )
 			);
 		} else {
 			$this->update_pagebuilders( $post_id );
@@ -848,7 +849,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				return new WP_Error(
 					'delete_failed',
 					sprintf(
-						__( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
+						/* translators: 1: post title, 2: post ID. */ __( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
 						esc_html( get_the_title( $this->container_id ) ),
 						$this->container_id
 					)
@@ -867,7 +868,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_disabled',
 				sprintf(
-					__( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)
@@ -887,7 +888,7 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_failed',
 				sprintf(
-					__( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)

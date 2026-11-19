@@ -40,7 +40,7 @@ class Avpvh_Lnkc_Url_Field extends Avpvh_Lnkc_Parser {
 		$raw_url = trim( $content );
 
 		//Attempt to parse the URL
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 
 		if ( ! $parts ) {
 			return $instances; //Ignore invalid URLs

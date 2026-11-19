@@ -275,7 +275,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 				}
 			}
 		}
-		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( __( 'View "%s"', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-link-checker' ) . '</a>';
+		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( /* translators: %s: post title. */ __( 'View "%s"', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-link-checker' ) . '</a>';
 
 		return $actions;
 	}
@@ -357,7 +357,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 				return new WP_Error(
 					'delete_failed',
 					sprintf(
-						__( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
+						/* translators: 1: post title, 2: post ID. */ __( 'Failed to delete post "%1$s" (%2$d)', 'avpvh-link-checker' ),
 						esc_html( get_the_title( $this->container_id ) ),
 						$this->container_id
 					)
@@ -376,7 +376,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_disabled',
 				sprintf(
-					__( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Can\'t move post "%1$s" (%2$d) to the trash because the trash feature is disabled', 'avpvh-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)
@@ -395,7 +395,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 			return new WP_Error(
 				'trash_failed',
 				sprintf(
-					__( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
+					/* translators: 1: post title, 2: post ID. */ __( 'Failed to move post "%1$s" (%2$d) to the trash', 'avpvh-link-checker' ),
 					esc_html( get_the_title( $this->container_id ) ),
 					$this->container_id
 				)

@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded DailyMotion videos
 Description: Parse embedded videos from DailyMotion

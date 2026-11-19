@@ -30,7 +30,7 @@ class Avpvh_Lnkc_Checker extends Avpvh_Lnkc_Module {
 	 * Check if this checker knows how to check a particular URL.
 	 *
 	 * @param string $url
-	 * @param array|bool $parsed_url The result of parsing $url with parse_url(). See PHP docs for details.
+	 * @param array|bool $parsed_url The result of parsing $url with wp_parse_url(). See PHP docs for details.
 	 * @return bool
 	 */
 	function can_check( $url, $parsed_url ) {
@@ -85,7 +85,7 @@ class Avpvh_Lnkc_Checker_Helper {
 	 * @return Avpvh_Lnkc_Checker|null
 	 */
 	static function get_checker_for( $url ) {
-		$parsed = @parse_url( $url );
+		$parsed = wp_parse_url( $url );
 
 		$manager         = Avpvh_Lnkc_Module_Manager::getInstance();
 		$active_checkers = $manager->get_active_by_category( 'checker' );

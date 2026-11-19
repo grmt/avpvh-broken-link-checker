@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded YouTube videos
 Description: Parse embedded videos from YouTube
@@ -64,7 +65,7 @@ class Avpvh_Lnkc_Youtube_Iframe extends Avpvh_Lnkc_Embed_Parser_Base {
 	}
 
 	function link_url_from_src( $src ) {
-		$parts = @parse_url( $src );
+		$parts = wp_parse_url( $src );
 		if ( empty( $parts ) || ! isset( $parts['path'] ) ) {
 			return null;
 		}

@@ -118,7 +118,7 @@ class Avpvh_Lnkc_Database_Upgrader {
 
 		if ( false === $rez ) {
 			$error = sprintf(
-				__( 'Failed to delete old DB tables. Database error : %s', 'avpvh-link-checker' ),
+				/* translators: %s: database error message. */ __( 'Failed to delete old DB tables. Database error : %s', 'avpvh-link-checker' ),
 				$wpdb->last_error
 			);
 

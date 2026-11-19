@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @author W-Shadow
@@ -96,7 +97,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 			if ( is_null( $container ) ) {
 				return new WP_Error(
 					'container_not_found',
-					sprintf( __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
+					sprintf( /* translators: 1: container type, 2: container ID. */ __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
 				);
 			}
 
@@ -118,7 +119,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 			if ( is_null( $parser ) ) {
 				return new WP_Error(
 					'parser_not_found',
-					sprintf( __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
+					sprintf( /* translators: %s: parser type. */ __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
 				);
 			}
 
@@ -165,7 +166,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 			if ( is_null( $container ) ) {
 				return new WP_Error(
 					'container_not_found',
-					sprintf( __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
+					sprintf( /* translators: 1: container type, 2: container ID. */ __( 'Container %1$s[%2$d] not found', 'avpvh-link-checker' ), $this->container_type, $this->container_id )
 				);
 			}
 
@@ -187,7 +188,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 			if ( is_null( $parser ) ) {
 				return new WP_Error(
 					'parser_not_found',
-					sprintf( __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
+					sprintf( /* translators: %s: parser type. */ __( "Parser '%s' not found.", 'avpvh-link-checker' ), $this->parser_type )
 				);
 			}
 

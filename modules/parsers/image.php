@@ -69,7 +69,7 @@ class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
 				}
 
 				//Attempt to parse the URL
-				$parts = @parse_url( $url );
+				$parts = wp_parse_url( $url );
 				if ( ! $parts ) {
 					continue; //Skip invalid URLs
 				}

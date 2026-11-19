@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Simple function to replicate PHP 5 behaviour
  *
@@ -834,7 +835,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 						}
 
 						//The log file must be writable.
-						if ( ! is_writable( $log_file ) || ! is_file( $log_file ) ) {
+						if ( ! wp_is_writable( $log_file ) || ! is_file( $log_file ) ) {
 							$this->conf->options['logging_enabled'] = false;
 							$log_error                              = 'avpvh_lnkc_log_dir_unusable';
 						}
@@ -1096,7 +1097,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 											<?php
 											printf(
-												esc_html__( 'Every %s hours', 'avpvh-link-checker' ),
+												/* translators: %s: number input. */ esc_html__( 'Every %s hours', 'avpvh-link-checker' ),
 												sprintf(
 													'<label for="check_threshold" class="screen-reader-text">%s</label><input type="text" name="check_threshold" id="check_threshold" value="%d" size="5" maxlength="5" aria-describedby="check_threshold_desc" />',
 													esc_attr__( 'Check frequency in hours', 'avpvh-link-checker' ),
@@ -1175,12 +1176,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 												<?php
 												if ( defined( 'TEST_WPEL_PLUGIN_FILE' ) ) {
 													printf(
-														wp_kses_post( __( 'Configure <a target="_blank" href="%s">External Links</a> settings.', 'avpvh-link-checker' ) ),
+														wp_kses_post( /* translators: %s: URL of the External Links plugin page. */ __( 'Configure <a target="_blank" href="%s">External Links</a> settings.', 'avpvh-link-checker' ) ),
 														esc_url( admin_url( 'admin.php?page=wpel-settings-page' ) )
 													);
 												} else {
 													printf(
-														wp_kses_post( __( 'Install the free <a href="%s" class="thickbox open-plugin-details-modal">External Links plugin</a> to control if external links open in a new tab, and their nofollow, noopener and UGC options.', 'avpvh-link-checker' ) ),
+														wp_kses_post( /* translators: %s: URL of the External Links plugin page. */ __( 'Install the free <a href="%s" class="thickbox open-plugin-details-modal">External Links plugin</a> to control if external links open in a new tab, and their nofollow, noopener and UGC options.', 'avpvh-link-checker' ) ),
 														'plugin-install.php?fix-install-button=1&tab=plugin-information&plugin=wp-external-links&TB_iframe=true&width=772&height=691'
 													);
 													echo '<br>';
@@ -1232,9 +1233,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					</textarea>
                                                 <p class="description" id="broken_link_css_desc">
 													<?php
-													printf(
-														wp_kses_post( __( 'Example : Lorem ipsum <a %s>broken link</a>, dolor sit amet.', 'avpvh-link-checker' ) ),
-														' href="#" class="broken_link" onclick="return false;"'
+													echo wp_kses_post(
+														sprintf(
+															/* translators: %s: attributes of the example element. */ __( 'Example : Lorem ipsum <a %s>broken link</a>, dolor sit amet.', 'avpvh-link-checker' ),
+															' href="#" class="broken_link"'
+														)
 													);
 													echo ' ', esc_html__( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
 													?>
@@ -1280,9 +1283,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
                                                 <p class="description" id="removed_link_css_desc">
 													<?php
-													printf(
-														wp_kses_post( __( 'Example : Lorem ipsum <span %s>removed link</span>, dolor sit amet.', 'avpvh-link-checker' ) ),
-														' class="removed_link"'
+													echo wp_kses_post(
+														sprintf(
+															/* translators: %s: attributes of the example element. */ __( 'Example : Lorem ipsum <span %s>removed link</span>, dolor sit amet.', 'avpvh-link-checker' ),
+															' class="removed_link"'
+														)
 													);
 													echo ' ', esc_html__( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
 													?>
@@ -1359,7 +1364,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                             aria-describedby="youtube_api_key_desc">
                                                 </label><br>
                                                 <span class="description" id="youtube_api_key_desc">
-							<?php printf( esc_html__( 'Use your own %1$sapi key%2$s for checking youtube links.', 'avpvh-link-checker' ), '<a href="https://developers.google.com/youtube/v3/getting-started">', '</a>' ); ?>
+							<?php printf( /* translators: 1: opening link tag, 2: closing link tag. */ esc_html__( 'Use your own %1$sapi key%2$s for checking youtube links.', 'avpvh-link-checker' ), '<a href="https://developers.google.com/youtube/v3/getting-started">', '</a>' ); ?>
 						</span>
                                             </p>
                                         </td>
@@ -1691,12 +1696,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                 <?php
 
 												printf(
-													esc_html__( 'Current load : %s', 'avpvh-link-checker' ),
+													/* translators: %s: server load average. */ esc_html__( 'Current load : %s', 'avpvh-link-checker' ),
 													'<span id="avpvh_lnkc_current_load">...</span>'
 												);
 												echo '<br/><span class="description" id="server_load_limit_desc">';
 												printf(
-													wp_kses_post( __(
+													wp_kses_post( /* translators: %s: URL explaining server load. */ __(
 														'Link checking will be suspended if the average <a href="%s">server load</a> rises above this number. Leave this field blank to disable load limiting.',
 														'avpvh-link-checker'
 													) ),
@@ -2152,7 +2157,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			//Error?
 			if ( empty( $current_filter['links'] ) && ! empty( $wpdb->last_error ) ) {
-				printf( esc_html__( 'Database error : %s', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
+				printf( /* translators: %s: database error message. */ esc_html__( 'Database error : %s', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
 			}
 			?>
 
@@ -2255,13 +2260,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 				if ( $filter_id ) {
 					//Saved
-					$message = sprintf( __( 'Filter "%s" created', 'avpvh-link-checker' ), $name );
+					$message = sprintf( /* translators: %s: filter name. */ __( 'Filter "%s" created', 'avpvh-link-checker' ), $name );
 					//A little hack to make the filter active immediately
 					$_GET['filter_id'] = $filter_id;
 				} else {
 					//Error
 					// $message is echoed as raw HTML by the caller.
-					$message   = sprintf( esc_html__( 'Database error : %s', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
+					$message   = sprintf( /* translators: %s: database error message. */ esc_html__( 'Database error : %s', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
 					$msg_class = 'error';
 				}
 			}
@@ -2293,7 +2298,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					$message = __( 'Filter deleted', 'avpvh-link-checker' );
 				} else {
 					//Either the ID is wrong or there was some other error
-					$message   = __( 'Database error : %s', 'avpvh-link-checker' );
+					$message   = /* translators: %s: database error message. */ __( 'Database error : %s', 'avpvh-link-checker' );
 					$msg_class = 'error';
 				}
 			}
@@ -2346,7 +2351,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					}
 
 					$message = sprintf(
-						_n(
+						/* translators: %d: number of links. */ _n(
 							'Replaced %d redirect with a direct link',
 							'Replaced %d redirects with direct links',
 							$processed_links,
@@ -2357,7 +2362,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 					if ( $failed_links > 0 ) {
 						$message   .= '<br>' . sprintf(
-								_n(
+								/* translators: %d: number of links. */ _n(
 									'Failed to fix %d redirect',
 									'Failed to fix %d redirects',
 									$failed_links,
@@ -2464,7 +2469,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					}
 
 					$message .= sprintf(
-						_n(
+						/* translators: %d: number of links. */ _n(
 							'%d link updated.',
 							'%d links updated.',
 							$processed_links,
@@ -2475,7 +2480,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 					if ( $failed_links > 0 ) {
 						$message   .= '<br>' . sprintf(
-								_n(
+								/* translators: %d: number of links. */ _n(
 									'Failed to update %d link.',
 									'Failed to update %d links.',
 									$failed_links,
@@ -2547,7 +2552,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					//This message is slightly misleading - it doesn't account for the fact that
 					//a link can be present in more than one post.
 					$message = sprintf(
-						_n(
+						/* translators: %d: number of links. */ _n(
 							'%d link removed',
 							'%d links removed',
 							$processed_links,
@@ -2558,7 +2563,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 					if ( $failed_links > 0 ) {
 						$message   .= '<br>' . sprintf(
-								_n(
+								/* translators: %d: number of links. */ _n(
 									'Failed to remove %d link',
 									'Failed to remove %d links',
 									$failed_links,
@@ -2680,7 +2685,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				//If some items couldn't be trashed, let the user know
 				if ( count( $skipped ) > 0 ) {
 					$message = sprintf(
-						_n(
+						/* translators: %d: number of items. */ _n(
 							"%d item was skipped because it can't be moved to the Trash. You need to delete it manually.",
 							"%d items were skipped because they can't be moved to the Trash. You need to delete them manually.",
 							count( $skipped ),
@@ -2742,7 +2747,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				);
 
 				$message = sprintf(
-					_n(
+					/* translators: %d: number of links. */ _n(
 						'%d link scheduled for rechecking',
 						'%d links scheduled for rechecking',
 						$changes,
@@ -2800,7 +2805,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 						$processed_links ++;
 					} else {
 						$messages[] = sprintf(
-							__( "Couldn't modify link %d", 'avpvh-link-checker' ),
+							/* translators: %d: link ID. */ __( "Couldn't modify link %d", 'avpvh-link-checker' ),
 							$link_id
 						);
 						$msg_class  = 'error';
@@ -2811,7 +2816,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			if ( $processed_links > 0 ) {
 				$transactionManager->commit();
 				$messages[] = sprintf(
-					_n(
+					/* translators: %d: number of links. */ _n(
 						'%d link marked as not broken',
 						'%d links marked as not broken',
 						$processed_links,
@@ -2864,7 +2869,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 						$processed_links ++;
 					} else {
 						$messages[] = sprintf(
-							__( "Couldn't modify link %d", 'avpvh-link-checker' ),
+							/* translators: %d: link ID. */ __( "Couldn't modify link %d", 'avpvh-link-checker' ),
 							$link_id
 						);
 						$msg_class  = 'error';
@@ -2875,7 +2880,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			if ( $processed_links > 0 ) {
 				$transactionManager->commit();
 				$messages[] = sprintf(
-					_n(
+					/* translators: %d: number of links. */ _n(
 						'%d link dismissed',
 						'%d links dismissed',
 						$processed_links,
@@ -3015,7 +3020,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$this->conf->options['failure_duration_threshold']
 			);
 			$html      .= sprintf(
-				__( 'Highlight links broken for at least %s days', 'avpvh-link-checker' ),
+				/* translators: %s: number input. */ __( 'Highlight links broken for at least %s days', 'avpvh-link-checker' ),
 				$input_box
 			);
 			$html      .= '</label>';
@@ -3531,7 +3536,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			if ( $status['broken_links'] > 0 ) {
 				$text .= sprintf(
 					"<a href='%s' title='" . __( 'View broken links', 'avpvh-link-checker' ) . "'><strong>" .
-					_n( 'Found %d broken link', 'Found %d broken links', $status['broken_links'], 'avpvh-link-checker' ) .
+					/* translators: %d: number of links. */ _n( 'Found %d broken link', 'Found %d broken links', $status['broken_links'], 'avpvh-link-checker' ) .
 					'</strong></a>',
 					esc_attr( admin_url( 'admin.php?page=avpvh-link-checker' ) ),
 					$status['broken_links']
@@ -3544,7 +3549,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			if ( $status['unchecked_links'] > 0 ) {
 				$text .= sprintf(
-					_n( '%d URL in the work queue', '%d URLs in the work queue', $status['unchecked_links'], 'avpvh-link-checker' ),
+					/* translators: %d: number of URLs. */ _n( '%d URL in the work queue', '%d URLs in the work queue', $status['unchecked_links'], 'avpvh-link-checker' ),
 					$status['unchecked_links']
 				);
 			} else {
@@ -3554,23 +3559,23 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			$text .= '<br/>';
 			if ( $status['known_links'] > 0 ) {
 				$url_count  = sprintf(
-					_nx( '%d unique URL', '%d unique URLs', $status['known_links'], 'for the "Detected X unique URLs in Y links" message', 'avpvh-link-checker' ),
+					/* translators: %d: number of URLs. */ _nx( '%d unique URL', '%d unique URLs', $status['known_links'], 'for the "Detected X unique URLs in Y links" message', 'avpvh-link-checker' ),
 					$status['known_links']
 				);
 				$link_count = sprintf(
-					_nx( '%d link', '%d links', $status['known_instances'], 'for the "Detected X unique URLs in Y links" message', 'avpvh-link-checker' ),
+					/* translators: %d: number of links. */ _nx( '%d link', '%d links', $status['known_instances'], 'for the "Detected X unique URLs in Y links" message', 'avpvh-link-checker' ),
 					$status['known_instances']
 				);
 
 				if ( $this->conf->options['need_resynch'] ) {
 					$text .= sprintf(
-						__( 'Detected %1$s in %2$s and still searching...', 'avpvh-link-checker' ),
+						/* translators: 1: number of unique URLs, 2: number of links. */ __( 'Detected %1$s in %2$s and still searching...', 'avpvh-link-checker' ),
 						$url_count,
 						$link_count
 					);
 				} else {
 					$text .= sprintf(
-						__( 'Detected %1$s in %2$s.', 'avpvh-link-checker' ),
+						/* translators: 1: number of unique URLs, 2: number of links. */ __( 'Detected %1$s in %2$s.', 'avpvh-link-checker' ),
 						$url_count,
 						$link_count
 					);
@@ -3685,7 +3690,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$link = new Avpvh_Lnkc_Link( intval( $_POST['link_id'] ) );
 
 				if ( ! $link->valid() ) {
-					printf( esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
+					printf( /* translators: %d: link ID. */ esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
 				}
 				//Make it appear "not broken"
@@ -3732,7 +3737,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$link = new Avpvh_Lnkc_Link( intval( $_POST['link_id'] ) );
 
 				if ( ! $link->valid() ) {
-					printf( esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
+					printf( /* translators: %d: link ID. */ esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
 				}
 
@@ -3831,7 +3836,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		 */
 		private function ui_skipped_links_message( $n ) {
 			return '<br>' . sprintf(
-				_n(
+				/* translators: %d: number of links. */ _n(
 					'%d link was skipped because you are not allowed to edit every item it appears in.',
 					'%d links were skipped because you are not allowed to edit every item they appear in.',
 					$n,
@@ -3874,7 +3879,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				wp_die(
 				wp_json_encode(
 					array(
-						'error' => sprintf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) ),
+						'error' => sprintf( /* translators: %d: link ID. */ __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) ),
 					)
 				)
 				);
@@ -3886,7 +3891,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			//Validate the new URL.
 			$new_url = isset( $_POST['new_url'] ) ? esc_url_raw( (string) wp_unslash( $_POST['new_url'] ) ) : '';
-			$parsed  = @parse_url( $new_url );
+			$parsed  = wp_parse_url( $new_url );
 			if ( ! $parsed ) {
 				wp_die(
 				wp_json_encode(
@@ -3995,7 +4000,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					wp_die(
 					wp_json_encode(
 						array(
-							'error' => sprintf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) ),
+							'error' => sprintf( /* translators: %d: link ID. */ __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) ),
 						)
 					)
 					);
@@ -4068,7 +4073,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				wp_die(
 				wp_json_encode(
 					array(
-						'error' => sprintf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), $id ),
+						'error' => sprintf( /* translators: %d: link ID. */ __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), $id ),
 					)
 				)
 				);
@@ -4152,7 +4157,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				die(
 				json_encode(
 					array(
-						'error' => sprintf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), $id ),
+						'error' => sprintf( /* translators: %d: link ID. */ __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), $id ),
 					)
 				)
 				);
@@ -4217,7 +4222,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				Avpvh_Lnkc_Table_Printer::details_row_contents( $link );
 				die();
 			} else {
-				printf( esc_html__( 'Failed to load link details (%s)', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
+				printf( /* translators: %s: error message. */ esc_html__( 'Failed to load link details (%s)', 'avpvh-link-checker' ), esc_html( $wpdb->last_error ) );
 				die();
 			}
 		}
@@ -4367,7 +4372,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			if ( Avpvh_Lnkc_Utility::is_open_basedir() ) {
 				$debug['open_basedir'] = array(
 					'state'   => 'warning',
-					'value'   => sprintf( __( 'On ( %s )', 'avpvh-link-checker' ), ini_get( 'open_basedir' ) ),
+					'value'   => sprintf( /* translators: %s: the open_basedir setting. */ __( 'On ( %s )', 'avpvh-link-checker' ), ini_get( 'open_basedir' ) ),
 					'message' => __( 'Redirects may be detected as broken links when open_basedir is on.', 'avpvh-link-checker' ),
 				);
 			} else {
@@ -4380,7 +4385,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			//Default PHP execution time limit
 			$debug['Default PHP execution time limit'] = array(
 				'state' => 'ok',
-				'value' => sprintf( __( '%s seconds', 'avpvh-link-checker' ), ini_get( 'max_execution_time' ) ),
+				'value' => sprintf( /* translators: %s: number of seconds. */ __( '%s seconds', 'avpvh-link-checker' ), ini_get( 'max_execution_time' ) ),
 			);
 
 			//Database character set. Usually it's UTF-8. Setting it to something else can cause problems
@@ -4439,7 +4444,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			//Email notifications.
 			if ( $this->conf->options['last_notification_sent'] ) {
 				$notificationDebug = array(
-					'value' => date( 'Y-m-d H:i:s T', $this->conf->options['last_notification_sent'] ),
+					'value' => gmdate( 'Y-m-d H:i:s T', $this->conf->options['last_notification_sent'] ),
 					//phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 					'state' => 'ok',
 				);
@@ -4536,12 +4541,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		function send_admin_notification( $links, $email ) {
 			//Prepare email message
 			$subject = sprintf(
-				__( '[%s] Broken links detected', 'avpvh-link-checker' ),
+				/* translators: %s: site name. */ __( '[%s] Broken links detected', 'avpvh-link-checker' ),
 				html_entity_decode( get_option( 'blogname' ), ENT_QUOTES )
 			);
 
 			$body = sprintf(
-				_n(
+				/* translators: %d: number of new broken links. */ _n(
 					'Broken Link Checker has detected %d new broken link on your site.',
 					'Broken Link Checker has detected %d new broken links on your site.',
 					count( $links ),
@@ -4573,7 +4578,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			$result = '';
 			if ( count( $instances ) > $max_displayed_links ) {
 				$line = sprintf(
-					_n(
+					/* translators: %d: number of links listed. */ _n(
 						"Here's a list of the first %d broken links:",
 						"Here's a list of the first %d broken links:",
 						$max_displayed_links,
@@ -4592,10 +4597,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			foreach ( $instances as $instance ) {
 				/* @var Avpvh_Lnkc_Link_Instance $instance */
 				$pieces = array(
-					sprintf( __( 'Link text : %s', 'avpvh-link-checker' ), $instance->ui_get_link_text( 'email' ) ),
+					sprintf( /* translators: %s: link text. */ __( 'Link text : %s', 'avpvh-link-checker' ), $instance->ui_get_link_text( 'email' ) ),
 					// The visible half of the anchor is the URL itself, so it needs escaping too.
-					sprintf( __( 'Link URL : <a href="%1$s">%2$s</a>', 'avpvh-link-checker' ), esc_url( $instance->get_url(), array( 'http', 'https' ) ), esc_html( Avpvh_Lnkc_Utility::truncate( $instance->get_url(), 70, '' ) ) ),
-					sprintf( __( 'Source : View: %1$s | Edit: %2$s', 'avpvh-link-checker' ), $instance->ui_get_source( 'email' ), $instance->ui_get_source() ),
+					sprintf( /* translators: 1: link URL, 2: link URL as shown. */ __( 'Link URL : <a href="%1$s">%2$s</a>', 'avpvh-link-checker' ), esc_url( $instance->get_url(), array( 'http', 'https' ) ), esc_html( Avpvh_Lnkc_Utility::truncate( $instance->get_url(), 70, '' ) ) ),
+					sprintf( /* translators: 1: source for viewing, 2: source for editing. */ __( 'Source : View: %1$s | Edit: %2$s', 'avpvh-link-checker' ), $instance->ui_get_source( 'email' ), $instance->ui_get_source() ),
 				);
 
 				$link_entry = implode( '<br>', $pieces );
@@ -4662,12 +4667,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			foreach ( $authorInstances as $author_id => $instances ) {
 				$subject = sprintf(
-					__( '[%s] Broken links detected', 'avpvh-link-checker' ),
+					/* translators: %s: site name. */ __( '[%s] Broken links detected', 'avpvh-link-checker' ),
 					html_entity_decode( get_option( 'blogname' ), ENT_QUOTES )
 				);
 
 				$body = sprintf(
-					_n(
+					/* translators: %d: number of new broken links. */ _n(
 						'Broken Link Checker has detected %d new broken link in your posts.',
 						'Broken Link Checker has detected %d new broken links in your posts.',
 						count( $instances ),
@@ -4770,9 +4775,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			}
 
 			//clear log file
-			if ( is_writable( $log_file ) && is_file( $log_file ) ) {
-				$handle = fopen( $log_file, 'w' );
-				fclose( $handle );
+			if ( wp_is_writable( $log_file ) && is_file( $log_file ) ) {
+				file_put_contents( $log_file, '' );
 			}
 		}
 

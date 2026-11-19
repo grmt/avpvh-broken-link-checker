@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @author W-Shadow
@@ -879,7 +880,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link' ) ) {
 
 			//Preserve the existing #anchor if the redirect doesn't include one.
 			$new_url = $this->final_url;
-			$anchor  = @parse_url( $this->url, PHP_URL_FRAGMENT );
+			$anchor  = wp_parse_url( $this->url, PHP_URL_FRAGMENT );
 			if ( ! empty( $anchor ) && ( strrpos( $new_url, '#' ) === false ) ) {
 				$new_url .= '#' . $anchor;
 			}
@@ -1110,12 +1111,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link' ) ) {
 		 * @return bool
 		 */
 		public function is_internal_to_domain() {
-			$host = @parse_url( $this->url, PHP_URL_HOST );
+			$host = wp_parse_url( $this->url, PHP_URL_HOST );
 			if ( empty( $host ) ) {
 				return false;
 			}
 
-			$site_host = @parse_url( get_site_url(), PHP_URL_HOST );
+			$site_host = wp_parse_url( get_site_url(), PHP_URL_HOST );
 			if ( empty( $site_host ) ) {
 				return false;
 			}

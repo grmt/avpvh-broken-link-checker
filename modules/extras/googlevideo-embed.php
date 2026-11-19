@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded GoogleVideo videos
 Description: Parse embedded videos from GoogleVideo
@@ -27,7 +28,7 @@ class Avpvh_Lnkc_Google_Video_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 	}
 
 	function link_url_from_src( $src ) {
-		parse_str( parse_url( $src, PHP_URL_QUERY ), $query );
+		parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 		$url = 'http://video.google.com/videoplay?' . build_query( array( 'docid' => $query['docid'] ) );
 		return $url;
 	}

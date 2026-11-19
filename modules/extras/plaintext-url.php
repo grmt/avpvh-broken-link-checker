@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Plaintext URLs
 Description: Parse plaintext URLs as links

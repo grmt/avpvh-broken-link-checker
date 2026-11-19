@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /*
  * Log file location.
@@ -223,7 +224,8 @@ if ( ! function_exists( 'avpvh_lnkc_prepare_log_directory' ) ) {
 			return false;
 		}
 
-		if ( ! is_dir( $directory ) && ! mkdir( $directory, 0750, true ) ) {
+		// 0750 rather than wp_mkdir_p()'s mode: the log holds the URLs of every checked link.
+		if ( ! is_dir( $directory ) && ! mkdir( $directory, 0750, true ) ) { // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
 			return false;
 		}
 
@@ -416,9 +418,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Logger' ) ) :
 		}
 
 		public function clear() {
-			if ( is_file( $this->fileName ) && is_writable( $this->fileName ) ) {
-				$handle = fopen( $this->fileName, 'w' );
-				fclose( $handle );
+			if ( is_file( $this->fileName ) && wp_is_writable( $this->fileName ) ) {
+				file_put_contents( $this->fileName, '' );
 			}
 		}
 

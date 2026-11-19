@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded YouTube playlists (old embed code)
 Description: Parse embedded playlists from YouTube
@@ -28,7 +29,7 @@ class Avpvh_Lnkc_Youtube_Playlist_Embed extends Avpvh_Lnkc_Embed_Parser_Base {
 
 	function link_url_from_src( $src ) {
 		//Extract playlist ID from the SRC.
-		$path = parse_url( $src, PHP_URL_PATH );
+		$path = wp_parse_url( $src, PHP_URL_PATH );
 		if ( empty( $path ) ) {
 			return null;
 		}

@@ -180,13 +180,13 @@ class Avpvh_Lnkc_Rapidshare_Checker extends Avpvh_Lnkc_Checker {
 					}
 
 					$result['log'] .= sprintf(
-						__( 'RapidShare : %s', 'avpvh-link-checker' ),
+						/* translators: %s: error or status message from RapidShare. */ __( 'RapidShare : %s', 'avpvh-link-checker' ),
 						$file_status_text
 					);
 
 				} else {
 					$result['log'] .= sprintf(
-						__( 'RapidShare API error: %s', 'avpvh-link-checker' ),
+						/* translators: %s: error or status message from RapidShare. */ __( 'RapidShare API error: %s', 'avpvh-link-checker' ),
 						esc_html( $response['body'] )
 					);
 				}

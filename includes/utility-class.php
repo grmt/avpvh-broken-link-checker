@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @author W-Shadow
@@ -207,24 +208,24 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 
 			$templates = array(
 				'seconds' => array(
-					'default' => _n_noop( '%d second', '%d seconds', 'avpvh-link-checker' ),
-					'ago'     => _n_noop( '%d second ago', '%d seconds ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d second', '%d seconds', 'avpvh-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d second ago', '%d seconds ago', 'avpvh-link-checker' ),
 				),
 				'minutes' => array(
-					'default' => _n_noop( '%d minute', '%d minutes', 'avpvh-link-checker' ),
-					'ago'     => _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d minute', '%d minutes', 'avpvh-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-link-checker' ),
 				),
 				'hours'   => array(
-					'default' => _n_noop( '%d hour', '%d hours', 'avpvh-link-checker' ),
-					'ago'     => _n_noop( '%d hour ago', '%d hours ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d hour', '%d hours', 'avpvh-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d hour ago', '%d hours ago', 'avpvh-link-checker' ),
 				),
 				'days'    => array(
-					'default' => _n_noop( '%d day', '%d days', 'avpvh-link-checker' ),
-					'ago'     => _n_noop( '%d day ago', '%d days ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d day', '%d days', 'avpvh-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d day ago', '%d days ago', 'avpvh-link-checker' ),
 				),
 				'months'  => array(
-					'default' => _n_noop( '%d month', '%d months', 'avpvh-link-checker' ),
-					'ago'     => _n_noop( '%d month ago', '%d months ago', 'avpvh-link-checker' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d month', '%d months', 'avpvh-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d month ago', '%d months ago', 'avpvh-link-checker' ),
 				),
 			);
 

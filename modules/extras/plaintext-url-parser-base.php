@@ -29,7 +29,7 @@ class Avpvh_Lnkc_Plaintext_Url_Base extends Avpvh_Lnkc_Parser {
 		//The closing tag of [shortcodes] is also treated as a boundary.
 		$content = str_replace( array( '<', '>', '[/' ), array( "\n<", ">\n", "\n[/" ), $content );
 		//Finally, kill all tags.
-		$content = strip_tags( $content );
+		$content = wp_strip_all_tags( $content );
 
 		//Find all URLs
 		$found = preg_match_all(
@@ -83,7 +83,7 @@ class Avpvh_Lnkc_Plaintext_Url_Base extends Avpvh_Lnkc_Parser {
 				return false;
 			}
 		}
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( empty( $parts['host'] ) || ! strpos( $parts['host'], '.' ) ) {
 			return false;
 		}
