@@ -3294,9 +3294,10 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				//Randomizing the array reduces the chances that we'll get several links to the same domain in a row.
 				shuffle( $links );
 
-				$transactionManager = Avpvh_Brkn_Transaction_Manager::getInstance();
-				$transactionManager->start();
-
+				// No transaction around this loop: it makes HTTP requests that can take minutes per
+				// batch, and an open transaction would keep every link row it saved locked until the
+				// end, so post saves, bulk actions and maintenance hit "Lock wait timeout". Each
+				// save() commits on its own; one small write per link costs nothing next to a request.
 				foreach ( $links as $link ) {
 					//Does this link need to be checked? Excluded links aren't checked, but their URLs are still
 					//tested periodically to see if they're still on the exclusion list.
@@ -3312,7 +3313,6 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 
 					//Check if we still have some execution time left
 					if ( $this->execution_time() > $max_execution_time ) {
-						$transactionManager->commit();
 						//FB::log('The allotted execution time has run out');
 						$blclog->info( 'The allotted execution time has run out.' );
 						$this->release_lock();
@@ -3322,7 +3322,6 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 
 					//Check if the server isn't overloaded
 					if ( $this->server_too_busy() ) {
-						$transactionManager->commit();
 						//FB::log('Server overloaded, bailing out.');
 						$blclog->info( 'Server load too high, stopping.' );
 						$this->release_lock();
@@ -3330,7 +3329,6 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 						return;
 					}
 				}
-				$transactionManager->commit();
 
 				$start          = microtime( true );
 				$links          = $this->get_links_to_check( $max_links_per_query );
@@ -4163,18 +4161,14 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				);
 			}
 
-			$transactionManager = Avpvh_Brkn_Transaction_Manager::getInstance();
-			$transactionManager->start();
-
+			// No transaction: it would hold the row locked during the HTTP request, and roll back the
+			// fallback below if the request kills the script.
 			//In case the immediate check fails, this will ensure the link is checked during the next work() run.
-			$link->last_check_attempt  = 0;
-			$link->isOptionLinkChanged = true;
+			$link->last_check_attempt = 0;
 			$link->save();
 
 			//Check the link and save the results.
 			$link->check( true );
-
-			$transactionManager->commit();
 
 			$status   = $link->analyse_status();
 			$response = array(
