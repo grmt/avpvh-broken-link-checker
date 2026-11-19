@@ -70,7 +70,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 				'<span class="edit"><a href="%s" title="%s">%s</a></span>',
 				esc_url( $this->get_edit_url() ),
 				esc_attr( $post_type_object->labels->edit_item ),
-				__( 'Edit', 'avpvh-link-checker' )
+				esc_html__( 'Edit', 'avpvh-link-checker' )
 			);
 		}
 
@@ -86,7 +86,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 				esc_url( get_delete_post_link( $this->container_id, '', false ) ),
 				// translators: %s: post title.
 				esc_attr( sprintf( __( 'Move &#8220;%s&#8221; to the Trash', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ),
-				__( 'Trash', 'avpvh-link-checker' )
+				esc_html__( 'Trash', 'avpvh-link-checker' )
 			);
 		}
 
@@ -95,7 +95,7 @@ trait Avpvh_Lnkc_Taxonomy_Container_Ui {
 			esc_url( get_permalink( $this->container_id ) ),
 			// translators: %s: post title.
 			esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ),
-			__( 'View', 'avpvh-link-checker' )
+			esc_html__( 'View', 'avpvh-link-checker' )
 		);
 
 		return $actions;

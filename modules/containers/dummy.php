@@ -52,9 +52,9 @@ class Avpvh_Lnkc_Dummy_Container extends Avpvh_Lnkc_Container {
 	function ui_get_source( $container_field, $context = 'display' ) {
 		return sprintf(
 			'<em>Unknown source %s[%d]:%s</em>',
-			$this->container_type,
-			$this->container_id,
-			$container_field
+			esc_html( $this->container_type ),
+			(int) $this->container_id,
+			esc_html( $container_field )
 		);
 	}
 }

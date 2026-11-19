@@ -549,7 +549,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		 */
 		public function plugin_action_links( $links, $file ) {
 			if ( $file === $this->my_basename ) {
-				$links[] = "<a href='admin.php?page=avpvh-link-checker&local-settings=true'>" . __( 'Settings' ) . '</a>';
+				$links[] = "<a href='admin.php?page=avpvh-link-checker&local-settings=true'>" . __( 'Settings', 'avpvh-link-checker' ) . '</a>';
 			}
 
 			return $links;
@@ -615,15 +615,15 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				}
 
 				// Activate/deactivate modules.
-				if ( ! empty( $_POST['module'] ) ) {
-					$active = array_keys( $_POST['module'] );
+				if ( ! empty( $_POST['module'] ) && is_array( $_POST['module'] ) ) {
+					$active = array_map( 'sanitize_key', array_keys( wp_unslash( $_POST['module'] ) ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- only the keys are used, each through sanitize_key().
 					$moduleManager->set_active_modules( $active );
 				}
 
 				// Only post statuses that actually exist can be selected.
 				if ( isset( $_POST['enabled_post_statuses'] ) && is_array( $_POST['enabled_post_statuses'] ) ) {
 					$available_statuses    = get_post_stati();
-					$enabled_post_statuses = array_intersect( $_POST['enabled_post_statuses'], $available_statuses );
+					$enabled_post_statuses = array_values( array_intersect( array_map( 'sanitize_key', wp_unslash( $_POST['enabled_post_statuses'] ) ), $available_statuses ) );
 				} else {
 					$enabled_post_statuses = array();
 				}
@@ -640,14 +640,14 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$this->conf->options['enabled_post_statuses'] = $enabled_post_statuses;
 
 				//The execution time limit must be above zero
-				$new_execution_time = ( $this->is_host_wp_engine() || $this->is_host_flywheel() ) ? 60 : intval( $_POST['max_execution_time'] );
+				$new_execution_time = ( $this->is_host_wp_engine() || $this->is_host_flywheel() ) ? 60 : ( isset( $_POST['max_execution_time'] ) ? intval( $_POST['max_execution_time'] ) : 0 );
 
 				if ( $new_execution_time > 0 ) {
 					$this->conf->options['max_execution_time'] = $new_execution_time;
 				}
 
 				//The check threshold also must be > 0
-				$new_check_threshold = intval( $_POST['check_threshold'] );
+				$new_check_threshold = isset( $_POST['check_threshold'] ) ? intval( $_POST['check_threshold'] ) : 0;
 
 				if ( $new_check_threshold > 0 ) {
 					$this->conf->options['check_threshold'] = $new_check_threshold;
@@ -728,7 +728,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$this->conf->options['warnings_enabled'] = $warnings_enabled;
 
 				//HTTP timeout
-				$new_timeout = intval( $_POST['timeout'] );
+				$new_timeout = isset( $_POST['timeout'] ) ? intval( $_POST['timeout'] ) : 0;
 				if ( $new_timeout > 0 ) {
 					$this->conf->options['timeout'] = $new_timeout;
 				}
@@ -774,13 +774,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				}
 				$this->conf->options['send_email_notifications']         = $email_notifications;
 				$this->conf->options['send_authors_email_notifications'] = $send_authors_email_notifications;
-				$this->conf->options['notification_email_address']       = strval( $_POST['notification_email_address'] );
+				$this->conf->options['notification_email_address']       = isset( $_POST['notification_email_address'] ) ? sanitize_email( (string) wp_unslash( $_POST['notification_email_address'] ) ) : '';
 
 				if ( ! filter_var( $this->conf->options['notification_email_address'], FILTER_VALIDATE_EMAIL ) ) {
 					$this->conf->options['notification_email_address'] = '';
 				}
 
-				$widget_cap = sanitize_text_field( wp_unslash( strval( $_POST['dashboard_widget_capability'] ) ) );
+				$widget_cap = isset( $_POST['dashboard_widget_capability'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['dashboard_widget_capability'] ) ) : '';
 				if ( ! empty( $widget_cap ) ) {
 					$this->conf->options['dashboard_widget_capability'] =  $widget_cap;
 				}
@@ -903,7 +903,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			//Show a confirmation message when settings are saved.
 			if ( ! empty( $_GET['settings-updated'] ) ) {
-				echo '<div id="message" class="updated fade" role="status" aria-live="polite"><p><strong>', __( 'Settings saved.', 'avpvh-link-checker' ), '</strong></p></div>';
+				echo '<div id="message" class="updated fade" role="status" aria-live="polite"><p><strong>', esc_html__( 'Settings saved.', 'avpvh-link-checker' ), '</strong></p></div>';
 
 			}
 
@@ -920,7 +920,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			//Show one when recheck is started, too.
 			if ( ! empty( $_GET['recheck-initiated'] ) ) {
 				echo '<div id="message" class="updated fade" role="status" aria-live="polite"><p><strong>',
-				__( 'Complete site recheck started.', 'avpvh-link-checker' ), // -- Yoda
+				esc_html__( 'Complete site recheck started.', 'avpvh-link-checker' ), // -- Yoda
 				'</strong></p></div>';
 			}
 
@@ -938,8 +938,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			//Output the custom broken link/removed link styles for example links
 			printf(
 				'<style>%s %s</style>',
-				$this->conf->options['broken_link_css'],
-				$this->conf->options['removed_link_css']
+				avpvh_lnkc_sanitize_custom_css( $this->conf->options['broken_link_css'] ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- no tags and no "</style" left.
+				avpvh_lnkc_sanitize_custom_css( $this->conf->options['removed_link_css'] ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- no tags and no "</style" left.
 			);
 
 			$section_names = array(
@@ -972,7 +972,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                     <form name="link_checker_options" id="link_checker_options" method="post" action="
 				<?php
 					//echo admin_url( 'admin.php?page=link-checker-settings&noheader=1' );
-                    echo admin_url( 'admin.php?page=avpvh-link-checker&local-settings=true&noheader=1' );
+                    echo esc_url( admin_url( 'admin.php?page=avpvh-link-checker&local-settings=true&noheader=1' ) );
 					?>
 			">
 						<?php
@@ -993,7 +993,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 										$first_tab ? '0' : '-1',
 										esc_attr( $section_id ),
 										esc_attr( $section_name ),
-										$section_name
+										esc_html( $section_name )
 									);
 									$first_tab = false;
 								}
@@ -1052,18 +1052,18 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                             </script>
 
                             <div id="section-general" class="blc-section" role="tabpanel" aria-labelledby="tab-button-general">
-                                <h3 class="hide-if-js"><?php echo $section_names['general']; ?></h3>
+                                <h3 class="hide-if-js"><?php echo esc_html( $section_names['general'] ); ?></h3>
 
                                 <table class="form-table">
 
                                     <tr valign="top">
                                         <th scope="row">
-											<?php _e( 'Status', 'avpvh-link-checker' ); ?>
+											<?php esc_html_e( 'Status', 'avpvh-link-checker' ); ?>
                                             <br>
                                             <button type="button" class="button-link" 
                                                id="blc-debug-info-toggle" 
                                                aria-expanded="false"
-                                               aria-controls="blc-debug-info"><?php _e( 'Show debug info', 'avpvh-link-checker' ); ?></button>
+                                               aria-controls="blc-debug-info"><?php esc_html_e( 'Show debug info', 'avpvh-link-checker' ); ?></button>
                                         </th>
                                         <td>
 
@@ -1078,10 +1078,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 												foreach ( $debug as $key => $value ) {
 													printf(
 														'<tr valign="top" class="blc-debug-item-%s"><th scope="row">%s</th><td>%s<div class="blc-debug-message">%s</div></td></tr>',
-														$value['state'],
-														$key,
-														$value['value'],
-														( array_key_exists( 'message', $value ) ? $value['message'] : '' )
+														esc_attr( $value['state'] ),
+														esc_html( $key ),
+														wp_kses_post( (string) $value['value'] ),
+														( array_key_exists( 'message', $value ) ? wp_kses_post( (string) $value['message'] ) : '' )
 													);
 												}
 												?>
@@ -1091,29 +1091,29 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Check each link', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Check each link', 'avpvh-link-checker' ); ?></th>
                                         <td>
 
 											<?php
 											printf(
-												__( 'Every %s hours', 'avpvh-link-checker' ),
+												esc_html__( 'Every %s hours', 'avpvh-link-checker' ),
 												sprintf(
 													'<label for="check_threshold" class="screen-reader-text">%s</label><input type="text" name="check_threshold" id="check_threshold" value="%d" size="5" maxlength="5" aria-describedby="check_threshold_desc" />',
 													esc_attr__( 'Check frequency in hours', 'avpvh-link-checker' ),
-													$this->conf->options['check_threshold']
+													(int) $this->conf->options['check_threshold']
 												)
 											);
 											?>
                                             <br/>
                                             <span class="description" id="check_threshold_desc">
-				<?php _e( 'Existing links will be checked this often. New links will usually be checked ASAP.', 'avpvh-link-checker' ); ?>
+				<?php esc_html_e( 'Existing links will be checked this often. New links will usually be checked ASAP.', 'avpvh-link-checker' ); ?>
 			</span>
 
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'E-mail notifications', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'E-mail notifications', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <p style="margin-top: 0;">
                                                 <label for='send_email_notifications'>
@@ -1125,7 +1125,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Send me e-mail notifications about newly detected broken links', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Send me e-mail notifications about newly detected broken links', 'avpvh-link-checker' ); ?>
                                                 </label><br/>
                                             </p>
 
@@ -1139,14 +1139,14 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Send authors e-mail notifications about broken links in their posts', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Send authors e-mail notifications about broken links in their posts', 'avpvh-link-checker' ); ?>
                                                 </label><br/>
                                             </p>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php echo __( 'Notification e-mail address', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php echo esc_html__( 'Notification e-mail address', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <p>
                                                 <label for="notification_email_address">
@@ -1160,7 +1160,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                             aria-describedby="notification_email_desc">
                                                 </label><br>
                                                 <span class="description" id="notification_email_desc">
-						<?php echo __( 'Leave empty to use the e-mail address specified in Settings &rarr; General.', 'avpvh-link-checker' ); ?>
+						<?php echo esc_html__( 'Leave empty to use the e-mail address specified in Settings &rarr; General.', 'avpvh-link-checker' ); ?>
 					</span>
                                             </p>
                                         </td>
@@ -1168,19 +1168,19 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
                                     <tr valign="top">
                                         <th scope="row">
-											<?php _ex( 'Control external links', 'settings page', 'avpvh-link-checker' ); ?>
+											<?php echo esc_html_x( 'Control external links', 'settings page', 'avpvh-link-checker' ); ?>
                                         </th>
                                         <td>
                                             <p>
 												<?php
 												if ( defined( 'TEST_WPEL_PLUGIN_FILE' ) ) {
 													printf(
-														__( 'Configure <a target="_blank" href="%s">External Links</a> settings.', 'avpvh-link-checker' ),
-														admin_url( 'admin.php?page=wpel-settings-page' )
+														wp_kses_post( __( 'Configure <a target="_blank" href="%s">External Links</a> settings.', 'avpvh-link-checker' ) ),
+														esc_url( admin_url( 'admin.php?page=wpel-settings-page' ) )
 													);
 												} else {
 													printf(
-														__( 'Install the free <a href="%s" class="thickbox open-plugin-details-modal">External Links plugin</a> to control if external links open in a new tab, and their nofollow, noopener and UGC options.', 'avpvh-link-checker' ),
+														wp_kses_post( __( 'Install the free <a href="%s" class="thickbox open-plugin-details-modal">External Links plugin</a> to control if external links open in a new tab, and their nofollow, noopener and UGC options.', 'avpvh-link-checker' ) ),
 														'plugin-install.php?fix-install-button=1&tab=plugin-information&plugin=wp-external-links&TB_iframe=true&width=772&height=691'
 													);
 													echo '<br>';
@@ -1192,7 +1192,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Link tweaks', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Link tweaks', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <p style="margin-top: 0; margin-bottom: 0.5em;">
                                                 <label for='mark_broken_links'>
@@ -1204,14 +1204,14 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Apply custom formatting to broken links', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Apply custom formatting to broken links', 'avpvh-link-checker' ); ?>
                                                 </label>
                                                 |
                                                 <button type="button" id="toggle-broken-link-css-editor" class="button-link blc-toggle-link"
                                                         aria-expanded="false"
                                                         aria-controls="broken-link-css-wrap">
 													<?php
-													_e( 'Edit CSS', 'avpvh-link-checker' );
+													esc_html_e( 'Edit CSS', 'avpvh-link-checker' );
 													?>
                                                 </button>
                                             </p>
@@ -1226,17 +1226,17 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					<label for="broken_link_css" class="screen-reader-text"><?php esc_html_e( 'Custom CSS for broken links', 'avpvh-link-checker' ); ?></label>
 					<textarea name="broken_link_css" id="broken_link_css" cols='45' rows='4' aria-describedby="broken_link_css_desc"><?php
 					if ( isset( $this->conf->options['broken_link_css'] ) && current_user_can( 'unfiltered_html' ) ) {
-						echo $this->conf->options['broken_link_css'];
+						echo esc_textarea( $this->conf->options['broken_link_css'] );
 					}
 					?>
 					</textarea>
                                                 <p class="description" id="broken_link_css_desc">
 													<?php
 													printf(
-														__( 'Example : Lorem ipsum <a %s>broken link</a>, dolor sit amet.', 'avpvh-link-checker' ),
+														wp_kses_post( __( 'Example : Lorem ipsum <a %s>broken link</a>, dolor sit amet.', 'avpvh-link-checker' ) ),
 														' href="#" class="broken_link" onclick="return false;"'
 													);
-													echo ' ', __( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
+													echo ' ', esc_html__( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
 													?>
                                                 </p>
                                             </div>
@@ -1251,14 +1251,14 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Apply custom formatting to removed links', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Apply custom formatting to removed links', 'avpvh-link-checker' ); ?>
                                                 </label>
                                                 |
                                                 <button type="button" id="toggle-removed-link-css-editor" class="button-link blc-toggle-link"
                                                         aria-expanded="false"
                                                         aria-controls="removed-link-css-wrap">
 													<?php
-													_e( 'Edit CSS', 'avpvh-link-checker' );
+													esc_html_e( 'Edit CSS', 'avpvh-link-checker' );
 													?>
                                                 </button>
                                             </p>
@@ -1273,7 +1273,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					<label for="removed_link_css" class="screen-reader-text"><?php esc_html_e( 'Custom CSS for removed links', 'avpvh-link-checker' ); ?></label>
 					<textarea name="removed_link_css" id="removed_link_css" cols='45' rows='4' aria-describedby="removed_link_css_desc"><?php
 					if ( isset( $this->conf->options['removed_link_css'] ) && current_user_can( 'unfiltered_html' ) ) {
-						echo $this->conf->options['removed_link_css'];
+						echo esc_textarea( $this->conf->options['removed_link_css'] );
 					}
 					?>
 					</textarea>
@@ -1281,10 +1281,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                 <p class="description" id="removed_link_css_desc">
 													<?php
 													printf(
-														__( 'Example : Lorem ipsum <span %s>removed link</span>, dolor sit amet.', 'avpvh-link-checker' ),
+														wp_kses_post( __( 'Example : Lorem ipsum <span %s>removed link</span>, dolor sit amet.', 'avpvh-link-checker' ) ),
 														' class="removed_link"'
 													);
-													echo ' ', __( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
+													echo ' ', esc_html__( 'Click "Save Changes" to update example output.', 'avpvh-link-checker' );
 													?>
 
                                                 </p>
@@ -1300,13 +1300,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Stop search engines from following broken links', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Stop search engines from following broken links', 'avpvh-link-checker' ); ?>
                                                 </label>
                                             </p>
 
                                             <p class="description">
 												<?php
-												echo _x(
+												echo esc_html_x(
 													'These settings only apply to the content of posts, not comments or custom fields.',
 													'"Link tweaks" settings',
 													'avpvh-link-checker'
@@ -1317,35 +1317,35 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php echo _x( 'Suggestions', 'settings page', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php echo esc_html_x( 'Suggestions', 'settings page', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <label>
                                                 <input type="checkbox" name="suggestions_enabled"
                                                        id="suggestions_enabled"
 													<?php checked( $this->conf->options['suggestions_enabled'] ); ?>/>
-												<?php _e( 'Suggest alternatives to broken links', 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( 'Suggest alternatives to broken links', 'avpvh-link-checker' ); ?>
                                             </label>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php echo _x( 'Warnings', 'settings page', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php echo esc_html_x( 'Warnings', 'settings page', 'avpvh-link-checker' ); ?></th>
                                         <td id="avpvh_lnkc_warning_settings">
                                             <label>
                                                 <input type="checkbox" name="warnings_enabled" id="warnings_enabled"
 													<?php checked( $this->conf->options['warnings_enabled'] ); ?>/>
-												<?php _e( 'Show uncertain or minor problems as "warnings" instead of "broken"', 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( 'Show uncertain or minor problems as "warnings" instead of "broken"', 'avpvh-link-checker' ); ?>
                                             </label>
                                             <p class="description">
 												<?php
-												_e( 'Turning off this option will make the plugin report all problems as broken links.', 'avpvh-link-checker' );
+												esc_html_e( 'Turning off this option will make the plugin report all problems as broken links.', 'avpvh-link-checker' );
 												?>
                                             </p>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php echo __( 'YouTube API Key', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php echo esc_html__( 'YouTube API Key', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <p>
                                                 <label for="youtube_api_key">
@@ -1359,7 +1359,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                             aria-describedby="youtube_api_key_desc">
                                                 </label><br>
                                                 <span class="description" id="youtube_api_key_desc">
-							<?php printf( __( 'Use your own %1$sapi key%2$s for checking youtube links.', 'avpvh-link-checker' ), '<a href="https://developers.google.com/youtube/v3/getting-started">', '</a>' ); ?>
+							<?php printf( esc_html__( 'Use your own %1$sapi key%2$s for checking youtube links.', 'avpvh-link-checker' ), '<a href="https://developers.google.com/youtube/v3/getting-started">', '</a>' ); ?>
 						</span>
                                             </p>
                                         </td>
@@ -1381,12 +1381,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                             </div>
 
                             <div id="section-where" class="blc-section" role="tabpanel" aria-labelledby="tab-button-where">
-                                <h3 class="hide-if-js"><?php echo $section_names['where']; ?></h3>
+                                <h3 class="hide-if-js"><?php echo esc_html( $section_names['where'] ); ?></h3>
 
                                 <table class="form-table">
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Look for links in', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Look for links in', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											if ( ! empty( $modules['container'] ) ) {
@@ -1403,7 +1403,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Post statuses', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Post statuses', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											$available_statuses = get_post_stati( array( 'internal' => false ), 'objects' );
@@ -1419,7 +1419,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 													'<p><label><input type="checkbox" name="enabled_post_statuses[]" value="%s"%s> %s</label></p>',
 													esc_attr( $status ),
 													in_array( $status, $enabled_post_statuses ) ? ' checked="checked"' : '',
-													$status_object->label
+													esc_html( $status_object->label )
 												);
 											}
 											?>
@@ -1432,28 +1432,28 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 
                             <div id="section-which" class="blc-section" role="tabpanel" aria-labelledby="tab-button-which">
-                                <h3 class="hide-if-js"><?php echo $section_names['which']; ?></h3>
+                                <h3 class="hide-if-js"><?php echo esc_html( $section_names['which'] ); ?></h3>
 
                                 <table class="form-table">
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Link types', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Link types', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											if ( ! empty( $modules['parser'] ) ) {
 												$this->print_module_list( $modules['parser'], $this->conf->options );
 											} else {
-												echo __( 'Error : All link parsers missing!', 'avpvh-link-checker' );
+												echo esc_html__( 'Error : All link parsers missing!', 'avpvh-link-checker' );
 											}
 											?>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Exclusion list', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Exclusion list', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <label for="exclusion_list">
-												<?php _e( "Don't check links whose URL matches any of these entries (one per line):", 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( "Don't check links whose URL matches any of these entries (one per line):", 'avpvh-link-checker' ); ?>
                                             </label>
                                             <br/>
                                             <textarea name="exclusion_list" id="exclusion_list" cols='45' rows='4' aria-describedby="exclusion_list_desc"><?php
@@ -1489,12 +1489,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                             </div>
 
                             <div id="section-how" class="blc-section" role="tabpanel" aria-labelledby="tab-button-how">
-                                <h3 class="hide-if-js"><?php echo $section_names['how']; ?></h3>
+                                <h3 class="hide-if-js"><?php echo esc_html( $section_names['how'] ); ?></h3>
 
                                 <table class="form-table">
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Check links using', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Check links using', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											if ( ! empty( $modules['checker'] ) ) {
@@ -1509,20 +1509,20 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                             </div>
 
                             <div id="section-advanced" class="blc-section" role="tabpanel" aria-labelledby="tab-button-advanced">
-                                <h3 class="hide-if-js"><?php echo $section_names['advanced']; ?></h3>
+                                <h3 class="hide-if-js"><?php echo esc_html( $section_names['advanced'] ); ?></h3>
 
                                 <table class="form-table">
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Timeout', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Timeout', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <label for="avpvh_lnkc_timeout" class="screen-reader-text">
-												<?php _e( 'Timeout in seconds:', 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( 'Timeout in seconds:', 'avpvh-link-checker' ); ?>
                                             </label>
                                             <input type="number" name="timeout" id="avpvh_lnkc_timeout" value="<?php echo esc_attr( $this->conf->options['timeout'] ); ?>" size="5" maxlength="3" min="1" max="999" aria-describedby="avpvh_lnkc_timeout_desc" />
-                                            <?php _e( 'seconds', 'avpvh-link-checker' ); ?>
+                                            <?php esc_html_e( 'seconds', 'avpvh-link-checker' ); ?>
                                             <br/><span class="description" id="avpvh_lnkc_timeout_desc">
-			<?php _e( 'Links that take longer than this to load will be marked as broken.', 'avpvh-link-checker' ); ?>
+			<?php esc_html_e( 'Links that take longer than this to load will be marked as broken.', 'avpvh-link-checker' ); ?>
 		</span>
 
                                         </td>
@@ -1580,7 +1580,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Link monitor', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Link monitor', 'avpvh-link-checker' ); ?></th>
                                         <td>
 
                                             <p>
@@ -1593,7 +1593,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Run continuously while the Dashboard is open', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Run continuously while the Dashboard is open', 'avpvh-link-checker' ); ?>
                                                 </label>
                                             </p>
 
@@ -1606,7 +1606,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 														}
 														?>
                                                     />
-													<?php _e( 'Run hourly in the background', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Run hourly in the background', 'avpvh-link-checker' ); ?>
                                                 </label>
                                             </p>
 
@@ -1614,7 +1614,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Show the dashboard widget for', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Show the dashboard widget for', 'avpvh-link-checker' ); ?></th>
                                         <td>
 
 											<?php
@@ -1629,7 +1629,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 													'<p><label><input type="radio" name="dashboard_widget_capability" value="%s"%s> %s</label></p>',
 													esc_attr( $capability ),
 													checked( $capability, $this->conf->get( 'dashboard_widget_capability' ), false ),
-													$title
+													esc_html( $title )
 												);
 											}
 											?>
@@ -1637,7 +1637,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php echo _x( 'Show link actions', 'settings page', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php echo esc_html_x( 'Show link actions', 'settings page', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											$show_link_actions = $this->conf->get( 'show_link_actions', array() );
@@ -1645,8 +1645,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 												$enabled = isset( $show_link_actions[ $action ] ) ? (bool) ( $show_link_actions[ $action ] ) : true;
 												printf(
 													'<p><label><input type="checkbox" name="show_link_actions[%1$s]" %3$s> %2$s</label></p>',
-													$action,
-													$text,
+													esc_attr( $action ),
+													esc_html( $text ),
 													checked( $enabled, true, false )
 												);
 											}
@@ -1655,17 +1655,17 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
                                     <?php if ( ! $this->is_host_wp_engine() && ! $this->is_host_flywheel() ) :?>
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Max. execution time', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Max. execution time', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <label for="max_execution_time" class="screen-reader-text">
-												<?php _e( 'Maximum execution time in seconds:', 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( 'Maximum execution time in seconds:', 'avpvh-link-checker' ); ?>
                                             </label>
                                             <input type="number" name="max_execution_time" id="max_execution_time" value="<?php echo esc_attr( $this->max_execution_time_option() ); ?>" size="5" maxlength="5" min="1" aria-describedby="max_execution_time_desc" />
-                                            <?php _e( 'seconds', 'avpvh-link-checker' ); ?>
+                                            <?php esc_html_e( 'seconds', 'avpvh-link-checker' ); ?>
                                             <br/><span class="description" id="max_execution_time_desc">
 			<?php
 
-			_e( 'The plugin works by periodically launching a background job that parses your posts for links, checks the discovered URLs, and performs other time-consuming tasks. Here you can set for how long, at most, the link monitor may run each time before stopping.', 'avpvh-link-checker' );
+			esc_html_e( 'The plugin works by periodically launching a background job that parses your posts for links, checks the discovered URLs, and performs other time-consuming tasks. Here you can set for how long, at most, the link monitor may run each time before stopping.', 'avpvh-link-checker' );
 
 			?>
 		</span>
@@ -1674,7 +1674,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
                                     <?php endif; ?>
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Server load limit', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Server load limit', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 
@@ -1685,21 +1685,21 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 												$value = ! empty( $this->conf->options['server_load_limit'] ) ? sprintf( '%.2f', $this->conf->options['server_load_limit'] ) : '';
 												?>
                                                 <label for="server_load_limit" class="screen-reader-text">
-													<?php _e( 'Server load limit:', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Server load limit:', 'avpvh-link-checker' ); ?>
                                                 </label>
                                                 <input type="number" name="server_load_limit" id="server_load_limit" value="<?php echo esc_attr( $value ); ?>" size="5" maxlength="5" step="0.01" min="0" aria-describedby="server_load_limit_desc" />
                                                 <?php
 
 												printf(
-													__( 'Current load : %s', 'avpvh-link-checker' ),
+													esc_html__( 'Current load : %s', 'avpvh-link-checker' ),
 													'<span id="avpvh_lnkc_current_load">...</span>'
 												);
 												echo '<br/><span class="description" id="server_load_limit_desc">';
 												printf(
-													__(
+													wp_kses_post( __(
 														'Link checking will be suspended if the average <a href="%s">server load</a> rises above this number. Leave this field blank to disable load limiting.',
 														'avpvh-link-checker'
-													),
+													) ),
 													'http://en.wikipedia.org/wiki/Load_(computing)'
 												);
 												echo '</span>';
@@ -1707,7 +1707,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 											} else {
 												echo '<input type="text" disabled="disabled" value="', esc_attr( __( 'Not available', 'avpvh-link-checker' ) ), '" size="13" aria-hidden="true"/><br>';
 												echo '<span class="description">';
-												_e( 'Load limiting only works on Linux-like systems where <code>/proc/loadavg</code> is present and accessible.', 'avpvh-link-checker' );
+												echo wp_kses_post( __( 'Load limiting only works on Linux-like systems where <code>/proc/loadavg</code> is present and accessible.', 'avpvh-link-checker' ) );
 												echo '</span>';
 											}
 											?>
@@ -1715,39 +1715,39 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Target resource usage', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Target resource usage', 'avpvh-link-checker' ); ?></th>
                                         <td>
 											<?php
 											$target_resource_usage = $this->conf->get( 'target_resource_usage', 0.25 );
 											?>
                                             <label for="target_resource_usage" class="screen-reader-text">
-												<?php _e( 'Target resource usage percentage:', 'avpvh-link-checker' ); ?>
+												<?php esc_html_e( 'Target resource usage percentage:', 'avpvh-link-checker' ); ?>
                                             </label>
                                             <input name="target_resource_usage" value="<?php echo esc_attr( $target_resource_usage * 100 ); ?>" type="range" min="1" max="100" id="target_resource_usage" aria-describedby="target_resource_usage_desc target_resource_usage_percent" />
 
                                             <span id="target_resource_usage_percent">
 				<?php
-				echo sprintf( '%.0f%%', $target_resource_usage * 100 );
+				printf( '%.0f%%', (float) $target_resource_usage * 100 );
 				?>
 				</span>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Logging', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Logging', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <p>
                                                 <label for='logging_enabled'>
                                                     <input type="checkbox" name="logging_enabled" id="logging_enabled"
 														<?php checked( $this->conf->options['logging_enabled'] ); ?>/>
-													<?php _e( 'Enable logging', 'avpvh-link-checker' ); ?>
+													<?php esc_html_e( 'Enable logging', 'avpvh-link-checker' ); ?>
                                                 </label>
                                             </p>
                                         </td>
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Log file location', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Log file location', 'avpvh-link-checker' ); ?></th>
                                         <td>
 
                                             <div class="blc-logging-options">
@@ -1756,13 +1756,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                     <label>
                                                         <input type="radio" name="custom_log_file_enabled" value=""
 															<?php checked( ! $this->conf->options['custom_log_file_enabled'] ); ?>>
-														<?php echo _x( 'Default', 'log file location', 'avpvh-link-checker' ); ?>
+														<?php echo esc_html_x( 'Default', 'log file location', 'avpvh-link-checker' ); ?>
                                                     </label>
                                                     <br>
                                                     <span class="description">
 						<code>
 						<?php
-						echo self::get_default_log_directory(), '/', self::get_default_log_basename();
+						echo esc_html( self::get_default_log_directory() . '/' . self::get_default_log_basename() );
 						?>
 						</code>
 					</span>
@@ -1772,11 +1772,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                                     <label>
                                                         <input type="radio" name="custom_log_file_enabled" value="1"
 															<?php checked( $this->conf->options['custom_log_file_enabled'] ); ?>>
-														<?php echo _x( 'Custom', 'log file location', 'avpvh-link-checker' ); ?>
+														<?php echo esc_html_x( 'Custom', 'log file location', 'avpvh-link-checker' ); ?>
                                                     </label>
                                                     <br>
                                                     <label for="log_file" class="screen-reader-text">
-														<?php _e( 'Custom log file name', 'avpvh-link-checker' ); ?>
+														<?php esc_html_e( 'Custom log file name', 'avpvh-link-checker' ); ?>
                                                     </label>
                                                     <input type="text" name="log_file" id="log_file" size="90" value="<?php echo esc_attr( '' === strval( $this->conf->options['log_file'] ) ? '' : avpvh_lnkc_sanitize_log_path( $this->conf->options['log_file'] ) ); ?>" aria-describedby="log_file_desc" />
                                                     <span class="description" id="log_file_desc">
@@ -1791,13 +1791,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                         </td>
                                     </tr>
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Log file clear schedule', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Log file clear schedule', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <div class="blc-logging-options">
                                                 <p>
 													<?php $schedules = wp_get_schedules(); ?>
                                                     <label for="clear_log_on" class="screen-reader-text">
-														<?php _e( 'Clear log file schedule:', 'avpvh-link-checker' ); ?>
+														<?php esc_html_e( 'Clear log file schedule:', 'avpvh-link-checker' ); ?>
                                                     </label>
                                                     <select name="clear_log_on" id="clear_log_on">
                                                         <option value=""> <?php esc_html_e( 'Never', 'avpvh-link-checker' ); ?></option>
@@ -1810,7 +1810,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 															);
 															?>
                                                             <option
-																<?php echo $selected; ?>value="<?php echo esc_attr( $key ); ?>"> <?php echo esc_html( $schedule['display'] ); ?></option>
+																<?php echo $selected; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- selected() output. ?>value="<?php echo esc_attr( $key ); ?>"> <?php echo esc_html( $schedule['display'] ); ?></option>
 															<?php
 														}
 														?>
@@ -1822,15 +1822,15 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row"><?php _e( 'Forced recheck', 'avpvh-link-checker' ); ?></th>
+                                        <th scope="row"><?php esc_html_e( 'Forced recheck', 'avpvh-link-checker' ); ?></th>
                                         <td>
                                             <input class="button" type="button" name="start-recheck" id="start-recheck"
-                                                   value="<?php _e( 'Re-check all pages', 'avpvh-link-checker' ); ?>"/>
+                                                   value="<?php esc_attr_e( 'Re-check all pages', 'avpvh-link-checker' ); ?>"/>
                                             <input type="hidden" name="recheck" value="" id="recheck"/>
                                             <br/>
                                             <span class="description">
 			<?php
-			_e( 'The "Nuclear Option". Click this button to make the plugin empty its link database and recheck the entire site from scratch.', 'avpvh-link-checker' );
+			esc_html_e( 'The "Nuclear Option". Click this button to make the plugin empty its link database and recheck the entire site from scratch.', 'avpvh-link-checker' );
 
 			?>
 			</span>
@@ -1843,7 +1843,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
                         </div>
 
                         <p class="submit"><input type="submit" name="submit" class='button-primary'
-                                                 value="<?php _e( 'Save Changes' ); ?>"/></p>
+                                                 value="<?php esc_attr_e( 'Save Changes', 'avpvh-link-checker' ); ?>"/></p>
                     </form>
 
                 </div> <!-- First postbox-container -->
@@ -1874,12 +1874,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			foreach ( $modules as $module_id => $module_data ) {
 				$module_id = $module_data['ModuleID'];
 
-				$style = $module_data['ModuleHidden'] ? ' style="display:none;"' : '';
-
 				printf(
 					'<div class="module-container" id="module-container-%s"%s>',
-					$module_id,
-					$style
+					esc_attr( $module_id ),
+					$module_data['ModuleHidden'] ? ' style="display:none;"' : ''
 				);
 				$this->print_module_checkbox( $module_id, $module_data, $moduleManager->is_active( $module_id ) );
 
@@ -1894,7 +1892,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					printf(
 						' | <a class="blc-toggle-link toggle-module-settings" id="toggle-module-settings-%s" href="#">%s</a>',
 						esc_attr( $module_id ),
-						__( 'Configure', 'avpvh-link-checker' )
+						esc_html__( 'Configure', 'avpvh-link-checker' )
 					);
 
 					//The plugin remembers the last open/closed state of module configuration boxes
@@ -1907,8 +1905,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					printf(
 						'<div class="module-extra-settings%s" id="%s">%s</div>',
 						$show ? '' : ' hidden',
-						$box_id,
-						$extra_settings
+						esc_attr( $box_id ),
+						wp_kses( $extra_settings, array( 'textarea' => array( 'name' => true, 'id' => true, 'cols' => true, 'rows' => true, 'aria-describedby' => true ), 'label' => array( 'for' => true, 'class' => true ), 'br' => array(), 'code' => array(), 'span' => array( 'class' => true, 'id' => true ), 'p' => array( 'class' => true, 'id' => true ) ) )
 					);
 				}
 
@@ -1965,21 +1963,17 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$name_prefix = 'module-always-active';
 			}
 
-			$checked = $active ? ' checked="checked"' : '';
-			if ( $disabled ) {
-				$checked .= ' disabled="disabled"';
-			}
 
 			printf(
 				'<label class="%s">
 					<input type="checkbox" name="%s[%s]" id="module-checkbox-%s"%s /> %s
 				</label>',
 				esc_attr( $label_class ),
-				$name_prefix,
+				esc_attr( $name_prefix ),
 				esc_attr( $module_id ),
 				esc_attr( $module_id ),
-				$checked,
-				$module_data['Name']
+				( $active ? ' checked="checked"' : '' ) . ( $disabled ? ' disabled="disabled"' : '' ),
+				wp_kses_post( $module_data['Name'] )
 			);
 
 			if ( $module_data['ModuleAlwaysActive'] ) {
@@ -2066,11 +2060,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				file_put_contents( dirname( $this->loader ) . '/includes/extra-strings.php', $code );
 			}
 
-			$action = ! empty( $_POST['action'] ) ? $_POST['action'] : '';
+			// phpcs:disable WordPress.Security.NonceVerification.Missing -- each do_bulk_*() checks the bulk-action nonce before it changes anything.
+			$action = ! empty( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : '';
 			if ( intval( $action ) == - 1 ) {
 				//Try the second bulk actions box
-				$action = ! empty( $_POST['action2'] ) ? $_POST['action2'] : '';
+				$action = ! empty( $_POST['action2'] ) ? sanitize_key( wp_unslash( $_POST['action2'] ) ) : '';
 			}
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 			//Get the list of link IDs selected via checkboxes
 			$selected_links = array();
@@ -2129,7 +2125,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			}
 
 			if ( ! empty( $message ) ) {
-				echo '<div id="message" class="' . $msg_class . ' fade"><p>' . $message . '</p></div>';
+				echo '<div id="message" class="' . esc_attr( $msg_class ) . ' fade"><p>' . wp_kses_post( $message ) . '</p></div>';
 			}
 
 			$start_time = microtime( true );
@@ -2141,14 +2137,14 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			$avpvh_lnkc_link_query->count_filter_results();
 
 			//Run the selected filter (defaults to displaying broken links)
-			$selected_filter_id = isset( $_GET['filter_id'] ) ? $_GET['filter_id'] : 'broken';
+			$selected_filter_id = isset( $_GET['filter_id'] ) ? sanitize_key( wp_unslash( $_GET['filter_id'] ) ) : 'broken';
 			$current_filter     = $avpvh_lnkc_link_query->exec_filter(
 				$selected_filter_id,
 				isset( $_GET['paged'] ) ? intval( $_GET['paged'] ) : 1,
 				$this->conf->options['table_links_per_page'],
 				'broken',
-				isset( $_GET['orderby'] ) ? $_GET['orderby'] : '',
-				isset( $_GET['order'] ) ? $_GET['order'] : ''
+				isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : '',
+				isset( $_GET['order'] ) ? sanitize_key( wp_unslash( $_GET['order'] ) ) : ''
 			);
 
 			//exec_filter() returns an array with filter data, including the actual filter ID that was used.
@@ -2203,7 +2199,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					);
 
 				}
-				printf( '<!-- Total elapsed : %.4f seconds -->', microtime( true ) - $start_time );
+				printf( '<!-- Total elapsed : %.4f seconds -->', (float) ( microtime( true ) - $start_time ) );
 
 				//Load assorted JS event handlers and other shinies
 				include dirname( $this->loader ) . '/includes/admin/links-page-js.php';
@@ -2238,11 +2234,13 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$msg_class = 'error';
 			} else {
 				//Save the new filter
-				$name           = strip_tags( strval( $_POST['name'] ) );
+				$name           = isset( $_POST['name'] ) ? sanitize_text_field( (string) wp_unslash( $_POST['name'] ) ) : '';
+				// A query string: sanitize_text_field() would strip its %-escapes. Its keys are checked below.
+				$raw_params     = (string) wp_unslash( $_POST['params'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 				$avpvh_lnkc_link_query = $this->get_link_query();
 				
 				$params = array();
-				wp_parse_str( $_POST['params'], $params );
+				wp_parse_str( $raw_params, $params );
 				
 				$allowed_keys   = $this->get_link_query()->valid_url_params;
 				$forbidden_keys = array_diff( array_keys( $params ), $allowed_keys );
@@ -2253,7 +2251,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					return array( $message, $msg_class );
 				}
 				
-				$filter_id      = $avpvh_lnkc_link_query->create_custom_filter( $name, $_POST['params'] );
+				$filter_id      = $avpvh_lnkc_link_query->create_custom_filter( $name, $raw_params );
 
 				if ( $filter_id ) {
 					//Saved
@@ -2290,7 +2288,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			} else {
 				//Try to delete the filter
 				$avpvh_lnkc_link_query = $this->get_link_query();
-				if ( $avpvh_lnkc_link_query->delete_custom_filter( $_POST['filter_id'] ) ) {
+				if ( $avpvh_lnkc_link_query->delete_custom_filter( sanitize_key( wp_unslash( $_POST['filter_id'] ) ) ) ) {
 					//Success
 					$message = __( 'Filter deleted', 'avpvh-link-checker' );
 				} else {
@@ -2685,7 +2683,8 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 						_n(
 							"%d item was skipped because it can't be moved to the Trash. You need to delete it manually.",
 							"%d items were skipped because they can't be moved to the Trash. You need to delete them manually.",
-							count( $skipped )
+							count( $skipped ),
+							'avpvh-link-checker'
 						),
 						count( $skipped )
 					);
@@ -2934,18 +2933,18 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 							<a href="%4$s">%5$s</a>
 						<p>
 					</div>',
-				__(
+				wp_kses_post( __(
 					'The "Warnings" page lists problems that are probably temporary or suspected to be false positives.<br> Warnings that persist for a long time will usually be reclassified as broken links.',
 					'avpvh-link-checker'
-				),
+				) ),
 				esc_attr( add_query_arg( $notice_name, '0' ) ),
-				_x(
+				esc_html_x(
 					'Hide notice',
 					'admin notice under Tools - Broken links - Warnings',
 					'avpvh-link-checker'
 				),
 				esc_attr( admin_url( 'admin.php?page=avpvh-link-checker&local-settings=true#avpvh_lnkc_warning_settings' ) ),
-				_x(
+				esc_html_x(
 					'Change warning settings',
 					'a link from the admin notice under Tools - Broken links - Warnings',
 					'avpvh-link-checker'
@@ -2997,7 +2996,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				<input type="button" class="button" value="%s" id="blc-per-page-apply-button" /><br />',
 				$this->conf->options['table_links_per_page'],
 				__( 'links', 'avpvh-link-checker' ),
-				__( 'Apply' )
+				__( 'Apply', 'avpvh-link-checker' )
 			);
 			$html .= '</div>';
 
@@ -3617,11 +3616,11 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 
 			$load = Avpvh_Lnkc_Utility::get_server_load();
 			if ( empty( $load ) ) {
-				die( _x( 'Unknown', 'current load', 'avpvh-link-checker' ) );
+				die( esc_html_x( 'Unknown', 'current load', 'avpvh-link-checker' ) );
 			}
 
 			$one_minute = reset( $load );
-			printf( '%.2f', $one_minute );
+			printf( '%.2f', (float) $one_minute );
 			die();
 		}
 
@@ -3663,7 +3662,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			check_ajax_referer( 'avpvh_lnkc_work' );
 
 			if ( ! current_user_can( 'edit_others_posts' ) ) {
-				die( __( "You're not allowed to do that!", 'avpvh-link-checker' ) );
+				die( esc_html__( "You're not allowed to do that!", 'avpvh-link-checker' ) );
 			}
 
 			//Run the worker function
@@ -3678,7 +3677,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 		 */
 		function ajax_discard() {
 			if ( ! current_user_can( 'edit_others_posts' ) || ! check_ajax_referer( 'avpvh_lnkc_discard', false, false ) ) {
-				die( __( "You're not allowed to do that!", 'avpvh-link-checker' ) );
+				die( esc_html__( "You're not allowed to do that!", 'avpvh-link-checker' ) );
 			}
 
 			if ( isset( $_POST['link_id'] ) ) {
@@ -3686,7 +3685,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$link = new Avpvh_Lnkc_Link( intval( $_POST['link_id'] ) );
 
 				if ( ! $link->valid() ) {
-					printf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
+					printf( esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
 				}
 				//Make it appear "not broken"
@@ -3706,10 +3705,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					$transactionManager->commit();
 					die( 'OK' );
 				} else {
-					die( __( "Oops, couldn't modify the link!", 'avpvh-link-checker' ) );
+					die( esc_html__( "Oops, couldn't modify the link!", 'avpvh-link-checker' ) );
 				}
 			} else {
-				die( __( 'Error : link_id not specified', 'avpvh-link-checker' ) );
+				die( esc_html__( 'Error : link_id not specified', 'avpvh-link-checker' ) );
 			}
 		}
 
@@ -3725,7 +3724,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			$action = $dismiss ? 'avpvh_lnkc_dismiss' : 'avpvh_lnkc_undismiss';
 
 			if ( ! current_user_can( 'edit_others_posts' ) || ! check_ajax_referer( $action, false, false ) ) {
-				die( __( "You're not allowed to do that!", 'avpvh-link-checker' ) );
+				die( esc_html__( "You're not allowed to do that!", 'avpvh-link-checker' ) );
 			}
 
 			if ( isset( $_POST['link_id'] ) ) {
@@ -3733,7 +3732,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				$link = new Avpvh_Lnkc_Link( intval( $_POST['link_id'] ) );
 
 				if ( ! $link->valid() ) {
-					printf( __( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
+					printf( esc_html__( "Oops, I can't find the link %d", 'avpvh-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
 				}
 
@@ -3747,10 +3746,10 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					$transactionManager->commit();
 					die( 'OK' );
 				} else {
-					die( __( "Oops, couldn't modify the link!", 'avpvh-link-checker' ) );
+					die( esc_html__( "Oops, couldn't modify the link!", 'avpvh-link-checker' ) );
 				}
 			} else {
-				die( __( 'Error : link_id not specified', 'avpvh-link-checker' ) );
+				die( esc_html__( 'Error : link_id not specified', 'avpvh-link-checker' ) );
 			}
 		}
 
@@ -3886,7 +3885,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			}
 
 			//Validate the new URL.
-			$new_url = stripslashes( $_POST['new_url'] );
+			$new_url = isset( $_POST['new_url'] ) ? esc_url_raw( (string) wp_unslash( $_POST['new_url'] ) ) : '';
 			$parsed  = @parse_url( $new_url );
 			if ( ! $parsed ) {
 				wp_die(
@@ -3913,7 +3912,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 				}
 			}
 
-			$new_text = ( isset( $_POST['new_text'] ) && is_string( $_POST['new_text'] ) ) ? stripslashes( $_POST['new_text'] ) : null;
+			$new_text = ( isset( $_POST['new_text'] ) && is_string( $_POST['new_text'] ) ) ? wp_kses_post( wp_unslash( $_POST['new_text'] ) ) : null;
 			if ( '' === $new_text ) {
 				$new_text = null;
 			}
@@ -4189,20 +4188,22 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			/* @var wpdb $wpdb */
 
 			if ( ! current_user_can( 'edit_others_posts' ) ) {
-				die( __( "You don't have sufficient privileges to access this information!", 'avpvh-link-checker' ) );
+				die( esc_html__( "You don't have sufficient privileges to access this information!", 'avpvh-link-checker' ) );
 			}
 
 			//FB::log("Loading link details via AJAX");
 
+			// phpcs:disable WordPress.Security.NonceVerification -- read-only; the capability is checked above.
 			if ( isset( $_GET['link_id'] ) ) {
 				//FB::info("Link ID found in GET");
 				$link_id = intval( $_GET['link_id'] );
 			} elseif ( isset( $_POST['link_id'] ) ) {
 				//FB::info("Link ID found in POST");
 				$link_id = intval( $_POST['link_id'] );
+			// phpcs:enable WordPress.Security.NonceVerification
 			} else {
 				//FB::error('Link ID not specified, you hacking bastard.');
-				die( __( 'Error : link ID not specified', 'avpvh-link-checker' ) );
+				die( esc_html__( 'Error : link ID not specified', 'avpvh-link-checker' ) );
 			}
 
 			//Load the link.
@@ -4379,7 +4380,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 			//Default PHP execution time limit
 			$debug['Default PHP execution time limit'] = array(
 				'state' => 'ok',
-				'value' => sprintf( __( '%s seconds' ), ini_get( 'max_execution_time' ) ),
+				'value' => sprintf( __( '%s seconds', 'avpvh-link-checker' ), ini_get( 'max_execution_time' ) ),
 			);
 
 			//Database character set. Usually it's UTF-8. Setting it to something else can cause problems
@@ -4594,7 +4595,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Checker' ) ) {
 					sprintf( __( 'Link text : %s', 'avpvh-link-checker' ), $instance->ui_get_link_text( 'email' ) ),
 					// The visible half of the anchor is the URL itself, so it needs escaping too.
 					sprintf( __( 'Link URL : <a href="%1$s">%2$s</a>', 'avpvh-link-checker' ), esc_url( $instance->get_url(), array( 'http', 'https' ) ), esc_html( Avpvh_Lnkc_Utility::truncate( $instance->get_url(), 70, '' ) ) ),
-					sprintf( __( 'Source : View: %s | Edit: %s', 'avpvh-link-checker' ), $instance->ui_get_source( 'email' ), $instance->ui_get_source() ),
+					sprintf( __( 'Source : View: %1$s | Edit: %2$s', 'avpvh-link-checker' ), $instance->ui_get_source( 'email' ), $instance->ui_get_source() ),
 				);
 
 				$link_entry = implode( '<br>', $pieces );

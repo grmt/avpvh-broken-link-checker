@@ -209,7 +209,7 @@ class Avpvh_Lnkc_Parser extends Avpvh_Lnkc_Module {
 	 * @return string HTML
 	 */
 	function ui_get_link_text( $instance, $context = 'display' ) {
-		return $instance->link_text;
+		return esc_html( $instance->link_text );
 	}
 
 	/**

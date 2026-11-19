@@ -147,24 +147,28 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 				$post_type
 			);
 
-			$current_instance_ids_results = $wpdb->get_results( $q_current_instance_ids, ARRAY_A );
+			$current_instance_ids_results = $wpdb->get_results( $q_current_instance_ids, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared above.
 
 			if ( $wpdb->num_rows == 0 ) {
 				// No current instances present, skip cleanup at once
 				return;
 			}
 
-			$current_instance_ids = wp_list_pluck( $current_instance_ids_results, 'instance_id' );
+			$current_instance_ids = array_map( 'intval', wp_list_pluck( $current_instance_ids_results, 'instance_id' ) );
+			$id_placeholders      = implode( ', ', array_fill( 0, count( $current_instance_ids ), '%d' ) );
 
 			// Secondly: Get all link_ids used in our current instances
-			$q_current_link_ids = 'SELECT DISTINCT link_id FROM `' . $wpdb->prefix . 'avpvh_lnkc_instances` WHERE instance_id IN (\'' . implode( "', '", $current_instance_ids ) . '\')';
-
-			$q_current_link_ids_results = $wpdb->get_results( $q_current_link_ids, ARRAY_A );
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %d placeholders and table names are interpolated.
+			$q_current_link_ids_results = $wpdb->get_results(
+				$wpdb->prepare( "SELECT DISTINCT link_id FROM `{$wpdb->prefix}avpvh_lnkc_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ),
+				ARRAY_A
+			);
 
 			$current_link_ids = wp_list_pluck( $q_current_link_ids_results, 'link_id' );
 
 			// Go ahead and remove avpvh_lnkc_instances for this container, avpvh_lnkc_cleanup_links( $current_link_ids ) will find and remove any dangling links in the avpvh_lnkc_links table
-			$wpdb->query( 'DELETE FROM `' . $wpdb->prefix . 'avpvh_lnkc_instances` WHERE instance_id IN (\'' . implode( "', '", $current_instance_ids ) . '\')' );
+			$wpdb->query( $wpdb->prepare( "DELETE FROM `{$wpdb->prefix}avpvh_lnkc_instances` WHERE instance_id IN ({$id_placeholders})", $current_instance_ids ) );
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			//Clean up any dangling links
 			avpvh_lnkc_cleanup_links( $current_link_ids );
@@ -290,6 +294,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		$status_placeholders = implode( ', ', array_fill( 0, count( $this->enabled_post_statuses ), '%s' ) );
 		$type_placeholders   = implode( ', ', array_fill( 0, count( $this->enabled_post_types ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
 			"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
 			  SELECT posts.id, posts.post_type, 0
@@ -301,8 +306,9 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 				$this->enabled_post_types
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$wpdb->query( $q );
+		$wpdb->query( $q ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared above.
 
 		return $wpdb->rows_affected;
 	}
@@ -319,6 +325,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		$status_placeholders = implode( ', ', array_fill( 0, count( $this->enabled_post_statuses ), '%s' ) );
 		$type_placeholders   = implode( ', ', array_fill( 0, count( $this->enabled_post_types ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
 			"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch(container_id, container_type, synched)
 			  SELECT posts.id, posts.post_type, 0
@@ -334,8 +341,9 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 				$this->enabled_post_types
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$wpdb->query( $q );
+		$wpdb->query( $q ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared above.
 
 		return $wpdb->rows_affected;
 	}
@@ -363,6 +371,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		$status_placeholders = implode( ', ', array_fill( 0, count( $this->enabled_post_statuses ), '%s' ) );
 
 		// Post types appear twice (post_type column and container_type column), so merge accordingly.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$q = $wpdb->prepare(
 			"DELETE synch.*
 			      FROM {$wpdb->prefix}avpvh_lnkc_synch AS synch
@@ -378,8 +387,9 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 				$this->enabled_post_types
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-		$wpdb->query( $q );
+		$wpdb->query( $q ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared above.
 
 		return $wpdb->rows_affected;
 	}
@@ -395,13 +405,14 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		 * the last synch. as unsynched in one go, using a single query.
 		 */
 		global $wpdb;
-		$q = "UPDATE
+		$wpdb->query(
+			"UPDATE
 				{$wpdb->prefix}avpvh_lnkc_synch AS synch
 				JOIN {$wpdb->posts} AS posts ON (synch.container_id = posts.ID and synch.container_type=posts.post_type)
 					SET synched = 0
 				WHERE
-					synch.last_synch < posts.post_modified";
-		$wpdb->query( $q );
+					synch.last_synch < posts.post_modified"
+		);
 
 		return $wpdb->rows_affected;
 	}
@@ -421,18 +432,21 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 		}
 
 		//Retrieve info about all occurrences of broken links in the current post
-		$q     = "
-			SELECT instances.raw_url
-			FROM {$wpdb->prefix}avpvh_lnkc_instances AS instances JOIN {$wpdb->prefix}avpvh_lnkc_links AS links
-				ON instances.link_id = links.link_id
-			WHERE
-				instances.container_type = %s
-				AND instances.container_id = %d
-				AND links.broken = 1
-				AND parser_type = 'link'
-		";
-		$q     = $wpdb->prepare( $q, $post->post_type, $post->ID );
-		$links = $wpdb->get_results( $q, ARRAY_A );
+		$links = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT instances.raw_url
+				FROM {$wpdb->prefix}avpvh_lnkc_instances AS instances JOIN {$wpdb->prefix}avpvh_lnkc_links AS links
+					ON instances.link_id = links.link_id
+				WHERE
+					instances.container_type = %s
+					AND instances.container_id = %d
+					AND links.broken = 1
+					AND parser_type = 'link'",
+				$post->post_type,
+				$post->ID
+			),
+			ARRAY_A
+		);
 
 		//Return the content unmodified if there are no broken links in this post.
 		if ( empty( $links ) || ! is_array( $links ) ) {
@@ -504,6 +518,7 @@ class Avpvh_Lnkc_Post_Type_Overlord {
 	 * @return void
 	 */
 	function hook_wp_head() {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- avpvh_lnkc_sanitize_custom_css() leaves no tags and no "</style".
 		echo '<style>', avpvh_lnkc_sanitize_custom_css( $this->plugin_conf->options['broken_link_css'] ), '</style>';
 	}
 }
@@ -567,9 +582,9 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 		if ( current_user_can( $post_type_object->cap->edit_post, $this->container_id ) ) {
 			$actions['edit'] = sprintf(
 				'<span class="edit"><a href="%s" title="%s">%s</a>',
-				$this->get_edit_url(),
-				$post_type_object->labels->edit_item,
-				__( 'Edit' )
+				esc_url( $this->get_edit_url() ),
+				esc_attr( $post_type_object->labels->edit_item ),
+				esc_html__( 'Edit', 'avpvh-link-checker' )
 			);
 
 			//Trash/Delete link
@@ -583,16 +598,16 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				if ( $this->can_be_trashed() ) {
 					$actions['trash'] = sprintf(
 						"<span class='trash'><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Move this item to the Trash' ) ),
-						esc_attr( get_delete_post_link( $this->container_id, '', false ) ),
-						__( 'Trash' )
+						esc_attr( __( 'Move this item to the Trash', 'avpvh-link-checker' ) ),
+						esc_url( get_delete_post_link( $this->container_id, '', false ) ),
+						esc_html__( 'Trash', 'avpvh-link-checker' )
 					);
 				} else {
 					$actions['delete'] = sprintf(
 						"<span><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Delete this item permanently' ) ),
-						esc_attr( get_delete_post_link( $this->container_id, '', true ) ),
-						__( 'Delete' )
+						esc_attr( __( 'Delete this item permanently', 'avpvh-link-checker' ) ),
+						esc_url( get_delete_post_link( $this->container_id, '', true ) ),
+						esc_html__( 'Delete', 'avpvh-link-checker' )
 					);
 				}
 			}
@@ -606,16 +621,16 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 				$actions['view'] = sprintf(
 					'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 					esc_url( add_query_arg( 'preview', 'true', get_permalink( $this->container_id ) ) ),
-					esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;' ), $title ) ),
-					__( 'Preview' )
+					esc_attr( sprintf( __( 'Preview &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
+					esc_html__( 'Preview', 'avpvh-link-checker' )
 				);
 			}
 		} elseif ( 'trash' != $post->post_status ) {
 			$actions['view'] = sprintf(
 				'<span class="view"><a href="%s" title="%s" rel="permalink">%s</a>',
 				esc_url( get_permalink( $this->container_id ) ),
-				esc_attr( sprintf( __( 'View &#8220;%s&#8221;' ), $title ) ),
-				__( 'View' )
+				esc_attr( sprintf( __( 'View &#8220;%s&#8221;', 'avpvh-link-checker' ), $title ) ),
+				esc_html__( 'View', 'avpvh-link-checker' )
 			);
 		}
 
@@ -635,14 +650,14 @@ class Avpvh_Lnkc_Any_Post_Container extends Avpvh_Lnkc_Container {
 			$source = sprintf(
 				$source,
 				esc_url( get_the_permalink( $this->container_id ) ),
-				esc_attr( __( 'View this item' ) ),
+				esc_attr( __( 'View this item', 'avpvh-link-checker' ) ),
 				esc_html( get_the_title( $this->container_id ) )
 			);
 		} else {
 			$source = sprintf(
 				$source,
 				esc_url( $this->get_edit_url() ),
-				esc_attr( __( 'Edit this item' ) ),
+				esc_attr( __( 'Edit this item', 'avpvh-link-checker' ) ),
 				esc_html( get_the_title( $this->container_id ) )
 			);
 		}

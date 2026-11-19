@@ -439,7 +439,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 			if ( ! is_null( $parser ) ) {
 				$text = $parser->ui_get_link_text( $this, $context );
 			} else {
-				$text = strip_tags( $this->link_text );
+				$text = esc_html( wp_strip_all_tags( $this->link_text ) );
 			}
 
 			if ( empty( $text ) ) {
@@ -479,7 +479,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Link_Instance' ) ) {
 				return $container->ui_get_source( $this->container_field, $context );
 			} else {
 				//No valid container = generate some bare-bones debug output.
-				return sprintf( '%s[%d] : %s', $this->container_type, $this->container_id, $this->container_field );
+				return esc_html( sprintf( '%s[%d] : %s', $this->container_type, $this->container_id, $this->container_field ) );
 			}
 		}
 

@@ -11,7 +11,7 @@
 	<form name="save-search-query" id="custom-filter-form" action="<?php echo esc_url( admin_url( 'admin.php?page=avpvh-link-checker' ) ); ?>" method="post" class="blc-inline-form">
 		<?php wp_nonce_field( 'create-custom-filter' ); ?>
 		<input type="hidden" name="name" id="blc-custom-filter-name" value="" />
-		<input type="hidden" name="params" id="blc-custom-filter-params" value="<?php echo http_build_query( $search_params, '', '&' ); ?>" />
+		<input type="hidden" name="params" id="blc-custom-filter-params" value="<?php echo esc_attr( http_build_query( $search_params, '', '&' ) ); ?>" />
 		<input type="hidden" name="action" value="create-custom-filter" />
 		<input type="button" value="<?php esc_attr_e( 'Save This Search As a Filter', 'avpvh-link-checker' ); ?>" id="blc-create-filter" class="button" />
 	</form>
@@ -39,16 +39,16 @@
 	<input type="hidden" name="filter_id" value="search" />
 	<fieldset>
 
-	<label for="s_link_text"><?php _e( 'Link text', 'avpvh-link-checker' ); ?></label>
+	<label for="s_link_text"><?php esc_html_e( 'Link text', 'avpvh-link-checker' ); ?></label>
 	<input type="text" name="s_link_text" value="<?php echo ! empty( $search_params['s_link_text'] ) ? esc_attr( $search_params['s_link_text'] ) : ''; ?>" id="s_link_text" class="text ui-widget-content" />
 
-	<label for="s_link_url"><?php _e( 'URL', 'avpvh-link-checker' ); ?></label>
+	<label for="s_link_url"><?php esc_html_e( 'URL', 'avpvh-link-checker' ); ?></label>
 	<input type="text" name="s_link_url" id="s_link_url" value="<?php echo ! empty( $search_params['s_link_url'] ) ? esc_attr( $search_params['s_link_url'] ) : ''; ?>" class="text ui-widget-content" />
 
-	<label for="s_http_code"><?php _e( 'HTTP code', 'avpvh-link-checker' ); ?></label>
+	<label for="s_http_code"><?php esc_html_e( 'HTTP code', 'avpvh-link-checker' ); ?></label>
 	<input type="text" name="s_http_code" id="s_http_code" value="<?php echo ! empty( $search_params['s_http_code'] ) ? esc_attr( $search_params['s_http_code'] ) : ''; ?>" class="text ui-widget-content" />
 
-	<label for="s_filter"><?php _e( 'Link status', 'avpvh-link-checker' ); ?></label>
+	<label for="s_filter"><?php esc_html_e( 'Link status', 'avpvh-link-checker' ); ?></label>
 	<select name="s_filter" id="s_filter">
 		<?php
 		if ( ! empty( $search_params['s_filter'] ) ) {
@@ -59,15 +59,15 @@
 
 		$linkQuery = Avpvh_Lnkc_Link_Query::getInstance();
 		foreach ( $linkQuery->native_filters as $filter => $data ) {
-			$selected = ( $search_subfilter == $filter ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $filter, $selected, $data['name'] );
+			$selected = ( $search_subfilter == $filter );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $filter ), $selected ? ' selected="selected"' : '', esc_html( $data['name'] ) );
 		}
 		?>
 	</select>
 
-	<label for="s_link_type"><?php _e( 'Link type', 'avpvh-link-checker' ); ?></label>
+	<label for="s_link_type"><?php esc_html_e( 'Link type', 'avpvh-link-checker' ); ?></label>
 	<select name="s_link_type" id="s_link_type">
-		<option value=""><?php _e( 'Any', 'avpvh-link-checker' ); ?></option>
+		<option value=""><?php esc_html_e( 'Any', 'avpvh-link-checker' ); ?></option>
 		<?php
 		$moduleManager = Avpvh_Lnkc_Module_Manager::getInstance();
 
@@ -77,8 +77,8 @@
 			if ( ! empty( $module_data['ModuleHidden'] ) || ! $moduleManager->is_active( $container_type ) ) {
 				continue;
 			}
-			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $container_type ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $container_type, $selected, $module_data['Name'] );
+			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $container_type );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $container_type ), $selected ? ' selected="selected"' : '', esc_html( $module_data['Name'] ) );
 		}
 		echo '</optgroup>';
 		//TODO: Better group labels
@@ -88,8 +88,8 @@
 			if ( ! empty( $module_data['ModuleHidden'] ) || ! $moduleManager->is_active( $parser_type ) ) {
 				continue;
 			}
-			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $parser_type ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $parser_type, $selected, $module_data['Name'] );
+			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $parser_type );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $parser_type ), $selected ? ' selected="selected"' : '', esc_html( $module_data['Name'] ) );
 		}
 		echo '</optgroup>';
 

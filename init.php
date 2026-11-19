@@ -200,20 +200,20 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_custom_css' ) ) {
 		if ( ! isset( $schedules['10min'] ) ) {
 			$schedules['10min'] = array(
 				'interval' => 600,
-				'display'  => __( 'Every 10 minutes' ),
+				'display'  => __( 'Every 10 minutes', 'avpvh-link-checker' ),
 			);
 		}
 
 		if ( ! isset( $schedules['weekly'] ) ) {
 			$schedules['weekly'] = array(
 				'interval' => 604800, // 7 days
-				'display'  => __( 'Once Weekly' ),
+				'display'  => __( 'Once Weekly', 'avpvh-link-checker' ),
 			);
 		}
 		if ( ! isset( $schedules['bimonthly'] ) ) {
 			$schedules['bimonthly'] = array(
 				'interval' => 15 * 24 * 2600, // 15 days
-				'display'  => __( 'Twice a Month' ),
+				'display'  => __( 'Twice a Month', 'avpvh-link-checker' ),
 			);
 		}
 
@@ -289,6 +289,7 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_custom_css' ) ) {
 				if ( $avpvh_lnkc_config_manager->options['mark_removed_links'] && ! empty( $avpvh_lnkc_config_manager->options['removed_link_css'] ) ) {
 					function avpvh_lnkc_print_removed_link_css() {
 						$avpvh_lnkc_config_manager = avpvh_lnkc_get_configuration();
+						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- avpvh_lnkc_sanitize_custom_css() leaves no tags and no "</style".
 						echo '<style>', avpvh_lnkc_sanitize_custom_css( $avpvh_lnkc_config_manager->options['removed_link_css'] ), '</style>';
 					}
 					add_action( 'wp_head', 'avpvh_lnkc_print_removed_link_css' );
@@ -349,7 +350,7 @@ if ( ! function_exists( 'avpvh_lnkc_sanitize_custom_css' ) ) {
 				}
 			}
 
-			echo '<div class="error"><p>', implode( "<br>\n", $messages ), '</p></div>';
+			echo '<div class="error"><p>', wp_kses_post( implode( "<br>\n", $messages ) ), '</p></div>';
 		}
 		add_action( 'admin_notices', 'avpvh_lnkc_print_installation_errors' );
 	}

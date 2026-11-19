@@ -201,6 +201,7 @@ class Avpvh_Lnkc_Html_Image extends Avpvh_Lnkc_Parser {
 			esc_attr( $text )
 		);
 
+		$text = esc_html( $text );
 		if ( 'email' !== $context ) {
 			$text = $image . $text;
 		}

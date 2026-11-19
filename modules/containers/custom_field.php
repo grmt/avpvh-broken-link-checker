@@ -235,7 +235,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 		$post_html = sprintf(
 			'<a class="row-title" href="%s" title="%s">%s</a>',
 			esc_url( $this->get_edit_url() ),
-			esc_attr( __( 'Edit this post' ) ),
+			esc_attr( __( 'Edit this post', 'avpvh-link-checker' ) ),
 			esc_html( get_the_title( $this->container_id ) )
 		);
 
@@ -249,7 +249,7 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 		}
 
 		if ( current_user_can( 'edit_post', $this->container_id ) ) {
-			$actions['edit'] = '<span class="edit"><a href="' . $this->get_edit_url() . '" title="' . esc_attr( __( 'Edit this item' ) ) . '">' . __( 'Edit' ) . '</a>';
+			$actions['edit'] = '<span class="edit"><a href="' . esc_url( $this->get_edit_url() ) . '" title="' . esc_attr( __( 'Edit this item', 'avpvh-link-checker' ) ) . '">' . esc_html__( 'Edit', 'avpvh-link-checker' ) . '</a>';
 
 			//Note: core's get_delete_post_link() has no special-case handling for
 			//Site Editor post types (unlike get_edit_post_link()), so calling it for
@@ -261,21 +261,21 @@ class Avpvh_Lnkc_Post_Meta extends Avpvh_Lnkc_Container {
 				if ( $this->can_be_trashed() ) {
 					$actions['trash'] = sprintf(
 						"<span><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Move this item to the Trash' ) ),
-						get_delete_post_link( $this->container_id, '', false ),
-						__( 'Trash' )
+						esc_attr( __( 'Move this item to the Trash', 'avpvh-link-checker' ) ),
+						esc_url( get_delete_post_link( $this->container_id, '', false ) ),
+						esc_html__( 'Trash', 'avpvh-link-checker' )
 					);
 				} else {
 					$actions['delete'] = sprintf(
 						"<span><a class='submitdelete' title='%s' href='%s'>%s</a>",
-						esc_attr( __( 'Delete this item permanently' ) ),
-						get_delete_post_link( $this->container_id, '', true ),
-						__( 'Delete' )
+						esc_attr( __( 'Delete this item permanently', 'avpvh-link-checker' ) ),
+						esc_url( get_delete_post_link( $this->container_id, '', true ) ),
+						esc_html__( 'Delete', 'avpvh-link-checker' )
 					);
 				}
 			}
 		}
-		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( __( 'View "%s"', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+		$actions['view'] = '<span class="view"><a href="' . esc_url( get_permalink( $this->container_id ) ) . '" title="' . esc_attr( sprintf( __( 'View "%s"', 'avpvh-link-checker' ), get_the_title( $this->container_id ) ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-link-checker' ) . '</a>';
 
 		return $actions;
 	}

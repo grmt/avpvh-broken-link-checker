@@ -154,12 +154,12 @@ if ( ! class_exists( 'Avpvh_Lnkc_Embed_Parser_Base' ) ) :
 			$image_html = sprintf(
 				'<img src="%s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
 				esc_attr( plugins_url( $image_url, AVPVH_LNKC_PLUGIN_FILE ) ),
-				$this->long_title
+				esc_attr( $this->long_title )
 			);
 
 			$field_html = sprintf(
 				'%s',
-				$this->short_title
+				esc_html( $this->short_title )
 			);
 
 			if ( 'email' != $context ) {

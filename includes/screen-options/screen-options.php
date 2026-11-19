@@ -190,7 +190,8 @@ if ( ! class_exists( 'wsScreenOptions12' ) ) :
 			}
 
 			//The 'action' argument is in the form "save_settings-panel_id"
-			$parts = explode( '-', $_POST['action'], 2 );
+			// The nonce is checked just below, with the panel ID taken from the action.
+			$parts = explode( '-', isset( $_POST['action'] ) ? sanitize_key( wp_unslash( $_POST['action'] ) ) : '', 2 ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$id    = end( $parts );
 
 			//Basic security check.

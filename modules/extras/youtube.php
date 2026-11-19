@@ -266,7 +266,7 @@ class Avpvh_Lnkc_Youtube_Checker extends Avpvh_Lnkc_Checker {
 
 	protected function format_api_error( $response, $api ) {
 		$log  = $response['response']['code'] . ' ' . $response['response']['message'];
-		$log .= "\n" . __( 'Unknown YouTube API response received.' );
+		$log .= "\n" . __( 'Unknown YouTube API response received.', 'avpvh-link-checker' );
 
 		//Log error details.
 		if ( isset( $api['error']['errors'] ) && is_array( $api['error']['errors'] ) ) {

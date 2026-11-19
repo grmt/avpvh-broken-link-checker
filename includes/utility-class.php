@@ -5,22 +5,6 @@
  * @copyright 2010
  */
 
-if ( ! function_exists( 'sys_get_temp_dir' ) ) {
-	function sys_get_temp_dir() {
-		if ( ! empty( $_ENV['TMP'] ) ) {
-			return realpath( $_ENV['TMP'] ); }
-		if ( ! empty( $_ENV['TMPDIR'] ) ) {
-			return realpath( $_ENV['TMPDIR'] ); }
-		if ( ! empty( $_ENV['TEMP'] ) ) {
-			return realpath( $_ENV['TEMP'] ); }
-		$tempfile = tempnam( uniqid( rand(), true ), '' );
-		if ( @file_exists( $tempfile ) ) {
-			unlink( $tempfile );
-			return realpath( dirname( $tempfile ) );
-		}
-		return '';
-	}
-}
 
 if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 	class Avpvh_Lnkc_Utility {
@@ -43,7 +27,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 			$host_name = 'flywheel';
 
 			return ! empty( $_SERVER['SERVER_SOFTWARE'] ) &&
-			       substr( strtolower( $_SERVER['SERVER_SOFTWARE'] ), 0, strlen( $host_name ) ) === strtolower( $host_name );
+			       substr( strtolower( sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) ), 0, strlen( $host_name ) ) === strtolower( $host_name );
 		}
 
 		/**
@@ -206,7 +190,7 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 		*/
 		static function get_cookie( $cookie_name, $default_value = '' ) {
 			if ( isset( $_COOKIE[ $cookie_name ] ) ) {
-				return $_COOKIE[ $cookie_name ];
+				return sanitize_text_field( wp_unslash( $_COOKIE[ $cookie_name ] ) );
 			} else {
 				return $default_value;
 			}
@@ -223,24 +207,24 @@ if ( ! class_exists( 'Avpvh_Lnkc_Utility' ) ) {
 
 			$templates = array(
 				'seconds' => array(
-					'default' => _n_noop( '%d second', '%d seconds' ),
-					'ago'     => _n_noop( '%d second ago', '%d seconds ago' ),
+					'default' => _n_noop( '%d second', '%d seconds', 'avpvh-link-checker' ),
+					'ago'     => _n_noop( '%d second ago', '%d seconds ago', 'avpvh-link-checker' ),
 				),
 				'minutes' => array(
-					'default' => _n_noop( '%d minute', '%d minutes' ),
-					'ago'     => _n_noop( '%d minute ago', '%d minutes ago' ),
+					'default' => _n_noop( '%d minute', '%d minutes', 'avpvh-link-checker' ),
+					'ago'     => _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-link-checker' ),
 				),
 				'hours'   => array(
-					'default' => _n_noop( '%d hour', '%d hours' ),
-					'ago'     => _n_noop( '%d hour ago', '%d hours ago' ),
+					'default' => _n_noop( '%d hour', '%d hours', 'avpvh-link-checker' ),
+					'ago'     => _n_noop( '%d hour ago', '%d hours ago', 'avpvh-link-checker' ),
 				),
 				'days'    => array(
-					'default' => _n_noop( '%d day', '%d days' ),
-					'ago'     => _n_noop( '%d day ago', '%d days ago' ),
+					'default' => _n_noop( '%d day', '%d days', 'avpvh-link-checker' ),
+					'ago'     => _n_noop( '%d day ago', '%d days ago', 'avpvh-link-checker' ),
 				),
 				'months'  => array(
-					'default' => _n_noop( '%d month', '%d months' ),
-					'ago'     => _n_noop( '%d month ago', '%d months ago' ),
+					'default' => _n_noop( '%d month', '%d months', 'avpvh-link-checker' ),
+					'ago'     => _n_noop( '%d month ago', '%d months ago', 'avpvh-link-checker' ),
 				),
 			);
 

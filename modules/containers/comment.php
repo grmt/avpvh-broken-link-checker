@@ -165,20 +165,20 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		//Display Edit & Delete/Trash links only if the user has the right caps.
 		$user_can = current_user_can( 'edit_post', $comment->comment_post_ID );
 		if ( $user_can ) {
-			$actions['edit'] = "<a href='" . $this->get_edit_url() . "' title='" . esc_attr__( 'Edit comment' ) . "'>" . __( 'Edit' ) . '</a>';
+			$actions['edit'] = "<a href='" . esc_url( $this->get_edit_url() ) . "' title='" . esc_attr__( 'Edit comment', 'avpvh-link-checker' ) . "'>" . esc_html__( 'Edit', 'avpvh-link-checker' ) . '</a>';
 
 			$del_nonce  = esc_html( '_wpnonce=' . wp_create_nonce( "delete-comment_$comment->comment_ID" ) );
 			$trash_url  = esc_url( admin_url( "comment.php?action=trashcomment&p=$post->ID&c=$comment->comment_ID&$del_nonce" ) );
 			$delete_url = esc_url( admin_url( "comment.php?action=deletecomment&p=$post->ID&c=$comment->comment_ID&$del_nonce" ) );
 
 			if ( ! constant( 'EMPTY_TRASH_DAYS' ) ) {
-				$actions['delete'] = "<a href='$delete_url' class='delete:the-comment-list:comment-$comment->comment_ID::delete=1 delete vim-d vim-destructive submitdelete'>" . __( 'Delete Permanently' ) . '</a>';
+				$actions['delete'] = "<a href='$delete_url' class='delete:the-comment-list:comment-$comment->comment_ID::delete=1 delete vim-d vim-destructive submitdelete'>" . esc_html__( 'Delete Permanently', 'avpvh-link-checker' ) . '</a>';
 			} else {
-				$actions['trash'] = "<a href='$trash_url' class='delete:the-comment-list:comment-$comment->comment_ID::trash=1 delete vim-d vim-destructive submitdelete' title='" . esc_attr__( 'Move this comment to the trash' ) . "'>" . _x( 'Trash', 'verb' ) . '</a>';
+				$actions['trash'] = "<a href='$trash_url' class='delete:the-comment-list:comment-$comment->comment_ID::trash=1 delete vim-d vim-destructive submitdelete' title='" . esc_attr__( 'Move this comment to the trash', 'avpvh-link-checker' ) . "'>" . esc_html_x( 'Trash', 'verb', 'avpvh-link-checker' ) . '</a>';
 			}
 		}
 
-		$actions['view'] = '<span class="view"><a href="' . get_comment_link( $this->container_id ) . '" title="' . esc_attr( __( 'View comment', 'avpvh-link-checker' ) ) . '" rel="permalink">' . __( 'View' ) . '</a>';
+		$actions['view'] = '<span class="view"><a href="' . esc_url( get_comment_link( $this->container_id ) ) . '" title="' . esc_attr( __( 'View comment', 'avpvh-link-checker' ) ) . '" rel="permalink">' . esc_html__( 'View', 'avpvh-link-checker' ) . '</a>';
 
 		return $actions;
 	}
@@ -200,15 +200,15 @@ class Avpvh_Lnkc_Comment extends Avpvh_Lnkc_Container {
 		$comment = $this->get_wrapped_object();
 
 		//Display a small text sample from the comment
-		$text_sample = strip_tags( $comment->comment_content );
+		$text_sample = wp_strip_all_tags( $comment->comment_content );
 		$text_sample = Avpvh_Lnkc_Utility::truncate( $text_sample, 65 );
 
 		$html = sprintf(
 			'<a href="%s" title="%s"><b>%s</b> &mdash; %s</a>',
-			$this->get_edit_url(),
-			esc_attr__( 'Edit comment' ),
-			esc_attr( $comment->comment_author ),
-			$text_sample
+			esc_url( $this->get_edit_url() ),
+			esc_attr__( 'Edit comment', 'avpvh-link-checker' ),
+			esc_html( $comment->comment_author ),
+			esc_html( $text_sample )
 		);
 
 		//Don't show the image in email notifications.

@@ -6,17 +6,17 @@ jQuery(function($){
 	//Refresh the "Status" box every 10 seconds
 	function blcUpdateStatus(){
 		$.getJSON(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_full_status',
 				'random' : Math.random(),
-				'nonce' : '<?php echo wp_create_nonce( 'avpvh_lnkc_full_status' ); ?>'
+				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_full_status' ) ); ?>'
 			},
 			function (data, textStatus){
 				if ( data && ( typeof(data['text']) != 'undefined' ) ){
 					$('#avpvh_lnkc_full_status').html(data.text);
 				} else {
-					$('#avpvh_lnkc_full_status').html('<?php _e( '[ Network error ]', 'avpvh-link-checker' ); ?>');
+					$('#avpvh_lnkc_full_status').html('<?php echo esc_js( __( '[ Network error ]', 'avpvh-link-checker' ) ); ?>');
 				}
 
 				setTimeout(blcUpdateStatus, 10000);
@@ -28,7 +28,7 @@ jQuery(function($){
 	//Refresh the avg. load display every 10 seconds
 	function blcUpdateLoad(){
 		$.get(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_current_load',
 				'nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_lnkc_current_load' ) ); ?>'
@@ -53,9 +53,9 @@ jQuery(function($){
 		var box = $('#blc-debug-info');
 		box.toggle();
 		if( box.is(':visible') ){
-			toggleButton.text('<?php _e( 'Hide debug info', 'avpvh-link-checker' ); ?>');
+			toggleButton.text('<?php echo esc_js( __( 'Hide debug info', 'avpvh-link-checker' ) ); ?>');
 		} else {
-			toggleButton.text('<?php _e( 'Show debug info', 'avpvh-link-checker' ); ?>');
+			toggleButton.text('<?php echo esc_js( __( 'Show debug info', 'avpvh-link-checker' ) ); ?>');
 		}
 
 	});

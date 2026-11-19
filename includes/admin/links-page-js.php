@@ -43,7 +43,7 @@ function reloadDetailsRow(link_id){
 
 	//Load up the new link info                     (so sue me)
 	details_row.find('td').html('<center><?php echo esc_js( __( 'Loading...', 'avpvh-link-checker' ) ); ?></center>').on( 'load', function() {
-		"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+		"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 		{
 			'action' : 'avpvh_lnkc_link_details',
 			'link_id' : link_id
@@ -72,7 +72,7 @@ jQuery(function($){
 		var link_id = master.attr('id').split('-')[2];
 
 		$.post(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_discard',
 				'link_id' : link_id,
@@ -128,7 +128,7 @@ jQuery(function($){
 		var should_hide_link = $.inArray(avpvh_lnkc_current_base_filter, ['broken', 'redirects', 'warnings']) > -1;
 
 		$.post(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_dismiss',
 				'link_id' : link_id,
@@ -175,7 +175,7 @@ jQuery(function($){
 		var should_hide_link = (avpvh_lnkc_current_base_filter == 'dismissed');
 
 		$.post(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_undismiss',
 				'link_id' : link_id,
@@ -220,7 +220,7 @@ jQuery(function($){
 		var link_id = master.attr('id').split('-')[2];
 
 		$.post(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_recheck',
 				'link_id' : link_id,
@@ -260,7 +260,7 @@ jQuery(function($){
 		var details = $('#link-details-' + linkId);
 
 		$.post(
-			"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+			"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 			{
 				'action' : 'avpvh_lnkc_deredirect',
 				'link_id' : linkId,
@@ -521,7 +521,7 @@ jQuery(function($){
 		updateButton.prop('disabled', true);
 
 		$.post(
-			'<?php echo admin_url( 'admin-ajax.php' ); ?>',
+			'<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>',
 			{
 				'action'   : 'avpvh_lnkc_edit',
 				'link_id'  : linkId,
@@ -694,7 +694,7 @@ jQuery(function($){
 			$(me).html('<?php echo esc_js( __( 'Wait...', 'avpvh-link-checker' ) ); ?>');
 
 			$.post(
-				"<?php echo admin_url( 'admin-ajax.php' ); ?>",
+				"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 				{
 					'action' : 'avpvh_lnkc_unlink',
 					'link_id' : link_id,

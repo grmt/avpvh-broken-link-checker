@@ -98,6 +98,7 @@ class Avpvh_Lnkc_Taxonomy_Container extends Avpvh_Lnkc_Container {
 		// Retrieve all distinct taxonomy slugs assigned to this post,
 		// including those belonging to unregistered taxonomies, but
 		// excluding the built-in ones that are always present.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT DISTINCT tt.taxonomy,tt.term_id, t.name
@@ -111,6 +112,7 @@ class Avpvh_Lnkc_Taxonomy_Container extends Avpvh_Lnkc_Container {
 				array_merge( array( $this->container_id ), $builtin_taxonomies )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( empty( $rows ) ) {
 			$this->mark_as_synched();

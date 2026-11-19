@@ -241,7 +241,7 @@ class Avpvh_Lnkc_Html_Link extends Avpvh_Lnkc_Parser {
 	 * @return string HTML
 	 */
 	function ui_get_link_text( $instance, $context = 'display' ) {
-		return strip_tags( $instance->link_text );
+		return esc_html( wp_strip_all_tags( $instance->link_text ) );
 	}
 
 	/**

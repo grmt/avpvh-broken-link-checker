@@ -198,6 +198,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$start        = microtime( true );
 		$placeholders = implode( ', ', array_fill( 0, count( $this->builtin_taxonomies ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch (container_id, container_type, synched)
@@ -210,6 +211,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows inserted/updated in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 
@@ -245,6 +247,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$blclog->log( '...... Deleting taxonomy synch records for posts with no custom taxonomy terms' );
 		$start = microtime( true );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE synch.*
@@ -260,6 +263,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows deleted in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 
@@ -301,6 +305,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 		$start        = microtime( true );
 		$placeholders = implode( ', ', array_fill( 0, count( $this->builtin_taxonomies ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->prefix}avpvh_lnkc_synch (container_id, container_type, synched)
@@ -315,6 +320,7 @@ class Avpvh_Lnkc_Taxonomy_Container_Manager extends Avpvh_Lnkc_Container_Manager
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies, array( $this->container_type ) )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows inserted in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 

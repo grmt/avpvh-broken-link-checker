@@ -117,7 +117,7 @@ class Avpvh_Lnkc_Acf_Parser extends Avpvh_Lnkc_Parser {
 		$image_html = sprintf(
 			'<img src="%s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
 			esc_attr( plugins_url( '/images/font-awesome/font-awesome-code.png', AVPVH_LNKC_PLUGIN_FILE ) ),
-			__( 'Custom field', 'avpvh-link-checker' )
+			esc_attr__( 'Custom field', 'avpvh-link-checker' )
 		);
 
 		$field_html = sprintf(

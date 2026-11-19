@@ -656,7 +656,7 @@ class Avpvh_Lnkc_Container {
 	 * @return string
 	 */
 	function ui_get_source( $container_field, $context = 'display' ) {
-		return sprintf( '%s[%d] : %s', $this->container_type, $this->container_id, $container_field );
+		return esc_html( sprintf( '%s[%d] : %s', $this->container_type, $this->container_id, $container_field ) );
 	}
 
 	/**

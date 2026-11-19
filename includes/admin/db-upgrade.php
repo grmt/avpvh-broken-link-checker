@@ -217,7 +217,13 @@ class Avpvh_Lnkc_Database_Upgrader {
 		}
 
 		// First let's check if table exists. You never know.
-		$table_response = $wpdb->get_var( "SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = '{$db_name}') AND (TABLE_NAME = '{$wpdb->prefix}avpvh_lnkc_links')" ); //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$table_response = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT count(*) FROM information_schema.TABLES WHERE (TABLE_SCHEMA = %s) AND (TABLE_NAME = %s)',
+				$db_name,
+				$wpdb->prefix . 'avpvh_lnkc_links'
+			)
+		);
 
 		if ( empty( $table_response ) ) {
 			return;

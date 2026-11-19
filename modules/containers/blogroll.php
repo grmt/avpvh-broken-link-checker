@@ -23,7 +23,7 @@ class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 
 		$link_name = sprintf(
 			'<a class="row-title" href="%s" title="%s">%s</a>',
-			$this->get_edit_url(),
+			esc_url( $this->get_edit_url() ),
 			__( 'Edit this bookmark', 'avpvh-link-checker' ),
 			sanitize_bookmark_field( 'link_name', $bookmark->link_name, $this->container_id, 'display' )
 		);
@@ -43,8 +43,8 @@ class Avpvh_Lnkc_Bookmark extends Avpvh_Lnkc_Container {
 
 		$actions = array();
 		if ( current_user_can( 'manage_links' ) ) {
-			$actions['edit']   = '<span class="edit"><a href="' . $this->get_edit_url() . '" title="' . esc_attr( __( 'Edit this bookmark', 'avpvh-link-checker' ) ) . '">' . __( 'Edit' ) . '</a>';
-			$actions['delete'] = "<span class='delete'><a class='submitdelete' href='" . esc_url( $delete_url ) . "' onclick=\"if ( confirm('" . esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete." ), $bookmark->link_name ) ) . "') ) { return true;}return false;\">" . __( 'Delete' ) . '</a>';
+			$actions['edit']   = '<span class="edit"><a href="' . esc_url( $this->get_edit_url() ) . '" title="' . esc_attr( __( 'Edit this bookmark', 'avpvh-link-checker' ) ) . '">' . esc_html__( 'Edit', 'avpvh-link-checker' ) . '</a>';
+			$actions['delete'] = "<span class='delete'><a class='submitdelete' href='" . esc_url( $delete_url ) . "' onclick=\"if ( confirm('" . esc_js( sprintf( __( "You are about to delete this link '%s'\n  'Cancel' to stop, 'OK' to delete.", 'avpvh-link-checker' ), $bookmark->link_name ) ) . "') ) { return true;}return false;\">" . esc_html__( 'Delete', 'avpvh-link-checker' ) . '</a>';
 		}
 
 		return $actions;

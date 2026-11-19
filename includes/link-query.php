@@ -180,7 +180,7 @@ class Avpvh_Lnkc_Link_Query {
 		global $wpdb; /** @var wpdb $wpdb */
 
 		if ( ! isset( $filter_id ) ) {
-			$filter_id = $_POST['filter_id'];
+			$filter_id = isset( $_POST['filter_id'] ) ? sanitize_key( wp_unslash( $_POST['filter_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the caller checks the delete-custom-filter nonce.
 		}
 		//Remove the "f" character from the filter ID to get its database key
 		$filter_id = intval( ltrim( $filter_id, 'f' ) );
@@ -504,11 +504,8 @@ class Avpvh_Lnkc_Link_Query {
 
 	private function esc_like( $input ) {
 		global $wpdb; /** @var wpdb $wpdb */
-		if ( method_exists( $wpdb, 'esc_like' ) ) {
-			return $wpdb->esc_like( $input );
-		} else {
-			return like_escape( $input );
-		}
+
+		return $wpdb->esc_like( $input );
 	}
 
 	/**
@@ -716,10 +713,11 @@ class Avpvh_Lnkc_Link_Query {
 				esc_attr( $filter ),
 				$class,
 				esc_html( $data['name'] ),
-				$number_class,
-				$data['count']
+				esc_attr( $number_class ),
+				(int) $data['count']
 			);
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part of each item is escaped above; $class is a fixed string.
 		echo implode( ' |</li>', $items );
 
 		echo '</ul>';
@@ -798,8 +796,9 @@ class Avpvh_Lnkc_Link_Query {
 		} elseif ( isset( $current_filter['params']['s_filter'] ) && ! empty( $current_filter['params']['s_filter'] ) ) {
 			$base_filter = $current_filter['params']['s_filter'];
 		} elseif ( isset( $_GET['s_filter'] ) && ! empty( $_GET['s_filter'] ) ) {
-			if ( array_key_exists( $_GET['s_filter'], $this->native_filters ) ) {
-				$base_filter = esc_html( $_GET['s_filter'] );
+			$s_filter = sanitize_key( wp_unslash( $_GET['s_filter'] ) );
+			if ( array_key_exists( $s_filter, $this->native_filters ) ) {
+				$base_filter = $s_filter;
 			} else {
 				$base_filter = 'all';
 			}
