@@ -1,0 +1,73 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/CI.yml
+    permissions:
+      contents: read
+
+  release:
+    name: Build & Publish Plugin ZIP
+    runs-on: ubuntu-latest
+    needs: ci
+    steps:
+      - name: Determine tag and version
+        id: meta
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          if ! [[ "$TAG" =~ ^v[0-9A-Za-z.+_-]+$ ]]; then
+            echo "Invalid tag: $TAG" >&2
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      # CI's build is the git archive of this commit, so the ZIP holds
+      # exactly what CI checked.
+      - name: Download build artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: build-artifact
+          path: avpvh-link-checker
+
+      - name: Package avpvh-link-checker.zip
+        run: |
+          zip -r -q "$GITHUB_WORKSPACE/avpvh-link-checker.zip" avpvh-link-checker
+          ls -lh avpvh-link-checker.zip
+
+      - name: Create or Update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" avpvh-link-checker.zip --clobber
+          else
+            gh release create "$TAG" avpvh-link-checker.zip \
+              --title "AV-PvH Link Checker ${VERSION}" \
+              --generate-notes
+          fi

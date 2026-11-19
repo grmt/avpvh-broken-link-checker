@@ -1,0 +1,24 @@
+{
+    "name": "grmt/avpvh-link-checker",
+    "description": "AV-PvH Link Checker: checks posts, pages, comments and custom fields for broken links, with per-host request rules. Based on the local engine of Broken Link Checker 2.4.15.1.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "php": ">=8.4"
+    },
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.1",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "lint": "find . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l",
+        "phpcs": "phpcs",
+        "test": "php tests/test-rules-and-patterns.php"
+    }
+}
