@@ -268,6 +268,7 @@ if ( ! function_exists( 'avpvh_brkn_sanitize_custom_css' ) ) {
 			require_once AVPVH_BRKN_DIRECTORY . '/includes/class-url-pattern.php';
 			require_once AVPVH_BRKN_DIRECTORY . '/includes/class-host-rules.php';
 			require_once AVPVH_BRKN_DIRECTORY . '/includes/class-url-replacer.php';
+			require_once AVPVH_BRKN_DIRECTORY . '/includes/class-local-links.php';
 
 			// Load the module subsystem
 			require_once AVPVH_BRKN_DIRECTORY . '/includes/modules.php';

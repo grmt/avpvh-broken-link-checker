@@ -3,7 +3,7 @@
  * Plugin Name: AV-PvH Broken Link Checker
  * Plugin URI:  https://github.com/grmt/avpvh-broken-link-checker
  * Description: Checks posts, pages, comments and custom fields for broken links and missing images, with per-host request rules, scheduled reports and bulk link actions.
- * Version:     1.0.0
+ * Version:     1.1.0
  * Author:      grmt
  * Author URI:  https://github.com/grmt/avpvh-broken-link-checker
  * Text Domain: avpvh-broken-link-checker
