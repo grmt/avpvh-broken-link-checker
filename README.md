@@ -49,7 +49,10 @@ Return `true`/`false`, or `array( 'ok' => bool, 'note' => string )`, or `null` t
 ## Tests
 
 ```sh
-php tests/test-rules-and-patterns.php
+composer install
+vendor/bin/phpunit
 ```
+
+PHPUnit covers the plugin's own classes (`includes/class-*.php`, see `phpunit.xml.dist`); the legacy engine needs a full WordPress and has no unit tests. CI reports coverage to Codecov. Locally PHPUnit needs PHP with `dom`, for example `docker run --rm -v "$PWD":/app -w /app php:8.4-cli vendor/bin/phpunit`.
 
 PHPCS, PHPStan and Plugin Check run in CI (`.github/workflows/CI.yml`, with the shared checks from `grmt/wp-plugin-ci`).

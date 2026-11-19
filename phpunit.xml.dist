@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Unit tests for the plugin's own classes. The legacy engine (core/, modules/, the rest of
+  includes/) needs a full WordPress and is not in the coverage source, so the coverage figure
+  is for these classes only.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <file>includes/class-host-rules.php</file>
+            <file>includes/class-local-links.php</file>
+            <file>includes/class-url-pattern.php</file>
+            <file>includes/class-url-replacer.php</file>
+        </include>
+    </source>
+</phpunit>

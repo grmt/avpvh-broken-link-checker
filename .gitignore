@@ -1,3 +1,5 @@
 vendor/
 deploy.local.env
 __pycache__/
+/.phpunit.cache/
+/coverage.xml

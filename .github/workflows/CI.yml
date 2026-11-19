@@ -72,6 +72,10 @@ jobs:
   test:
     name: "Unit tests (PHP ${{ matrix.php }})"
     runs-on: ubuntu-latest
+    # id-token: Codecov's OIDC upload, so no token secret is needed.
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       matrix:
         php: ["8.4", "8.5"]
@@ -83,7 +87,24 @@ jobs:
         uses: shivammathur/setup-php@2.40.0
         with:
           php-version: ${{ matrix.php }}
-          coverage: none
+          # Coverage once, on the floor.
+          coverage: ${{ matrix.php == '8.4' && 'pcov' || 'none' }}
 
-      - name: "Host rules, URL patterns and URL replacer"
-        run: php tests/test-rules-and-patterns.php
+      - name: "Install Composer dependencies"
+        run: composer install -n --prefer-dist --no-progress
+
+      - name: "PHPUnit"
+        if: matrix.php != '8.4'
+        run: vendor/bin/phpunit
+
+      - name: "PHPUnit with coverage"
+        if: matrix.php == '8.4'
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+
+      - name: "Upload coverage results"
+        if: matrix.php == '8.4'
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
+        with:
+          use_oidc: true
+          files: coverage.xml
+          fail_ci_if_error: false
