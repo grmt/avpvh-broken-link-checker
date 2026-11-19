@@ -483,6 +483,7 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		$request_url    = $url;
 		$final_url      = $url;
 		$blocked_url    = '';
+		$redirect_loop  = false;
 
 		// Durations are accumulated across every hop, because cURL used to report
 		// the time for the whole chain and the timeout heuristic below is tuned
@@ -510,7 +511,8 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 			}
 
 			if ( $redirect_count >= $max_redirects ) {
-				$log .= sprintf( "[Warning] Stopped following redirects after %d hops.\n", $max_redirects );
+				$log          .= sprintf( "[Warning] Stopped following redirects after %d hops.\n", $max_redirects );
+				$redirect_loop = true;
 				break;
 			}
 
@@ -640,6 +642,12 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_WARNING;
 			$result['status_text'] = __( 'Unknown Error', 'avpvh-link-checker' );
 			$result['warning']     = true;
+		} elseif ( $redirect_loop ) {
+			// What cURL reported as error 47 when it followed redirects itself.
+			$result['broken']      = true;
+			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Too many redirects', 'avpvh-link-checker' );
+			$result['error_code']  = 'too_many_redirects';
 		} else {
 			$result['broken'] = $this->is_error_code( $final_http_code );
 		}
@@ -658,6 +666,8 @@ class Avpvh_Lnkc_Curl_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		if ( $nobody && ! $result['timeout'] && ! $use_get && ( $result['broken'] || $result['redirect_count'] == 1 ) ) {
 			// The site in question might be expecting GET instead of HEAD, so lets retry the request
 			// using the GET verb...but not in cases of timeout, or where we've already done it.
+			// A redirect loop counts as broken, so it is retried too: uitspraken.rechtspraak.nl
+			// sends HEAD requests round a loop of 302s and answers GET with 200.
 			return $this->check( $url, true );
 
 			// Note : normally a server that doesn't allow HEAD requests on a specific resource *should*
@@ -959,13 +969,17 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		$blocked_url    = '';
 		$request        = null;
 		$http_code      = 0;
+		$use_get        = false;
+		$redirect_loop  = false;
 
 		while ( true ) {
-			$request   = wp_safe_remote_head( $this->urlencodefix( $request_url ), $request_args );
+			$request   = $use_get
+				? wp_safe_remote_get( $this->urlencodefix( $request_url ), $request_args )
+				: wp_safe_remote_head( $this->urlencodefix( $request_url ), $request_args );
 			$http_code = is_wp_error( $request ) ? 0 : (int) wp_remote_retrieve_response_code( $request );
 
 			// Fall back to GET if the server rejected HEAD (405 Method Not Allowed) or returned nothing.
-			if ( in_array( $http_code, array( 0, 405 ), true ) ) {
+			if ( ! $use_get && in_array( $http_code, array( 0, 405 ), true ) ) {
 				$request   = wp_safe_remote_get( $this->urlencodefix( $request_url ), $request_args );
 				$http_code = is_wp_error( $request ) ? 0 : (int) wp_remote_retrieve_response_code( $request );
 			}
@@ -990,7 +1004,16 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 			}
 
 			if ( $redirect_count >= $max_redirects ) {
-				$log .= sprintf( "[Warning] Stopped following redirects after %d hops.\n", $max_redirects );
+				if ( ! $use_get ) {
+					// Some servers send HEAD round a redirect loop and answer GET; start over with GET.
+					$log           .= sprintf( "[Warning] HEAD requests stopped after %d redirects; retrying with GET.\n", $max_redirects );
+					$use_get        = true;
+					$request_url    = $url;
+					$redirect_count = 0;
+					continue;
+				}
+				$log          .= sprintf( "[Warning] Stopped following redirects after %d hops.\n", $max_redirects );
+				$redirect_loop = true;
 				break;
 			}
 
@@ -1079,7 +1102,12 @@ class Avpvh_Lnkc_Wp_Http extends Avpvh_Lnkc_Http_Checker_Base {
 		}
 
 		// Determine if the link counts as "broken"
-		$result['broken'] = $this->is_error_code( $result['http_code'] ) || $result['timeout'];
+		$result['broken'] = $this->is_error_code( $result['http_code'] ) || $result['timeout'] || $redirect_loop;
+		if ( $redirect_loop ) {
+			$result['status_code'] = AVPVH_LNKC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Too many redirects', 'avpvh-link-checker' );
+			$result['error_code']  = 'too_many_redirects';
+		}
 
 		$log          .= '<em>(' . __( 'Using WP HTTP', 'avpvh-link-checker' ) . ')</em>';
 		$result['log'] = $log;
