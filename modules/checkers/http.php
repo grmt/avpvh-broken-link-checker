@@ -77,7 +77,12 @@ class Avpvh_Brkn_Http_Checker extends Avpvh_Brkn_Checker {
 		$blclog->debug( 'HTTP module checking "' . $url . '"' );
 		$result = $this->implementation->check( $url, $use_get );
 
-		return is_array( $result ) ? $rules->apply_ok_codes( $url, $result ) : $result;
+		if ( ! is_array( $result ) ) {
+			return $result;
+		}
+
+		// A link to this site that an anonymous visitor may not open is looked up in WordPress.
+		return Avpvh_Brkn_Local_Links::apply( $url, $rules->apply_ok_codes( $url, $result ) );
 	}
 }
 
