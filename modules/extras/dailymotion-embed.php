@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded DailyMotion videos
 Description: Parse embedded videos from DailyMotion
@@ -6,22 +7,22 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcDailyMotionEmbed
+ModuleClassName: Avpvh_Brkn_Dailymotion_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcDailyMotionEmbed extends blcEmbedParserBase {
+class Avpvh_Brkn_Dailymotion_Embed extends Avpvh_Brkn_Embed_Parser_Base {
 
 	function init() {
 		parent::init();
 		$this->url_search_string = 'dailymotion.com/swf/video/';
-		$this->short_title       = __( 'DailyMotion Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded DailyMotion video', 'broken-link-checker' );
+		$this->short_title       = __( 'DailyMotion Video', 'avpvh-broken-link-checker' );
+		$this->long_title        = __( 'Embedded DailyMotion video', 'avpvh-broken-link-checker' );
 	}
 
 	function link_url_from_src( $src ) {

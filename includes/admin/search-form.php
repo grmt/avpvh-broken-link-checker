@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 	$search_params = $current_filter['search_params'];
 ?>
 <div class="search-box">
@@ -8,47 +9,47 @@
 			//save the search query as a custom filter.
 	if ( 'search' == $filter_id ) {
 		?>
-	<form name="save-search-query" id="custom-filter-form" action="<?php echo esc_url( admin_url( 'admin.php?page=blc_local' ) ); ?>" method="post" class="blc-inline-form">
+	<form name="save-search-query" id="custom-filter-form" action="<?php echo esc_url( admin_url( 'admin.php?page=avpvh-broken-link-checker' ) ); ?>" method="post" class="blc-inline-form">
 		<?php wp_nonce_field( 'create-custom-filter' ); ?>
 		<input type="hidden" name="name" id="blc-custom-filter-name" value="" />
-		<input type="hidden" name="params" id="blc-custom-filter-params" value="<?php echo http_build_query( $search_params, '', '&' ); ?>" />
+		<input type="hidden" name="params" id="blc-custom-filter-params" value="<?php echo esc_attr( http_build_query( $search_params, '', '&' ) ); ?>" />
 		<input type="hidden" name="action" value="create-custom-filter" />
-		<input type="button" value="<?php esc_attr_e( 'Save This Search As a Filter', 'broken-link-checker' ); ?>" id="blc-create-filter" class="button" />
+		<input type="button" value="<?php esc_attr_e( 'Save This Search As a Filter', 'avpvh-broken-link-checker' ); ?>" id="blc-create-filter" class="button" />
 	</form>
 		<?php
 	} elseif ( ! empty( $current_filter['custom'] ) ) {
 		//If we're displaying a custom filter give an option to delete it.
 		?>
-	<form name="save-search-query" id="custom-filter-form" action="<?php echo esc_url( admin_url( 'admin.php?page=blc_local' ) ); ?>" method="post" class="blc-inline-form">
+	<form name="save-search-query" id="custom-filter-form" action="<?php echo esc_url( admin_url( 'admin.php?page=avpvh-broken-link-checker' ) ); ?>" method="post" class="blc-inline-form">
 		<?php wp_nonce_field( 'delete-custom-filter' ); ?>
 		<input type="hidden" name="filter_id" id="blc-custom-filter-id" value="<?php echo esc_attr( $filter_id ); ?>" />
 		<input type="hidden" name="action" value="delete-custom-filter" />
-		<input type="submit" value="<?php esc_attr_e( 'Delete This Filter', 'broken-link-checker' ); ?>" id="blc-delete-filter" class="button" />
+		<input type="submit" value="<?php esc_attr_e( 'Delete This Filter', 'avpvh-broken-link-checker' ); ?>" id="blc-delete-filter" class="button" />
 	</form>
 		<?php
 	}
 	?>
 
-	<input type="button" value="<?php esc_attr_e( 'Search', 'broken-link-checker' ); ?> &raquo;" id="blc-open-search-box" class="button" />
+	<input type="button" value="<?php esc_attr_e( 'Search', 'avpvh-broken-link-checker' ); ?> &raquo;" id="blc-open-search-box" class="button" />
 </div>
 
 <!-- The search dialog -->
 <div id='search-links-dialog' title='Search'>
-<form class="search-form" action="<?php echo esc_url( admin_url( 'admin.php?page=blc_local' ) ); ?>" method="get">
-	<input type="hidden" name="page" value="blc_local" />
+<form class="search-form" action="<?php echo esc_url( admin_url( 'admin.php?page=avpvh-broken-link-checker' ) ); ?>" method="get">
+	<input type="hidden" name="page" value="avpvh-broken-link-checker" />
 	<input type="hidden" name="filter_id" value="search" />
 	<fieldset>
 
-	<label for="s_link_text"><?php _e( 'Link text', 'broken-link-checker' ); ?></label>
+	<label for="s_link_text"><?php esc_html_e( 'Link text', 'avpvh-broken-link-checker' ); ?></label>
 	<input type="text" name="s_link_text" value="<?php echo ! empty( $search_params['s_link_text'] ) ? esc_attr( $search_params['s_link_text'] ) : ''; ?>" id="s_link_text" class="text ui-widget-content" />
 
-	<label for="s_link_url"><?php _e( 'URL', 'broken-link-checker' ); ?></label>
+	<label for="s_link_url"><?php esc_html_e( 'URL', 'avpvh-broken-link-checker' ); ?></label>
 	<input type="text" name="s_link_url" id="s_link_url" value="<?php echo ! empty( $search_params['s_link_url'] ) ? esc_attr( $search_params['s_link_url'] ) : ''; ?>" class="text ui-widget-content" />
 
-	<label for="s_http_code"><?php _e( 'HTTP code', 'broken-link-checker' ); ?></label>
+	<label for="s_http_code"><?php esc_html_e( 'HTTP code', 'avpvh-broken-link-checker' ); ?></label>
 	<input type="text" name="s_http_code" id="s_http_code" value="<?php echo ! empty( $search_params['s_http_code'] ) ? esc_attr( $search_params['s_http_code'] ) : ''; ?>" class="text ui-widget-content" />
 
-	<label for="s_filter"><?php _e( 'Link status', 'broken-link-checker' ); ?></label>
+	<label for="s_filter"><?php esc_html_e( 'Link status', 'avpvh-broken-link-checker' ); ?></label>
 	<select name="s_filter" id="s_filter">
 		<?php
 		if ( ! empty( $search_params['s_filter'] ) ) {
@@ -57,50 +58,50 @@
 			$search_subfilter = 'all';
 		}
 
-		$linkQuery = blcLinkQuery::getInstance();
+		$linkQuery = Avpvh_Brkn_Link_Query::getInstance();
 		foreach ( $linkQuery->native_filters as $filter => $data ) {
-			$selected = ( $search_subfilter == $filter ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $filter, $selected, $data['name'] );
+			$selected = ( $search_subfilter == $filter );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $filter ), $selected ? ' selected="selected"' : '', esc_html( $data['name'] ) );
 		}
 		?>
 	</select>
 
-	<label for="s_link_type"><?php _e( 'Link type', 'broken-link-checker' ); ?></label>
+	<label for="s_link_type"><?php esc_html_e( 'Link type', 'avpvh-broken-link-checker' ); ?></label>
 	<select name="s_link_type" id="s_link_type">
-		<option value=""><?php _e( 'Any', 'broken-link-checker' ); ?></option>
+		<option value=""><?php esc_html_e( 'Any', 'avpvh-broken-link-checker' ); ?></option>
 		<?php
-		$moduleManager = blcModuleManager::getInstance();
+		$moduleManager = Avpvh_Brkn_Module_Manager::getInstance();
 
-		printf( '<optgroup label="%s">', esc_attr( __( 'Links used in', 'broken-link-checker' ) ) );
+		printf( '<optgroup label="%s">', esc_attr( __( 'Links used in', 'avpvh-broken-link-checker' ) ) );
 		$containers = $moduleManager->get_modules_by_category( 'container', false, true );
 		foreach ( $containers as $container_type => $module_data ) {
 			if ( ! empty( $module_data['ModuleHidden'] ) || ! $moduleManager->is_active( $container_type ) ) {
 				continue;
 			}
-			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $container_type ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $container_type, $selected, $module_data['Name'] );
+			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $container_type );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $container_type ), $selected ? ' selected="selected"' : '', esc_html( $module_data['Name'] ) );
 		}
 		echo '</optgroup>';
 		//TODO: Better group labels
-		printf( '<optgroup label="%s">', esc_attr( __( 'Link type', 'broken-link-checker' ) ) );
+		printf( '<optgroup label="%s">', esc_attr( __( 'Link type', 'avpvh-broken-link-checker' ) ) );
 		$parsers = $moduleManager->get_modules_by_category( 'parser', false, true );
 		foreach ( $parsers as $parser_type => $module_data ) {
 			if ( ! empty( $module_data['ModuleHidden'] ) || ! $moduleManager->is_active( $parser_type ) ) {
 				continue;
 			}
-			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $parser_type ) ? ' selected="selected"' : '';
-			printf( '<option value="%s"%s>%s</option>', $parser_type, $selected, $module_data['Name'] );
+			$selected = ( isset( $search_params['s_link_type'] ) && $search_params['s_link_type'] == $parser_type );
+			printf( '<option value="%s"%s>%s</option>', esc_attr( $parser_type ), $selected ? ' selected="selected"' : '', esc_html( $module_data['Name'] ) );
 		}
 		echo '</optgroup>';
 
 		/*
 		$link_types = array(
-			__('Any', 'broken-link-checker') => '',
-			__('Normal link', 'broken-link-checker') => 'link',
-			__('Image', 'broken-link-checker') => 'image',
-			__('Custom field', 'broken-link-checker') => 'custom_field',
-			__('Bookmark', 'broken-link-checker') => 'blogroll',
-			__('Comment', 'broken-link-checker') => 'comment',
+			__('Any', 'avpvh-broken-link-checker') => '',
+			__('Normal link', 'avpvh-broken-link-checker') => 'link',
+			__('Image', 'avpvh-broken-link-checker') => 'image',
+			__('Custom field', 'avpvh-broken-link-checker') => 'custom_field',
+			__('Bookmark', 'avpvh-broken-link-checker') => 'blogroll',
+			__('Comment', 'avpvh-broken-link-checker') => 'comment',
 		);
 		*/
 		?>
@@ -109,8 +110,8 @@
 	</fieldset>
 
 	<div id="blc-search-button-row">
-		<input type="submit" value="<?php esc_attr_e( 'Search Links', 'broken-link-checker' ); ?>" id="blc-search-button" name="search_button" class="button-primary" />
-		<input type="button" value="<?php esc_attr_e( 'Cancel', 'broken-link-checker' ); ?>" id="blc-cancel-search" class="button" />
+		<input type="submit" value="<?php esc_attr_e( 'Search Links', 'avpvh-broken-link-checker' ); ?>" id="blc-search-button" name="search_button" class="button-primary" />
+		<input type="button" value="<?php esc_attr_e( 'Cancel', 'avpvh-broken-link-checker' ); ?>" id="blc-cancel-search" class="button" />
 	</div>
 
 </form>

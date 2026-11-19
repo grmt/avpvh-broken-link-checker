@@ -1,11 +1,12 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @author Janis Elsts
  * @copyright 2010
  */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) :
+if ( ! class_exists( 'Avpvh_Brkn_Embed_Parser_Base' ) ) :
 
 	/**
 	 * Base class for embedded video/audio parsers.
@@ -17,7 +18,7 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 	 * @author Janis Elsts
 	 * @access public
 	 */
-	class blcEmbedParserBase extends blcParser {
+	class Avpvh_Brkn_Embed_Parser_Base extends Avpvh_Brkn_Parser {
 		var $supported_formats = array( 'html' );
 
 		var $short_title       = '';      //Short desc. of embeds handled by this parser, singular. Example: "YouTube Video".
@@ -30,7 +31,7 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 		 * @param string $content The text to parse.
 		 * @param string $base_url The base URL. Ignored.
 		 * @param string $default_link_text Default link text. Ignored.
-		 * @return array An array of new blcLinkInstance objects. The objects will include info about the embeds found, but not about the corresponding container entity.
+		 * @return array An array of new Avpvh_Brkn_Link_Instance objects. The objects will include info about the embeds found, but not about the corresponding container entity.
 		 */
 		function parse( $content, $base_url = '', $default_link_text = '' ) {
 			$instances = array();
@@ -50,13 +51,13 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 				}
 
 				//Create a new link instance.
-				$instance = new blcLinkInstance();
+				$instance = new Avpvh_Brkn_Link_Instance();
 
 				$instance->set_parser( $this );
 				$instance->raw_url   = $embed['embed_code'];
 				$instance->link_text = '[' . $this->short_title . ']';
 
-				$link_obj = new blcLink( $url ); //Creates or loads the link
+				$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 				$instance->set_link( $link_obj );
 
 				$instances[] = $instance;
@@ -72,12 +73,12 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 		 * string. Embeds without a 'src' attribute are skipped.
 		 *
 		 * Each array item has the same basic structure as the array items
-		 * returned by blcUtility::extract_tags(), plus an additional 'embed_code' key
+		 * returned by Avpvh_Brkn_Utility::extract_tags(), plus an additional 'embed_code' key
 		 * that contains the HTML code for the element. If the embed element is wrapped
 		 * in an <object>, the 'embed_code' key contains the full HTML for the entire
 		 * <object> + <embed> structure.
 		 *
-		 * @uses blcUtility::extract_tags() This function is a simple wrapper around extract_tags()
+		 * @uses Avpvh_Brkn_Utility::extract_tags() This function is a simple wrapper around extract_tags()
 		 *
 		 * @param string $html
 		 * @return array
@@ -89,10 +90,10 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 			$html = preg_replace( '/<code[^>]*>.+?<\/code>/si', ' ', $html );
 
 			//Find likely-looking <object> elements
-			$objects = blcUtility::extract_tags( $html, 'object', false, true );
+			$objects = Avpvh_Brkn_Utility::extract_tags( $html, 'object', false, true );
 			foreach ( $objects as $candidate ) {
 				//Find the <embed> tag
-				$embed = blcUtility::extract_tags( $candidate['full_tag'], 'embed', true );
+				$embed = Avpvh_Brkn_Utility::extract_tags( $candidate['full_tag'], 'embed', true );
 				if ( empty( $embed ) ) {
 					continue;
 				}
@@ -111,7 +112,7 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 			}
 
 			//Find <embed> elements not wrapped in an <object> element.
-			$embeds = blcUtility::extract_tags( $html, 'embed', true, true );
+			$embeds = Avpvh_Brkn_Utility::extract_tags( $html, 'embed', true, true );
 			foreach ( $embeds as $embed ) {
 				if ( ! empty( $embed['attributes']['src'] ) ) {
 					$embed['embed_code'] = $embed['full_tag'];
@@ -141,7 +142,7 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 		/**
 		 * Get the link text for printing in the "Broken Links" table.
 		 *
-		 * @param blcLinkInstance $instance
+		 * @param Avpvh_Brkn_Link_Instance $instance
 		 * @param string $context
 		 * @return string HTML
 		 */
@@ -153,13 +154,13 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 
 			$image_html = sprintf(
 				'<img src="%s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
-				esc_attr( plugins_url( $image_url, BLC_PLUGIN_FILE_LEGACY ) ),
-				$this->long_title
+				esc_attr( plugins_url( $image_url, AVPVH_BRKN_PLUGIN_FILE ) ),
+				esc_attr( $this->long_title )
 			);
 
 			$field_html = sprintf(
 				'%s',
-				$this->short_title
+				esc_html( $this->short_title )
 			);
 
 			if ( 'email' != $context ) {
@@ -196,7 +197,7 @@ if ( ! class_exists( 'blcEmbedParserBase' ) ) :
 		function edit( $content, $new_url, $old_url, $old_raw_url ) {
 			return new WP_Error(
 				'not_implemented',
-				sprintf( __( "Embedded videos can't be edited using Broken Link Checker. Please edit or replace the video in question manually.", 'broken-link-checker' ), $this->parser_type )
+				sprintf( __( "Embedded videos can't be edited using Broken Link Checker. Please edit or replace the video in question manually.", 'avpvh-broken-link-checker' ), $this->parser_type )
 			);
 		}
 

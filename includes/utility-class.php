@@ -1,71 +1,23 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @author W-Shadow
  * @copyright 2010
  */
 
-if ( ! function_exists( 'sys_get_temp_dir' ) ) {
-	function sys_get_temp_dir() {
-		if ( ! empty( $_ENV['TMP'] ) ) {
-			return realpath( $_ENV['TMP'] ); }
-		if ( ! empty( $_ENV['TMPDIR'] ) ) {
-			return realpath( $_ENV['TMPDIR'] ); }
-		if ( ! empty( $_ENV['TEMP'] ) ) {
-			return realpath( $_ENV['TEMP'] ); }
-		$tempfile = tempnam( uniqid( rand(), true ), '' );
-		if ( @file_exists( $tempfile ) ) {
-			unlink( $tempfile );
-			return realpath( dirname( $tempfile ) );
-		}
-		return '';
-	}
-}
 
-//Include the internationalized domain name converter (requires PHP 5)
-if ( version_compare( phpversion(), '5.0.0', '>=' ) && ! class_exists( 'idna_convert' ) ) {
-	include BLC_DIRECTORY_LEGACY . '/idn/idna_convert.class.php';
-	if ( ! function_exists( 'encode_utf8' ) ) {
-		include BLC_DIRECTORY_LEGACY . '/idn/transcode_wrapper.php';
-	}
-}
-
-
-if ( ! class_exists( 'blcUtility' ) ) {
-	class blcUtility {
+if ( ! class_exists( 'Avpvh_Brkn_Utility' ) ) {
+	class Avpvh_Brkn_Utility {
 		/**
 		 * Checks if PHP is running in safe mode
-		 * blcUtility::is_safe_mode()
+		 * Avpvh_Brkn_Utility::is_safe_mode()
 		 *
 		 * @return bool
 		 */
 		static function is_safe_mode() {
-			// Check php.ini safe_mode only if PHP version is lower than 5.3.0, else set to false.
-			if ( version_compare( phpversion(), '5.3.0', '<' ) ) {
-				$safe_mode = ini_get( 'safe_mode' );
-			} else {
-				$safe_mode = false;
-			}
-
-			// Null, 0, '', '0' and so on count as false.
-			if ( ! $safe_mode ) {
-				return false;
-			}
-			// Test for some textual true/false variations.
-			switch ( strtolower( $safe_mode ) ) {
-				case 'on':
-				case 'true':
-				case 'yes':
-					return true;
-
-				case 'off':
-				case 'false':
-				case 'no':
-					return false;
-
-				default: // Let PHP handle anything else.
-					return (bool) (int) $safe_mode;
-			}
+			// safe_mode was removed in PHP 5.4.
+			return false;
 		}
 
 		public static function is_host_wp_engine() {
@@ -76,11 +28,11 @@ if ( ! class_exists( 'blcUtility' ) ) {
 			$host_name = 'flywheel';
 
 			return ! empty( $_SERVER['SERVER_SOFTWARE'] ) &&
-			       substr( strtolower( $_SERVER['SERVER_SOFTWARE'] ), 0, strlen( $host_name ) ) === strtolower( $host_name );
+			       substr( strtolower( sanitize_text_field( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) ), 0, strlen( $host_name ) ) === strtolower( $host_name );
 		}
 
 		/**
-		* blcUtility::is_open_basedir()
+		* Avpvh_Brkn_Utility::is_open_basedir()
 		* Checks if open_basedir is enabled
 		*
 		* @return bool
@@ -239,7 +191,7 @@ if ( ! class_exists( 'blcUtility' ) ) {
 		*/
 		static function get_cookie( $cookie_name, $default_value = '' ) {
 			if ( isset( $_COOKIE[ $cookie_name ] ) ) {
-				return $_COOKIE[ $cookie_name ];
+				return sanitize_text_field( wp_unslash( $_COOKIE[ $cookie_name ] ) );
 			} else {
 				return $default_value;
 			}
@@ -256,24 +208,24 @@ if ( ! class_exists( 'blcUtility' ) ) {
 
 			$templates = array(
 				'seconds' => array(
-					'default' => _n_noop( '%d second', '%d seconds' ),
-					'ago'     => _n_noop( '%d second ago', '%d seconds ago' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d second', '%d seconds', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d second ago', '%d seconds ago', 'avpvh-broken-link-checker' ),
 				),
 				'minutes' => array(
-					'default' => _n_noop( '%d minute', '%d minutes' ),
-					'ago'     => _n_noop( '%d minute ago', '%d minutes ago' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d minute', '%d minutes', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d minute ago', '%d minutes ago', 'avpvh-broken-link-checker' ),
 				),
 				'hours'   => array(
-					'default' => _n_noop( '%d hour', '%d hours' ),
-					'ago'     => _n_noop( '%d hour ago', '%d hours ago' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d hour', '%d hours', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d hour ago', '%d hours ago', 'avpvh-broken-link-checker' ),
 				),
 				'days'    => array(
-					'default' => _n_noop( '%d day', '%d days' ),
-					'ago'     => _n_noop( '%d day ago', '%d days ago' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d day', '%d days', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d day ago', '%d days ago', 'avpvh-broken-link-checker' ),
 				),
 				'months'  => array(
-					'default' => _n_noop( '%d month', '%d months' ),
-					'ago'     => _n_noop( '%d month ago', '%d months ago' ),
+					'default' => /* translators: %d: number of time units. */ _n_noop( '%d month', '%d months', 'avpvh-broken-link-checker' ),
+					'ago'     => /* translators: %d: number of time units. */ _n_noop( '%d month ago', '%d months ago', 'avpvh-broken-link-checker' ),
 				),
 			);
 
@@ -302,7 +254,7 @@ if ( ! class_exists( 'blcUtility' ) ) {
 					$templates[ $units ][ $template ][0], //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralSingle
 					$templates[ $units ][ $template ][1], //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralPlural
 					$delta,
-					'broken-link-checker'
+					'avpvh-broken-link-checker'
 				),
 				$delta
 			);
@@ -316,7 +268,7 @@ if ( ! class_exists( 'blcUtility' ) ) {
 		static function optimize_database() {
 			global $wpdb; /** @var wpdb $wpdb */
 
-			$wpdb->query( "OPTIMIZE TABLE {$wpdb->prefix}blc_links, {$wpdb->prefix}blc_instances, {$wpdb->prefix}blc_synch" );
+			$wpdb->query( "OPTIMIZE TABLE {$wpdb->prefix}avpvh_brkn_links, {$wpdb->prefix}avpvh_brkn_instances, {$wpdb->prefix}avpvh_brkn_synch" );
 		}
 
 		/**
@@ -353,59 +305,55 @@ if ( ! class_exists( 'blcUtility' ) ) {
 		}
 
 		/**
-		* Convert an internationalized domain name or URL to ASCII-compatible encoding.
-		*
-		* @param string $url Either a domain name or a complete URL.
-		* @param string $charset The character encoding of the $url parameter. Defaults to the encoding set in Settings -> Reading.
-		* @return string
-		*/
-		static function idn_to_ascii( $url, $charset = '' ) {
-			$idn = blcUtility::get_idna_converter();
-			if ( null != $idn ) {
-				if ( empty( $charset ) ) {
-					$charset = get_bloginfo( 'charset' );
-				}
-
-				// Encode only the host.
-				if ( preg_match( '@(\w+:/*)?([^/:]+)(.*$)?@s', $url, $matches ) ) {
-					$host = $matches[2];
-					if ( ( strtoupper( $charset ) != 'UTF-8' ) && ( strtoupper( $charset ) != 'UTF8' ) ) {
-						$host = encode_utf8( $host, $charset, true );
-					}
-					$host = $idn->encode( $host );
-					$url  = $matches[1] . $host . $matches[3];
-				}
+		 * Convert the host of an internationalized domain name or URL to ASCII (punycode).
+		 *
+		 * Uses PHP's intl extension; without it the URL is returned unchanged.
+		 *
+		 * @param string $url     Either a domain name or a complete URL.
+		 * @param string $charset Encoding of $url. Defaults to the blog's charset.
+		 * @return string
+		 */
+		public static function idn_to_ascii( $url, $charset = '' ) {
+			if ( empty( $charset ) ) {
+				$charset = get_bloginfo( 'charset' );
+			}
+			if ( ! in_array( strtoupper( (string) $charset ), array( 'UTF-8', 'UTF8' ), true ) ) {
+				$url = mb_convert_encoding( $url, 'UTF-8', $charset );
 			}
 
-			return $url;
+			return self::map_host( $url, 'idn_to_ascii' );
 		}
 
 		/**
-		* Convert an internationalized domain name (or URL) from ASCII-compatible encoding to UTF8.
-		*
-		* @param string $url
-		* @return string
-		*/
-		static function idn_to_utf8( $url ) {
-			$idn = blcUtility::get_idna_converter();
-			if ( null !== $idn ) {
-				$url = $idn->decode( $url );
-			}
-
-			return $url;
+		 * Convert the punycode host of a domain name or URL to UTF-8.
+		 *
+		 * @param string $url Either a domain name or a complete URL.
+		 * @return string
+		 */
+		public static function idn_to_utf8( $url ) {
+			return self::map_host( $url, 'idn_to_utf8' );
 		}
 
 		/**
-		* Get an instance of idna_converter
-		*
-		* @return idna_convert|null Either an instance of IDNA converter, or NULL if the converter class is not available
-		*/
-		static function get_idna_converter() {
-			static $idn = null;
-			if ( ( null === $idn ) && class_exists( 'idna_convert' ) ) {
-				$idn = new idna_convert();
+		 * Apply an intl IDN conversion to the host part of a domain name or URL.
+		 *
+		 * @param string $url      Domain name or URL.
+		 * @param string $function 'idn_to_ascii' or 'idn_to_utf8'.
+		 * @return string
+		 */
+		private static function map_host( $url, $function ) {
+			if ( ! function_exists( $function ) || ! preg_match( '~^(\w+:/*(?:[^/@]*@)?)?([^/:?#]+)(.*)$~s', (string) $url, $matches ) ) {
+				return $url;
 			}
-			return $idn;
+			$host = $matches[2];
+			// Only hosts with non-ASCII characters (to ASCII) or punycode labels (to UTF-8) change.
+			if ( 'idn_to_ascii' === $function ? ! preg_match( '/[^\x00-\x7F]/', $host ) : false === stripos( $host, 'xn--' ) ) {
+				return $url;
+			}
+			$flags     = 'idn_to_ascii' === $function ? IDNA_NONTRANSITIONAL_TO_ASCII : IDNA_NONTRANSITIONAL_TO_UNICODE;
+			$converted = $function( $host, $flags, INTL_IDNA_VARIANT_UTS46 );
+
+			return false === $converted ? $url : $matches[1] . $converted . $matches[3];
 		}
 
 		/**

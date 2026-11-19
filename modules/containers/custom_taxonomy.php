@@ -7,7 +7,7 @@ Author: Broken Link Checker
 
 ModuleID: custom_taxonomy
 ModuleCategory: container
-ModuleClassName: blcTaxonomyContainerManager
+ModuleClassName: Avpvh_Brkn_Taxonomy_Container_Manager
 */
 
 require_once __DIR__ . '/custom_taxonomy/class-blc-taxonomy-container.php';

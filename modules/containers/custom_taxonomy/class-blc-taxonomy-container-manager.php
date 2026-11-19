@@ -10,14 +10,14 @@
  * @package Broken Link Checker
  * @access public
  */
-class blcTaxonomyContainerManager extends blcContainerManager {
+class Avpvh_Brkn_Taxonomy_Container_Manager extends Avpvh_Brkn_Container_Manager {
 
 	/**
 	 * The name of the container class this manager handles.
 	 *
 	 * @var string
 	 */
-	public $container_class_name = 'blcTaxonomyContainer';
+	public $container_class_name = 'Avpvh_Brkn_Taxonomy_Container';
 
 	/**
 	 * Built-in WordPress taxonomies that are always registered and therefore
@@ -114,10 +114,10 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 	 * @return void
 	 */
 	public function on_post_deleted( $post_id ) {
-		$container = blcContainerHelper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		if ( $container ) {
 			$container->delete();
-			blc_cleanup_links();
+			avpvh_brkn_cleanup_links();
 		}
 	}
 
@@ -128,7 +128,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 	 * @return void
 	 */
 	public function mark_post_unsynched( $post_id ) {
-		$container = blcContainerHelper::get_container( array( $this->container_type, intval( $post_id ) ) );
+		$container = Avpvh_Brkn_Container_Helper::get_container( array( $this->container_type, intval( $post_id ) ) );
 		if ( $container ) {
 			$container->mark_as_unsynched();
 		}
@@ -144,12 +144,12 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 	 * @param array  $containers           Array of container identifiers (container_type, container_id).
 	 * @param string $purpose              Optional context for which the containers will be loaded; may be used to determine whether to preload the wrapped posts.
 	 * @param bool   $load_wrapped_objects Whether to preload the wrapped posts.
-	 * @return blcTaxonomyContainer[]
+	 * @return Avpvh_Brkn_Taxonomy_Container[]
 	 */
 	public function get_containers( $containers, $purpose = '', $load_wrapped_objects = false ) {
 		$containers = $this->make_containers( $containers );
 
-		$preload = $load_wrapped_objects || in_array( $purpose, array( BLC_FOR_DISPLAY ) );
+		$preload = $load_wrapped_objects || in_array( $purpose, array( AVPVH_BRKN_FOR_DISPLAY ) );
 		if ( $preload ) {
 			$post_ids = array();
 			foreach ( $containers as $container ) {
@@ -198,9 +198,10 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 		$start        = microtime( true );
 		$placeholders = implode( ', ', array_fill( 0, count( $this->builtin_taxonomies ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}blc_synch (container_id, container_type, synched)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch (container_id, container_type, synched)
 				SELECT DISTINCT tr.object_id, %s, 0
 				FROM {$wpdb->term_relationships} AS tr
 				INNER JOIN {$wpdb->posts} AS p ON p.ID = tr.object_id AND p.post_status = 'publish'
@@ -210,6 +211,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows inserted/updated in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 
@@ -231,7 +233,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE synch.*
-				FROM {$wpdb->prefix}blc_synch AS synch
+				FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 				LEFT JOIN {$wpdb->posts} AS p ON p.ID = synch.container_id AND p.post_status = 'publish'
 				WHERE synch.container_type = %s
 				  AND p.ID IS NULL",
@@ -245,10 +247,11 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 		$blclog->log( '...... Deleting taxonomy synch records for posts with no custom taxonomy terms' );
 		$start = microtime( true );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE synch.*
-				FROM {$wpdb->prefix}blc_synch AS synch
+				FROM {$wpdb->prefix}avpvh_brkn_synch AS synch
 				WHERE synch.container_type = %s
 				  AND NOT EXISTS (
 					SELECT 1
@@ -260,6 +263,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows deleted in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 
@@ -277,7 +281,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->prefix}blc_synch AS synch
+				"UPDATE {$wpdb->prefix}avpvh_brkn_synch AS synch
 		      JOIN {$wpdb->posts} AS p ON p.ID = synch.container_id
 		      SET synch.synched = 0
 		      WHERE synch.container_type = %s
@@ -301,20 +305,22 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 		$start        = microtime( true );
 		$placeholders = implode( ', ', array_fill( 0, count( $this->builtin_taxonomies ), '%s' ) );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- only %s placeholders and table names are interpolated.
 		$wpdb->query(
 			$wpdb->prepare(
-				"INSERT INTO {$wpdb->prefix}blc_synch (container_id, container_type, synched)
+				"INSERT INTO {$wpdb->prefix}avpvh_brkn_synch (container_id, container_type, synched)
 				SELECT DISTINCT tr.object_id, %s, 0
 				FROM {$wpdb->term_relationships} AS tr
 				INNER JOIN {$wpdb->posts} AS p ON p.ID = tr.object_id AND p.post_status = 'publish'
 				INNER JOIN {$wpdb->term_taxonomy} AS tt ON tt.term_taxonomy_id = tr.term_taxonomy_id
 					AND tt.taxonomy NOT IN ({$placeholders})
-				LEFT JOIN {$wpdb->prefix}blc_synch AS synch
+				LEFT JOIN {$wpdb->prefix}avpvh_brkn_synch AS synch
 					ON synch.container_id = tr.object_id AND synch.container_type = %s
 				WHERE synch.container_id IS NULL",
 				array_merge( array( $this->container_type ), $this->builtin_taxonomies, array( $this->container_type ) )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$blclog->log( sprintf( '...... %d rows inserted in %.3f seconds', $wpdb->rows_affected, microtime( true ) - $start ) );
 	}
 
@@ -329,7 +335,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 	 * @return string
 	 */
 	public function ui_bulk_delete_message( $amount_of_posts ) {
-		return blcAnyPostContainerManager::build_delete_action_message(
+		return Avpvh_Brkn_Any_Post_Container_Manager::build_delete_action_message(
 			$amount_of_posts,
 			'post',
 			null
@@ -343,7 +349,7 @@ class blcTaxonomyContainerManager extends blcContainerManager {
 	 * @return string
 	 */
 	public function ui_bulk_trash_message( $amount_of_posts ) {
-		return blcAnyPostContainerManager::build_trash_action_message(
+		return Avpvh_Brkn_Any_Post_Container_Manager::build_trash_action_message(
 			$amount_of_posts,
 			'post',
 			null

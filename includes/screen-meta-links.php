@@ -1,26 +1,16 @@
 <?php
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * @author Janis Elsts
  * @copyright 2011
  */
 
 
-if ( ! class_exists( 'wsScreenMetaLinks11' ) ) :
+if ( ! class_exists( 'Avpvh_Brkn_Screen_Meta_Links' ) ) :
 
-	//Load JSON functions for PHP < 5.2
-	if ( ! ( function_exists( 'json_encode' ) && function_exists( 'json_decode' ) ) && ! ( class_exists( 'Services_JSON' ) || class_exists( 'Moxiecode_JSON' ) ) ) {
-		$class_json_path           = ABSPATH . WPINC . '/class-json.php';
-		$class_moxiecode_json_path = ABSPATH . WPINC . '/js/tinymce/plugins/spellchecker/classes/utils/JSON.php';
-		if ( file_exists( $class_json_path ) ) {
-			require $class_json_path;
-
-		} elseif ( file_exists( $class_moxiecode_json_path ) ) {
-			require $class_moxiecode_json_path;
-		}
-	}
-
-	class wsScreenMetaLinks11 {
+	class Avpvh_Brkn_Screen_Meta_Links {
 		var $registered_links; //List of meta links registered for each page.
 
 		/**
@@ -38,7 +28,7 @@ if ( ! class_exists( 'wsScreenMetaLinks11' ) ) :
 		/**
 		 * Add a new link to the screen meta area.
 		 *
-		 * Do not call this method directly. Instead, use the global add_screen_meta_link() function.
+		 * Do not call this method directly. Instead, use the global avpvh_brkn_add_screen_meta_link() function.
 		 *
 		 * @param string $id Link ID. Should be unique and a valid value for a HTML ID attribute.
 		 * @param string $text Link text.
@@ -47,7 +37,7 @@ if ( ! class_exists( 'wsScreenMetaLinks11' ) ) :
 		 * @param array $attributes Optional. Additional attributes for the link tag.
 		 * @return void
 		 */
-		function add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
+		function avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
 			if ( ! is_array( $page ) ) {
 				$page = array( $page );
 			}
@@ -107,7 +97,7 @@ if ( ! class_exists( 'wsScreenMetaLinks11' ) ) :
 							.append( $('<a/>', links[i]) )
 					);
 				}
-			})(jQuery, <?php echo $this->json_encode( $links ); ?>);
+			})(jQuery, <?php echo wp_json_encode( $links ); ?>);
 		</script>
 			<?php
 		}
@@ -252,36 +242,13 @@ if ( ! class_exists( 'wsScreenMetaLinks11' ) ) :
 			}
 		}
 
-		/**
-		 * Back-wards compatible json_encode(). Used to encode link data before
-		 * passing it to the JavaScript that actually creates the links.
-		 *
-		 * @param mixed $data
-		 * @return string
-		 */
-		function json_encode( $data ) {
-			if ( function_exists( 'json_encode' ) ) {
-				return json_encode( $data );
-			}
-			if ( class_exists( 'Services_JSON' ) ) {
-				$json = new Services_JSON();
-				return( $json->encodeUnsafe( $data ) );
-			} elseif ( class_exists( 'Moxiecode_JSON' ) ) {
-				$json = new Moxiecode_JSON();
-				return $json->encode( $data );
-			} else {
-				trigger_error( 'No JSON parser available', E_USER_ERROR );
-				return null;
-			}
-		}
-
 	}
 
 	global $ws_screen_meta_links_versions;
 	if ( ! isset( $ws_screen_meta_links_versions ) ) {
 		$ws_screen_meta_links_versions = array();
 	}
-	$ws_screen_meta_links_versions['1.1'] = 'wsScreenMetaLinks11';
+	$ws_screen_meta_links_versions['1.1'] = 'Avpvh_Brkn_Screen_Meta_Links';
 
 endif;
 
@@ -295,7 +262,7 @@ endif;
  * @param array $attributes Optional. Additional attributes for the link tag.
  * @return void
  */
-function add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
+function avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
 	global $ws_screen_meta_links_versions;
 
 	static $instance = null;
@@ -306,7 +273,7 @@ function add_screen_meta_link( $id, $text, $href, $page, $attributes = null ) {
 		$instance  = new $className;
 	}
 
-	$instance->add_screen_meta_link( $id, $text, $href, $page, $attributes );
+	$instance->avpvh_brkn_add_screen_meta_link( $id, $text, $href, $page, $attributes );
 }
 
 ?>

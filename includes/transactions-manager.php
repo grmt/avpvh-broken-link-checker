@@ -2,7 +2,7 @@
 /**
  * Transaction manager for batching database writes.
  *
- * @package broken-link-checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 /**
@@ -12,7 +12,7 @@
  * A COMMIT is only issued when the depth goes from 1 → 0, so inner
  * callers that call commit() do not flush an outer transaction prematurely.
  */
-class TransactionManager {
+class Avpvh_Brkn_Transaction_Manager {
 
 	/**
 	 * Current nesting depth.
@@ -24,7 +24,7 @@ class TransactionManager {
 	/**
 	 * Singleton instance.
 	 *
-	 * @var TransactionManager|null
+	 * @var Avpvh_Brkn_Transaction_Manager|null
 	 */
 	private static $instance;
 
@@ -77,11 +77,11 @@ class TransactionManager {
 	/**
 	 * Return the singleton instance.
 	 *
-	 * @return TransactionManager
+	 * @return Avpvh_Brkn_Transaction_Manager
 	 */
 	public static function getInstance() {
 		if ( ! self::$instance ) {
-			self::$instance = new TransactionManager();
+			self::$instance = new Avpvh_Brkn_Transaction_Manager();
 		}
 
 		return self::$instance;

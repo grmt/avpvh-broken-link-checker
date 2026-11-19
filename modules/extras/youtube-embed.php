@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded YouTube videos (old embed code)
 Description: Parse embedded videos from YouTube
@@ -6,23 +7,23 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcYouTubeEmbed
+ModuleClassName: Avpvh_Brkn_Youtube_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 110
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcYouTubeEmbed extends blcEmbedParserBase {
+class Avpvh_Brkn_Youtube_Embed extends Avpvh_Brkn_Embed_Parser_Base {
 
 	function init() {
 		parent::init();
-		$this->short_title       = __( 'YouTube Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded YouTube video', 'broken-link-checker' );
+		$this->short_title       = __( 'YouTube Video', 'avpvh-broken-link-checker' );
+		$this->long_title        = __( 'Embedded YouTube video', 'avpvh-broken-link-checker' );
 		$this->url_search_string = 'youtube.com/v/';
 	}
 

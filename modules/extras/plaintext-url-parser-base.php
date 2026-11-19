@@ -1,6 +1,6 @@
 <?php
 
-class blcPlaintextUrlBase extends blcParser {
+class Avpvh_Brkn_Plaintext_Url_Base extends Avpvh_Brkn_Parser {
 	var $supported_formats = array( 'html', 'plaintext' );
 
 	//Regexp for detecting plaintext URLs lifted from make_clickable()
@@ -16,7 +16,7 @@ class blcPlaintextUrlBase extends blcParser {
 	 * @param string $content The text to parse.
 	 * @param string $base_url The base URL. Ignored.
 	 * @param string $default_link_text Default link text.
-	 * @return array An array of new blcLinkInstance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		//Don't want to detect URLs inside links or tag attributes -
@@ -29,7 +29,7 @@ class blcPlaintextUrlBase extends blcParser {
 		//The closing tag of [shortcodes] is also treated as a boundary.
 		$content = str_replace( array( '<', '>', '[/' ), array( "\n<", ">\n", "\n[/" ), $content );
 		//Finally, kill all tags.
-		$content = strip_tags( $content );
+		$content = wp_strip_all_tags( $content );
 
 		//Find all URLs
 		$found = preg_match_all(
@@ -49,13 +49,13 @@ class blcPlaintextUrlBase extends blcParser {
 				}
 
 				//Create a new link instance.
-				$instance = new blcLinkInstance();
+				$instance = new Avpvh_Brkn_Link_Instance();
 
 				$instance->set_parser( $this );
 				$instance->raw_url   = $match;
 				$instance->link_text = $match;
 
-				$link_obj = new blcLink( $url ); //Creates or loads the link
+				$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 				$instance->set_link( $link_obj );
 
 				$instances[] = $instance;
@@ -83,7 +83,7 @@ class blcPlaintextUrlBase extends blcParser {
 				return false;
 			}
 		}
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( empty( $parts['host'] ) || ! strpos( $parts['host'], '.' ) ) {
 			return false;
 		}

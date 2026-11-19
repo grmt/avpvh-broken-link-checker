@@ -8,7 +8,7 @@
  * @package Broken Link Checker
  * @access public
  */
-class blcChecker extends blcModule {
+class Avpvh_Brkn_Checker extends Avpvh_Brkn_Module {
 
 	/**
 	 * Priority determines the order in which the plugin will try all registered checkers
@@ -30,7 +30,7 @@ class blcChecker extends blcModule {
 	 * Check if this checker knows how to check a particular URL.
 	 *
 	 * @param string $url
-	 * @param array|bool $parsed_url The result of parsing $url with parse_url(). See PHP docs for details.
+	 * @param array|bool $parsed_url The result of parsing $url with wp_parse_url(). See PHP docs for details.
 	 * @return bool
 	 */
 	function can_check( $url, $parsed_url ) {
@@ -53,28 +53,28 @@ class blcChecker extends blcModule {
 	 *    'log' (string) - Free-form log of the performed check. It will be displayed in the "Details" section of the checked link.
 	 *    'result_hash' (string) - A free-form hash or code uniquely identifying the detected link status. See sub-classes for examples. Max 200 characters.
 	 *
-	 * @see blcLink:check()
+	 * @see Avpvh_Brkn_Link:check()
 	 *
 	 * @param string $url
 	 * @return array
 	 */
 	function check( $url ) {
-		trigger_error( 'Function blcChecker::check() must be over-ridden in a subclass', E_USER_ERROR );
+		trigger_error( 'Function Avpvh_Brkn_Checker::check() must be over-ridden in a subclass', E_USER_ERROR );
 	}
 }
 
-class blcCheckerHelper {
+class Avpvh_Brkn_Checker_Helper {
 
 	/**
 	 * Get a reference to a specific checker.
 	 *
-	 * @uses blcModuleManager::get_module()
+	 * @uses Avpvh_Brkn_Module_Manager::get_module()
 	 *
 	 * @param string $checker_id
-	 * @return blcChecker
+	 * @return Avpvh_Brkn_Checker
 	 */
 	static function get_checker( $checker_id ) {
-		$manager = blcModuleManager::getInstance();
+		$manager = Avpvh_Brkn_Module_Manager::getInstance();
 		return $manager->get_module( $checker_id, true, 'checker' );
 	}
 
@@ -82,12 +82,12 @@ class blcCheckerHelper {
 	 * Get a checker object that can check the specified URL.
 	 *
 	 * @param string $url
-	 * @return blcChecker|null
+	 * @return Avpvh_Brkn_Checker|null
 	 */
 	static function get_checker_for( $url ) {
-		$parsed = @parse_url( $url );
+		$parsed = wp_parse_url( $url );
 
-		$manager         = blcModuleManager::getInstance();
+		$manager         = Avpvh_Brkn_Module_Manager::getInstance();
 		$active_checkers = $manager->get_active_by_category( 'checker' );
 		foreach ( $active_checkers as $module_id => $module_data ) {
 			//Try the URL pattern in the header first. If it doesn't match,

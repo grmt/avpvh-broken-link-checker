@@ -10,13 +10,13 @@ ModuleID: youtube-checker
 ModuleCategory: checker
 ModuleContext: on-demand
 ModuleLazyInit: true
-ModuleClassName: blcYouTubeChecker
+ModuleClassName: Avpvh_Brkn_Youtube_Checker
 ModulePriority: 100
 
 ModuleCheckerUrlPattern: @^https?://(?:([\w\d]+\.)*youtube\.[^/]+/watch\?.*v=[^/#]|youtu\.be/[^/#\?]+|(?:[\w\d]+\.)*?youtube\.[^/]+/(playlist|view_play_list)\?[^/#]{15,}?)@i
 */
 
-class blcYouTubeChecker extends blcChecker {
+class Avpvh_Brkn_Youtube_Checker extends Avpvh_Brkn_Checker {
 	var $api_grace_period      = 0.3; //How long to wait between YouTube API requests.
 	var $last_api_request      = 0;   //Timestamp of the last request.
 
@@ -26,7 +26,7 @@ class blcYouTubeChecker extends blcChecker {
 
 	function check( $url ) {
 		//Throttle API requests to avoid getting blocked due to quota violation.
-		$delta = microtime_float() - $this->last_api_request;
+		$delta = microtime( true ) - $this->last_api_request;
 		if ( $delta < $this->api_grace_period ) {
 			usleep( intval( $this->api_grace_period - $delta ) * 1000000 );
 		}
@@ -43,12 +43,12 @@ class blcYouTubeChecker extends blcChecker {
 		$url = wp_http_validate_url( $url );
 		if ( empty( $url ) ) {
 			$result['status_text'] = 'Invalid URL';
-			$result['status_code'] = BLC_LINK_STATUS_UNKNOWN;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_UNKNOWN;
 			
 			return $result;
 		}
 
-		$components = @parse_url( $url );
+		$components = wp_parse_url( $url );
 		if ( ! empty( $components['query'] ) && isset( $components['query'] ) ) {
 			parse_str( $components['query'], $query );
 		} else {
@@ -70,7 +70,7 @@ class blcYouTubeChecker extends blcChecker {
 
 		if ( empty( $playlist_id ) && empty( $video_id ) ) {
 			$result['status_text'] = 'Unsupported URL Syntax';
-			$result['status_code'] = BLC_LINK_STATUS_UNKNOWN;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_UNKNOWN;
 			return $result;
 		}
 
@@ -81,12 +81,12 @@ class blcYouTubeChecker extends blcChecker {
 			$api_url = $this->get_playlist_resource_url( $playlist_id );
 		}
 
-		$conf = blc_get_configuration();
+		$conf = avpvh_brkn_get_configuration();
 		$args = array( 'timeout' => $conf->options['timeout'] );
 
-		$start                      = microtime_float();
+		$start                      = microtime( true );
 		$response                   = wp_remote_get( $api_url, $args );
-		$result['request_duration'] = microtime_float() - $start;
+		$result['request_duration'] = microtime( true ) - $start;
 		$this->last_api_request     = $start;
 
 		//Got anything?
@@ -135,19 +135,19 @@ class blcYouTubeChecker extends blcChecker {
 		$videoFound = ( 200 == $result['http_code'] ) && isset( $api['items'], $api['items'][0] );
 
 		if ( isset( $api['error'] ) && ( 404 !== $result['http_code'] ) ) { //404's are handled later.
-			$result['status_code'] = BLC_LINK_STATUS_WARNING;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 			$result['warning']     = true;
 			if ( isset( $api['error']['errors'] ) ) {
 				$result['status_text'] = $api['error']['errors'][0]['reason'];
 			} else {
-				$result['status_text'] = __( 'Unknown Error', 'broken-link-checker' );
+				$result['status_text'] = __( 'Unknown Error', 'avpvh-broken-link-checker' );
 			}
 			$result['log'] .= $this->format_api_error( $response, $api );
 
 		} elseif ( $videoFound ) {
-			$result['log']        .= __( 'Video OK', 'broken-link-checker' );
-			$result['status_text'] = _x( 'OK', 'link status', 'broken-link-checker' );
-			$result['status_code'] = BLC_LINK_STATUS_OK;
+			$result['log']        .= __( 'Video OK', 'avpvh-broken-link-checker' );
+			$result['status_text'] = _x( 'OK', 'link status', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_OK;
 			$result['http_code']   = 0;
 
 			//Add the video title to the log, purely for information.
@@ -156,11 +156,11 @@ class blcYouTubeChecker extends blcChecker {
 				$result['log'] .= "\n\nTitle : \"" . htmlentities( $title ) . '"';
 			}
 		} else {
-			$result['log']        .= __( 'Video Not Found', 'broken-link-checker' );
+			$result['log']        .= __( 'Video Not Found', 'avpvh-broken-link-checker' );
 			$result['broken']      = true;
 			$result['http_code']   = 0;
-			$result['status_text'] = __( 'Video Not Found', 'broken-link-checker' );
-			$result['status_code'] = BLC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Video Not Found', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 		}
 
 		return $result;
@@ -178,26 +178,26 @@ class blcYouTubeChecker extends blcChecker {
 
 		if ( 404 === $result['http_code'] ) {
 			//Not found.
-			$result['log']        .= __( 'Playlist Not Found', 'broken-link-checker' );
+			$result['log']        .= __( 'Playlist Not Found', 'avpvh-broken-link-checker' );
 			$result['broken']      = true;
 			$result['http_code']   = 0;
-			$result['status_text'] = __( 'Playlist Not Found', 'broken-link-checker' );
-			$result['status_code'] = BLC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Playlist Not Found', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 
 		} elseif ( 403 === $result['http_code'] ) {
 			//Forbidden. We're unlikely to see this code for playlists, but lets allow it.
 			$result['log']        .= htmlentities( $response['body'] );
 			$result['broken']      = true;
-			$result['status_text'] = __( 'Playlist Restricted', 'broken-link-checker' );
-			$result['status_code'] = BLC_LINK_STATUS_ERROR;
+			$result['status_text'] = __( 'Playlist Restricted', 'avpvh-broken-link-checker' );
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_ERROR;
 
 		} elseif ( ( 200 === $result['http_code'] ) && isset( $api['items'] ) && is_array( $api['items'] ) ) {
 			//The playlist exists.
 			if ( empty( $api['items'] ) ) {
 				//An empty playlist. It is possible that all of the videos have been deleted.
-				$result['log']        .= __( 'This playlist has no entries or all entries have been deleted.', 'broken-link-checker' );
-				$result['status_text'] = _x( 'Empty Playlist', 'link status', 'broken-link-checker' );
-				$result['status_code'] = BLC_LINK_STATUS_WARNING;
+				$result['log']        .= __( 'This playlist has no entries or all entries have been deleted.', 'avpvh-broken-link-checker' );
+				$result['status_text'] = _x( 'Empty Playlist', 'link status', 'avpvh-broken-link-checker' );
+				$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 				$result['http_code']   = 0;
 				$result['broken']      = true;
 			} else {
@@ -206,14 +206,14 @@ class blcYouTubeChecker extends blcChecker {
 					$is_private = isset( $video['status']['privacyStatus'] ) && ( 'private' == $video['status']['privacyStatus'] );
 					if ( $is_private ) {
 						$result['log'] .= sprintf(
-							__( 'Video status : %1$s%2$s', 'broken-link-checker' ),
+							/* translators: 1: video privacy status, 2: extra detail (may be empty). */ __( 'Video status : %1$s%2$s', 'avpvh-broken-link-checker' ),
 							$video['status']['privacyStatus'],
 							''
 						);
 
 						$result['broken']      = true;
-						$result['status_text'] = __( 'Video Restricted', 'broken-link-checker' );
-						$result['status_code'] = BLC_LINK_STATUS_WARNING;
+						$result['status_text'] = __( 'Video Restricted', 'avpvh-broken-link-checker' );
+						$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 						$result['http_code']   = 0;
 						break;
 					}
@@ -221,21 +221,21 @@ class blcYouTubeChecker extends blcChecker {
 
 				if ( ! $result['broken'] ) {
 					//All is well.
-					$result['log']        .= __( 'Playlist OK', 'broken-link-checker' );
-					$result['status_text'] = _x( 'OK', 'link status', 'broken-link-checker' );
-					$result['status_code'] = BLC_LINK_STATUS_OK;
+					$result['log']        .= __( 'Playlist OK', 'avpvh-broken-link-checker' );
+					$result['status_text'] = _x( 'OK', 'link status', 'avpvh-broken-link-checker' );
+					$result['status_code'] = AVPVH_BRKN_LINK_STATUS_OK;
 					$result['http_code']   = 0;
 				}
 			}
 		} else {
 			//Some other error.
-			$result['status_code'] = BLC_LINK_STATUS_WARNING;
+			$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 			$result['warning']     = true;
 
 			if ( isset( $api['error']['message'] ) ) {
 				$result['status_text'] = $api['error']['message'];
 			} else {
-				$result['status_text'] = __( 'Unknown Error', 'broken-link-checker' );
+				$result['status_text'] = __( 'Unknown Error', 'avpvh-broken-link-checker' );
 			}
 			$result['log'] .= $this->format_api_error( $response, $api );
 		}
@@ -266,7 +266,7 @@ class blcYouTubeChecker extends blcChecker {
 
 	protected function format_api_error( $response, $api ) {
 		$log  = $response['response']['code'] . ' ' . $response['response']['message'];
-		$log .= "\n" . __( 'Unknown YouTube API response received.' );
+		$log .= "\n" . __( 'Unknown YouTube API response received.', 'avpvh-broken-link-checker' );
 
 		//Log error details.
 		if ( isset( $api['error']['errors'] ) && is_array( $api['error']['errors'] ) ) {
@@ -289,11 +289,11 @@ class blcYouTubeChecker extends blcChecker {
 	}
 
 	public function get_youtube_api_key() {
-		$conf = blc_get_configuration();
+		$conf = avpvh_brkn_get_configuration();
 
 		$api_key = ! empty( $conf->options['youtube_api_key'] ) ? $conf->options['youtube_api_key'] : '';
 
-		return apply_filters( 'blc_youtube_api_key', $conf->options['youtube_api_key'] );
+		return apply_filters( 'avpvh_brkn_youtube_api_key', $conf->options['youtube_api_key'] );
 	}
 
 }

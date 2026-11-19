@@ -1,22 +1,23 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Configuration Manager Class
  *
  * Handles plugin configuration and options management.
  *
- * @package Broken_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  * @author  W-Shadow
  * @since   0.1.0
  */
 
-if ( ! class_exists( 'blcConfigurationManager' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Configuration_Manager' ) ) {
 
 	/**
 	 * Configuration Manager for Broken Link Checker
 	 *
 	 * Manages plugin options including loading, saving, and retrieving settings.
 	 */
-	class blcConfigurationManager {
+	class Avpvh_Brkn_Configuration_Manager {
 
 		/**
 		 * Key of the configuration manager.
@@ -123,7 +124,7 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 			$this->ensure_loaded();
 			$this->options = array_merge( $this->defaults, $this->loaded_values );
 
-			do_action( 'blc_configuration_options_changed', $this->options, $this );
+			do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 		}
 
 		/**
@@ -224,7 +225,7 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 			$this->options[ $key ] = $value;
 			$this->modified        = true;
 
-			do_action( 'blc_configuration_options_changed', $this->options, $this );
+			do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 		}
 
 		/**
@@ -247,7 +248,7 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 			}
 
 			$this->modified = true;
-			do_action( 'blc_configuration_options_changed', $this->options, $this );
+			do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 		}
 
 		/**
@@ -291,7 +292,7 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 			$this->options  = $options;
 			$this->modified = true;
 
-			do_action( 'blc_configuration_options_changed', $this->options, $this );
+			do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 		}
 
 		/**
@@ -329,8 +330,8 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 				unset( $this->options[ $key ] );
 				$this->modified = true;
 
-				do_action( 'blc_configuration_option_deleted', $key, $this );
-				do_action( 'blc_configuration_options_changed', $this->options, $this );
+				do_action( 'avpvh_brkn_configuration_option_deleted', $key, $this );
+				do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 			}
 		}
 
@@ -378,8 +379,8 @@ if ( ! class_exists( 'blcConfigurationManager' ) ) {
 			$this->options  = array_merge( $this->options, $new_options );
 			$this->modified = true;
 
-			do_action( 'blc_configuration_options_added', $new_options, $this );
-			do_action( 'blc_configuration_options_changed', $this->options, $this );
+			do_action( 'avpvh_brkn_configuration_options_added', $new_options, $this );
+			do_action( 'avpvh_brkn_configuration_options_changed', $this->options, $this );
 		}
 
 		/**

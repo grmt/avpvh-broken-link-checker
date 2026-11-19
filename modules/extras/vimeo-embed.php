@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded Vimeo videos
 Description: Parse embedded videos from Vimeo
@@ -6,28 +7,28 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcVimeoEmbed
+ModuleClassName: Avpvh_Brkn_Vimeo_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcVimeoEmbed extends blcEmbedParserBase {
+class Avpvh_Brkn_Vimeo_Embed extends Avpvh_Brkn_Embed_Parser_Base {
 	var $supported_formats = array( 'html' );
 
 	function init() {
 		parent::init();
 		$this->url_search_string = 'vimeo.com/moogaloop.swf?';
-		$this->short_title       = __( 'Vimeo Video', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded Vimeo video', 'broken-link-checker' );
+		$this->short_title       = __( 'Vimeo Video', 'avpvh-broken-link-checker' );
+		$this->long_title        = __( 'Embedded Vimeo video', 'avpvh-broken-link-checker' );
 	}
 
 	function link_url_from_src( $src ) {
 		//Extract video ID from the SRC
-		$components = @parse_url( $src );
+		$components = wp_parse_url( $src );
 		if ( empty( $components['query'] ) ) {
 			return '';
 		}

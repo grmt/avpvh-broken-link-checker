@@ -8,7 +8,7 @@ Author: Janis Elsts
 
 ModuleID: dummy
 ModuleCategory: container
-ModuleClassName: blcDummyManager
+ModuleClassName: Avpvh_Brkn_Dummy_Manager
 ModuleAlwaysActive: true
 ModuleHidden: true
 */
@@ -20,7 +20,7 @@ ModuleHidden: true
  * @package Broken Link Checker
  * @access public
  */
-class blcDummyContainer extends blcContainer {
+class Avpvh_Brkn_Dummy_Container extends Avpvh_Brkn_Container {
 
 	function synch() {
 		//Just mark it as synched so that it doesn't bother us anymore.
@@ -31,7 +31,7 @@ class blcDummyContainer extends blcContainer {
 		return new WP_Error(
 			'container_not_found',
 			sprintf(
-				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'broken-link-checker' ),
+				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-broken-link-checker' ),
 				$this->container_type,
 				$this->container_id
 			)
@@ -42,7 +42,7 @@ class blcDummyContainer extends blcContainer {
 		return new WP_Error(
 			'container_not_found',
 			sprintf(
-				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'broken-link-checker' ),
+				__( "I don't know how to edit a '%1\$s' [%2\$d].", 'avpvh-broken-link-checker' ),
 				$this->container_type,
 				$this->container_id
 			)
@@ -52,9 +52,9 @@ class blcDummyContainer extends blcContainer {
 	function ui_get_source( $container_field, $context = 'display' ) {
 		return sprintf(
 			'<em>Unknown source %s[%d]:%s</em>',
-			$this->container_type,
-			$this->container_id,
-			$container_field
+			esc_html( $this->container_type ),
+			(int) $this->container_id,
+			esc_html( $container_field )
 		);
 	}
 }
@@ -65,9 +65,9 @@ class blcDummyContainer extends blcContainer {
  * @package Broken Link Checker
  * @access public
  */
-class blcDummyManager extends blcContainerManager {
+class Avpvh_Brkn_Dummy_Manager extends Avpvh_Brkn_Container_Manager {
 
-	var $container_class_name = 'blcDummyContainer';
+	var $container_class_name = 'Avpvh_Brkn_Dummy_Container';
 
 	function resynch( $forced = false ) {
 		//Do nothing.

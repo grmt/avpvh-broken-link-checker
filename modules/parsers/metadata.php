@@ -6,14 +6,14 @@
  * Author: Janis Elsts
  * ModuleID: metadata
  * ModuleCategory: parser
- * ModuleClassName: blcMetadataParser
+ * ModuleClassName: Avpvh_Brkn_Metadata_Parser
  * ModuleContext: on-demand
  * ModuleLazyInit: true
  * ModuleAlwaysActive: true
  * ModuleHidden: true
 */
 
-class blcMetadataParser extends blcParser {
+class Avpvh_Brkn_Metadata_Parser extends Avpvh_Brkn_Parser {
 	var $supported_formats    = array( 'metadata' );
 	var $supported_containers = array();
 
@@ -23,7 +23,7 @@ class blcMetadataParser extends blcParser {
 	 * @param string|array $content Metadata value(s).
 	 * @param string $base_url The base URL to use for normalizing relative URLs. If ommitted, the blog's root URL will be used.
 	 * @param string $default_link_text
-	 * @return array An array of new blcLinkInstance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	 */
 	function parse( $content, $base_url = '', $default_link_text = '' ) {
 		$instances = array();
@@ -55,7 +55,7 @@ class blcMetadataParser extends blcParser {
 	 *
 	 * @param string $metaurl The url on the meta data
 	 * @param string $default_link_text
-	 * @return array An array of new blcLinkInstance objects.
+	 * @return array An array of new Avpvh_Brkn_Link_Instance objects.
 	 */
 	function parse_metafield( $metaurl = '', $base_url = '', $default_link_text = '' ) {
 		//The complete contents of the meta field are stored in raw_url.
@@ -68,7 +68,7 @@ class blcMetadataParser extends blcParser {
 		$url   = trim( reset( $lines ) );
 
 		//Attempt to parse the URL
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 
 		if ( ! $parts ) {
 			return ''; //Ignore invalid URLs
@@ -85,13 +85,13 @@ class blcMetadataParser extends blcParser {
 		}
 
 		//The URL is okay, create and populate a new link instance.
-		$instance = new blcLinkInstance();
+		$instance = new Avpvh_Brkn_Link_Instance();
 
 		$instance->set_parser( $this );
 		$instance->raw_url   = $raw_url;
 		$instance->link_text = $default_link_text;
 
-		$link_obj = new blcLink( $url ); //Creates or loads the link
+		$link_obj = new Avpvh_Brkn_Link( $url ); //Creates or loads the link
 		$instance->set_link( $link_obj );
 
 		return $instance;
@@ -105,7 +105,7 @@ class blcMetadataParser extends blcParser {
 	 * metadata values) and use the old raw_url that we stored when parsing the field(s)
 	 * instead.
 	 *
-	 * @see blcMetadataParser::parse()
+	 * @see Avpvh_Brkn_Metadata_Parser::parse()
 	 *
 	 * @param string $content Ignored.
 	 * @param string $new_url The new URL.
@@ -130,15 +130,15 @@ class blcMetadataParser extends blcParser {
 	/**
 	 * Get the link text for printing in the "Broken Links" table.
 	 *
-	 * @param blcLinkInstance $instance
+	 * @param Avpvh_Brkn_Link_Instance $instance
 	 * @param string $context
 	 * @return string HTML
 	 */
 	function ui_get_link_text( $instance, $context = 'display' ) {
 		$image_html = sprintf(
 			'<img src="%s" class="blc-small-image" title="%2$s" alt="%2$s"> ',
-			esc_attr( plugins_url( '/images/font-awesome/font-awesome-code.png', BLC_PLUGIN_FILE_LEGACY ) ),
-			__( 'Custom field', 'broken-link-checker' )
+			esc_attr( plugins_url( '/images/font-awesome/font-awesome-code.png', AVPVH_BRKN_PLUGIN_FILE ) ),
+			esc_attr__( 'Custom field', 'avpvh-broken-link-checker' )
 		);
 
 		$field_html = sprintf(

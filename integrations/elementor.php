@@ -1,16 +1,17 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /**
  * Elementor Page Builder Integration
  *
- * @package Broken_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
-if ( ! class_exists( 'blcElementor' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Elementor' ) ) {
 
 	/**
 	 * Elementor Page Builder Integration
 	 */
-	class blcElementor {
+	class Avpvh_Brkn_Elementor {
 
 		/**
 		 * Constructor

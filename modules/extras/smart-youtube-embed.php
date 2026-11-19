@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Smart YouTube httpv:// URLs
 Description: Parse video URLs used by the Smart YouTube plugin
@@ -6,22 +7,22 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcSmartYouTubeURL
+ModuleClassName: Avpvh_Brkn_Smart_Youtube_Url
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 100
 */
 
-if ( ! class_exists( 'blcPlaintextUrlBase' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Plaintext_Url_Base' ) ) {
 	require_once 'plaintext-url-parser-base.php';
 }
 
-class blcSmartYouTubeURL extends blcPlaintextUrlBase {
+class Avpvh_Brkn_Smart_Youtube_Url extends Avpvh_Brkn_Plaintext_Url_Base {
 
 	protected function validate_url( $url ) {
 		//Ignore invalid URLs.
-		$parts = @parse_url( $url );
+		$parts = wp_parse_url( $url );
 		if ( empty( $parts ) ) {
 			return false;
 		}
@@ -57,10 +58,10 @@ class blcSmartYouTubeURL extends blcPlaintextUrlBase {
 	function edit( $content, $new_url, $old_url, $old_raw_url = '' ) {
 		//If the user manually prefixes the URL with "httpv://" or other Smart YouTube scheme
 		//then use the URL as-is. Otherwise change the scheme to the prefix from the old URL (if available).
-		$new_scheme = @parse_url( $new_url, PHP_URL_SCHEME );
+		$new_scheme = wp_parse_url( $new_url, PHP_URL_SCHEME );
 		if ( empty( $new_scheme ) || ( stripos( $new_scheme, 'httpv' ) !== 0 ) ) {
 			if ( ! empty( $old_raw_url ) ) {
-				$scheme = parse_url( $old_raw_url, PHP_URL_SCHEME );
+				$scheme = wp_parse_url( $old_raw_url, PHP_URL_SCHEME );
 			} else {
 				$scheme = 'httpv';
 			}

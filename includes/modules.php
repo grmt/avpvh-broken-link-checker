@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Load all files pertaining to BLC's module subsystem
@@ -11,7 +12,7 @@ require 'containers.php';
 require 'checkers.php';
 require 'parsers.php';
 
-$blc_module_manager = blcModuleManager::getInstance(
+$avpvh_brkn_module_manager = Avpvh_Brkn_Module_Manager::getInstance(
 	array(
 		//List of modules active by default
 		'http',             //Link checker for the HTTP(s) protocol
@@ -35,4 +36,4 @@ $blc_module_manager = blcModuleManager::getInstance(
 require 'any-post.php';
 
 //Let other plugins register virtual modules.
-do_action( 'blc_register_modules', $blc_module_manager );
+do_action( 'avpvh_brkn_register_modules', $avpvh_brkn_module_manager );

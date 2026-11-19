@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 /*
 Plugin Name: Embedded YouTube playlists (old embed code)
 Description: Parse embedded playlists from YouTube
@@ -6,29 +7,29 @@ Version: 1.0
 Author: Janis Elsts
 
 ModuleCategory: parser
-ModuleClassName: blcYouTubePlaylistEmbed
+ModuleClassName: Avpvh_Brkn_Youtube_Playlist_Embed
 ModuleContext: on-demand
 ModuleLazyInit: true
 
 ModulePriority: 110
 */
 
-if ( ! class_exists( 'blcEmbedParserBase' ) ) {
+if ( ! class_exists( 'Avpvh_Brkn_Embed_Parser_Base' ) ) {
 	require 'embed-parser-base.php';
 }
 
-class blcYouTubePlaylistEmbed extends blcEmbedParserBase {
+class Avpvh_Brkn_Youtube_Playlist_Embed extends Avpvh_Brkn_Embed_Parser_Base {
 
 	function init() {
 		parent::init();
-		$this->short_title       = __( 'YouTube Playlist', 'broken-link-checker' );
-		$this->long_title        = __( 'Embedded YouTube playlist', 'broken-link-checker' );
+		$this->short_title       = __( 'YouTube Playlist', 'avpvh-broken-link-checker' );
+		$this->long_title        = __( 'Embedded YouTube playlist', 'avpvh-broken-link-checker' );
 		$this->url_search_string = 'youtube.com/p/';
 	}
 
 	function link_url_from_src( $src ) {
 		//Extract playlist ID from the SRC.
-		$path = parse_url( $src, PHP_URL_PATH );
+		$path = wp_parse_url( $src, PHP_URL_PATH );
 		if ( empty( $path ) ) {
 			return null;
 		}

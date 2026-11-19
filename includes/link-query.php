@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Class for querying, sorting and filtering links.
@@ -7,7 +8,7 @@
  * @package Broken Link Checker
  * @access public
  */
-class blcLinkQuery {
+class Avpvh_Brkn_Link_Query {
 
 	var $native_filters;
 	var $search_filter;
@@ -22,9 +23,9 @@ class blcLinkQuery {
 				'params'       => array(
 					'where_expr' => '1',
 				),
-				'name'         => __( 'All', 'broken-link-checker' ),
-				'heading'      => __( 'Detected Links', 'broken-link-checker' ),
-				'heading_zero' => __( 'No links found (yet)', 'broken-link-checker' ),
+				'name'         => __( 'All', 'avpvh-broken-link-checker' ),
+				'heading'      => __( 'Detected Links', 'avpvh-broken-link-checker' ),
+				'heading_zero' => __( 'No links found (yet)', 'avpvh-broken-link-checker' ),
 				'native'       => true,
 			),
 
@@ -33,9 +34,9 @@ class blcLinkQuery {
 					'where_expr'          => '( broken = 1 )',
 					's_include_dismissed' => false,
 				),
-				'name'         => __( 'Broken', 'broken-link-checker' ),
-				'heading'      => __( 'Broken Links', 'broken-link-checker' ),
-				'heading_zero' => __( 'No broken links found', 'broken-link-checker' ),
+				'name'         => __( 'Broken', 'avpvh-broken-link-checker' ),
+				'heading'      => __( 'Broken Links', 'avpvh-broken-link-checker' ),
+				'heading_zero' => __( 'No broken links found', 'avpvh-broken-link-checker' ),
 				'native'       => true,
 			),
 			'warnings'  => array(
@@ -43,9 +44,9 @@ class blcLinkQuery {
 					'where_expr'          => '( warning = 1 )',
 					's_include_dismissed' => false,
 				),
-				'name'         => _x( 'Warnings', 'filter name', 'broken-link-checker' ),
-				'heading'      => _x( 'Warnings', 'filter heading', 'broken-link-checker' ),
-				'heading_zero' => __( 'No warnings found', 'broken-link-checker' ),
+				'name'         => _x( 'Warnings', 'filter name', 'avpvh-broken-link-checker' ),
+				'heading'      => _x( 'Warnings', 'filter heading', 'avpvh-broken-link-checker' ),
+				'heading_zero' => __( 'No warnings found', 'avpvh-broken-link-checker' ),
 				'native'       => true,
 			),
 			'redirects' => array(
@@ -53,9 +54,9 @@ class blcLinkQuery {
 					'where_expr'          => '( redirect_count > 0 )',
 					's_include_dismissed' => false,
 				),
-				'name'         => __( 'Redirects', 'broken-link-checker' ),
-				'heading'      => __( 'Redirected Links', 'broken-link-checker' ),
-				'heading_zero' => __( 'No redirects found', 'broken-link-checker' ),
+				'name'         => __( 'Redirects', 'avpvh-broken-link-checker' ),
+				'heading'      => __( 'Redirected Links', 'avpvh-broken-link-checker' ),
+				'heading_zero' => __( 'No redirects found', 'avpvh-broken-link-checker' ),
 				'native'       => true,
 			),
 
@@ -63,24 +64,24 @@ class blcLinkQuery {
 				'params'       => array(
 					'where_expr' => '( dismissed = 1 )',
 				),
-				'name'         => __( 'Dismissed', 'broken-link-checker' ),
-				'heading'      => __( 'Dismissed Links', 'broken-link-checker' ),
-				'heading_zero' => __( 'No dismissed links found', 'broken-link-checker' ),
+				'name'         => __( 'Dismissed', 'avpvh-broken-link-checker' ),
+				'heading'      => __( 'Dismissed Links', 'avpvh-broken-link-checker' ),
+				'heading_zero' => __( 'No dismissed links found', 'avpvh-broken-link-checker' ),
 				'native'       => true,
 			),
 		);
 
 		//The user can turn off warnings. In that case, all errors will show up in the "broken" filter instead.
-		$conf = blc_get_configuration();
+		$conf = avpvh_brkn_get_configuration();
 		if ( ! $conf->get( 'warnings_enabled' ) ) {
 			unset( $this->native_filters['warnings'] );
 		}
 
 		//Create the special "search" filter
 		$this->search_filter = array(
-			'name'           => __( 'Search', 'broken-link-checker' ),
-			'heading'        => __( 'Search Results', 'broken-link-checker' ),
-			'heading_zero'   => __( 'No links found for your query', 'broken-link-checker' ),
+			'name'           => __( 'Search', 'avpvh-broken-link-checker' ),
+			'heading'        => __( 'Search Results', 'avpvh-broken-link-checker' ),
+			'heading_zero'   => __( 'No links found for your query', 'avpvh-broken-link-checker' ),
 			'params'         => array(),
 			'use_url_params' => true,
 			'hidden'         => true,
@@ -104,7 +105,7 @@ class blcLinkQuery {
 	static function getInstance() {
 		static $instance = null;
 		if ( is_null( $instance ) ) {
-			$instance = new blcLinkQuery;
+			$instance = new Avpvh_Brkn_Link_Query;
 		}
 		return $instance;
 	}
@@ -117,7 +118,7 @@ class blcLinkQuery {
 	function load_custom_filters() {
 		global $wpdb; /** @var wpdb $wpdb */
 
-		$filter_data = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}blc_filters ORDER BY name ASC", ARRAY_A );
+		$filter_data = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}avpvh_brkn_filters ORDER BY name ASC", ARRAY_A );
 		$filters     = array();
 
 		if ( ! empty( $filter_data ) ) {
@@ -130,7 +131,7 @@ class blcLinkQuery {
 					'name'         => $data['name'],
 					'params'       => $params,
 					'heading'      => ucwords( $data['name'] ),
-					'heading_zero' => __( 'No links found for your query', 'broken-link-checker' ),
+					'heading_zero' => __( 'No links found for your query', 'avpvh-broken-link-checker' ),
 					'custom'       => true,
 				);
 			}
@@ -157,7 +158,7 @@ class blcLinkQuery {
 
 		//Save the new filter
 		$q = $wpdb->prepare(
-			"INSERT INTO {$wpdb->prefix}blc_filters(name, params) VALUES (%s, %s)",
+			"INSERT INTO {$wpdb->prefix}avpvh_brkn_filters(name, params) VALUES (%s, %s)",
 			$name,
 			$params
 		);
@@ -180,13 +181,13 @@ class blcLinkQuery {
 		global $wpdb; /** @var wpdb $wpdb */
 
 		if ( ! isset( $filter_id ) ) {
-			$filter_id = $_POST['filter_id'];
+			$filter_id = isset( $_POST['filter_id'] ) ? sanitize_key( wp_unslash( $_POST['filter_id'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- the caller checks the delete-custom-filter nonce.
 		}
 		//Remove the "f" character from the filter ID to get its database key
 		$filter_id = intval( ltrim( $filter_id, 'f' ) );
 
 		//Try to delete the filter
-		$q = $wpdb->prepare( "DELETE FROM {$wpdb->prefix}blc_filters WHERE id = %d", $filter_id );
+		$q = $wpdb->prepare( "DELETE FROM {$wpdb->prefix}avpvh_brkn_filters WHERE id = %d", $filter_id );
 		if ( false !== $wpdb->query( $q ) ) { //phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			return true;
 		} else {
@@ -219,7 +220,7 @@ class blcLinkQuery {
 	 * Get link search parameters from the specified filter.
 	 *
 	 * @param array $filter
-	 * @return array An array of parameters suitable for use with blcLinkQuery::get_links()
+	 * @return array An array of parameters suitable for use with Avpvh_Brkn_Link_Query::get_links()
 	 */
 	function get_search_params( $filter = null ) {
 		//If present, the filter's parameters may be saved either as an array or a string.
@@ -259,7 +260,7 @@ class blcLinkQuery {
 	/**
 	 * A helper method for parsing a list of search criteria and generating the parts of the SQL query.
 	 *
-	 * @see blcLinkQuery::get_links()
+	 * @see Avpvh_Brkn_Link_Query::get_links()
 	 *
 	 * @param array $params An array of search criteria.
 	 * @return array 'where_exprs' - an array of search expressions, 'join_instances' - whether joining the instance table is required.
@@ -295,7 +296,7 @@ class blcLinkQuery {
 		if ( empty( $params['include_invalid'] ) ) {
 			$join_instances = true;
 
-			$module_manager    = blcModuleManager::getInstance();
+			$module_manager    = Avpvh_Brkn_Module_Manager::getInstance();
 			$loaded_containers = array_keys( $module_manager->get_active_by_category( 'container' ) );
 			$loaded_parsers    = array_keys( $module_manager->get_active_by_category( 'parser' ) );
 
@@ -504,17 +505,14 @@ class blcLinkQuery {
 
 	private function esc_like( $input ) {
 		global $wpdb; /** @var wpdb $wpdb */
-		if ( method_exists( $wpdb, 'esc_like' ) ) {
-			return $wpdb->esc_like( $input );
-		} else {
-			return like_escape( $input );
-		}
+
+		return $wpdb->esc_like( $input );
 	}
 
 	/**
-	 * blcLinkQuery::get_links()
+	 * Avpvh_Brkn_Link_Query::get_links()
 	 *
-	 * @see blc_get_links()
+	 * @see avpvh_brkn_get_links()
 	 *
 	 * @param array $params
 	 * @return array|int
@@ -551,10 +549,10 @@ class blcLinkQuery {
 			$where_expr = '1';
 		}
 
-		//Join the blc_instances table if it's required to perform the search.
+		//Join the avpvh_brkn_instances table if it's required to perform the search.
 		$joins = '';
 		if ( $criteria['join_instances'] ) {
-			$joins = "JOIN {$wpdb->prefix}blc_instances AS instances ON links.link_id = instances.link_id";
+			$joins = "JOIN {$wpdb->prefix}avpvh_brkn_instances AS instances ON links.link_id = instances.link_id";
 		}
 
 		//Optional sorting
@@ -572,7 +570,7 @@ class blcLinkQuery {
 					SELECT 0
 
 					FROM
-						{$wpdb->prefix}blc_links AS links
+						{$wpdb->prefix}avpvh_brkn_links AS links
 						$joins
 
 					WHERE
@@ -588,7 +586,7 @@ class blcLinkQuery {
 				 links.*
 
 			  FROM
-				 {$wpdb->prefix}blc_links AS links
+				 {$wpdb->prefix}avpvh_brkn_links AS links
 				 $joins
 
 			  WHERE
@@ -612,7 +610,7 @@ class blcLinkQuery {
 		$links = array();
 
 		foreach ( $results as $result ) {
-			$link                    = new blcLink( $result );
+			$link                    = new Avpvh_Brkn_Link( $result );
 			$links[ $link->link_id ] = $link;
 		}
 
@@ -622,17 +620,17 @@ class blcLinkQuery {
 			* It has been requested via the 'load_instances' argument.
 			* The links are going to be displayed or edited, which involves instances.
 		*/
-		$load_instances = $params['load_instances'] || in_array( $purpose, array( BLC_FOR_DISPLAY, BLC_FOR_EDITING ) );
+		$load_instances = $params['load_instances'] || in_array( $purpose, array( AVPVH_BRKN_FOR_DISPLAY, AVPVH_BRKN_FOR_EDITING ) );
 
 		if ( $load_instances ) {
 			$link_ids      = array_keys( $links );
-			$all_instances = blc_get_instances( $link_ids, $purpose, $params['load_containers'], $params['load_wrapped_objects'] );
+			$all_instances = avpvh_brkn_get_instances( $link_ids, $purpose, $params['load_containers'], $params['load_wrapped_objects'] );
 			//Assign each batch of instances to the right link
 			foreach ( $all_instances as $link_id => $instances ) {
-				foreach ( $instances as $instance ) { /** @var blcLinkInstance $instance */
-					$instance->_link = $links[ $link_id ];
+				foreach ( $instances as $instance ) { /** @var Avpvh_Brkn_Link_Instance $instance */
+					$instance->cached_link = $links[ $link_id ];
 				}
-				$links[ $link_id ]->_instances = $instances;
+				$links[ $link_id ]->cached_instances = $instances;
 			}
 		}
 
@@ -665,11 +663,11 @@ class blcLinkQuery {
 	/**
 	 * Retrieve a list of links matching a filter.
 	 *
-	 * @uses blcLinkQuery::get_links()
+	 * @uses Avpvh_Brkn_Link_Query::get_links()
 	 *
 	 * @param string|array $filter Either a filter ID or an array containing filter data.
-	 * @param array $extra_params Optional extra criteria that will override those set by the filter. See blc_get_links() for details.
-	 * @return array|int Either an array of blcLink objects, or an integer indicating the number of links that match the filter.
+	 * @param array $extra_params Optional extra criteria that will override those set by the filter. See avpvh_brkn_get_links() for details.
+	 * @return array|int Either an array of Avpvh_Brkn_Link objects, or an integer indicating the number of links that match the filter.
 	 */
 	function get_filter_links( $filter, $extra_params = null ) {
 		if ( is_string( $filter ) ) {
@@ -712,14 +710,15 @@ class blcLinkQuery {
 			}
 
 			$items[] = sprintf(
-				"<li><a href='admin.php?page=blc_local&filter_id=%s' %s>%s</a> <span class='count'>(<span class='%s'>%d</span>)</span>",
+				"<li><a href='admin.php?page=avpvh-broken-link-checker&filter_id=%s' %s>%s</a> <span class='count'>(<span class='%s'>%d</span>)</span>",
 				esc_attr( $filter ),
 				$class,
 				esc_html( $data['name'] ),
-				$number_class,
-				$data['count']
+				esc_attr( $number_class ),
+				(int) $data['count']
 			);
 		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- every part of each item is escaped above; $class is a fixed string.
 		echo implode( ' |</li>', $items );
 
 		echo '</ul>';
@@ -734,7 +733,7 @@ class blcLinkQuery {
 	 *  'per_page'      - How many results per page the method tried to retrieve.
 	 *  'page'          - Which page of results was retrieved.
 	 *  'max_pages'     - The total number of results pages, calculated using the above 'per_page' value.
-	 *  'links'         - An array of retrieved links (blcLink objects).
+	 *  'links'         - An array of retrieved links (Avpvh_Brkn_Link objects).
 	 *  'search_params' - An associative array of the current search parameters as extracted either from the current URL or the filter itself.
 	 *  'is_broken_filter' - TRUE if the filter was set to retrieve only broken links, FALSE otherwise.
 	 *
@@ -778,7 +777,7 @@ class blcLinkQuery {
 		$extra_params = array(
 			'offset'      => ( ( $page - 1 ) * $per_page ),
 			'max_results' => $per_page,
-			'purpose'     => BLC_FOR_DISPLAY,
+			'purpose'     => AVPVH_BRKN_FOR_DISPLAY,
 			'orderby'     => $orderby,
 			'order'       => $order,
 		);
@@ -798,8 +797,9 @@ class blcLinkQuery {
 		} elseif ( isset( $current_filter['params']['s_filter'] ) && ! empty( $current_filter['params']['s_filter'] ) ) {
 			$base_filter = $current_filter['params']['s_filter'];
 		} elseif ( isset( $_GET['s_filter'] ) && ! empty( $_GET['s_filter'] ) ) {
-			if ( array_key_exists( $_GET['s_filter'], $this->native_filters ) ) {
-				$base_filter = esc_html( $_GET['s_filter'] );
+			$s_filter = sanitize_key( wp_unslash( $_GET['s_filter'] ) );
+			if ( array_key_exists( $s_filter, $this->native_filters ) ) {
+				$base_filter = $s_filter;
 			} else {
 				$base_filter = 'all';
 			}
@@ -853,13 +853,13 @@ class blcLinkQuery {
  *
  * All keys are optional.
  *
- * @uses blcLinkQuery::get_links();
+ * @uses Avpvh_Brkn_Link_Query::get_links();
  *
  * @param array $params
- * @return int|blcLink[] Either an array of blcLink objects, or the number of results for the query.
+ * @return int|Avpvh_Brkn_Link[] Either an array of Avpvh_Brkn_Link objects, or the number of results for the query.
  */
-function blc_get_links( $params = null ) {
-	$instance = blcLinkQuery::getInstance();
+function avpvh_brkn_get_links( $params = null ) {
+	$instance = Avpvh_Brkn_Link_Query::getInstance();
 	return $instance->get_links( $params );
 }
 
