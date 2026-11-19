@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Plugin activation script
  *
- * @package Avpvh_Link_Checker
+ * @package Avpvh_Broken_Link_Checker
  */
 
 $migrated = avpvh_brkn_maybe_migrate_configuration();
@@ -48,47 +48,11 @@ $activation_start = microtime( true );
 $avpvh_brkn_config_manager->options['installation_complete']        = false;
 $avpvh_brkn_config_manager->options['installation_flag_cleared_on'] = date( 'c' ) . ' (' . microtime( true ) . ')'; //phpcs:ignore
 //Note the time of the first installation (not very accurate, but still useful)
+// Upstream returned here on a first installation, before the modules were notified and the
+// content was queued for parsing: the local engine was opt-in next to the WPMU DEV cloud, and
+// switching to it did the rest. Without the cloud, a first installation takes the full path.
 if ( empty( $avpvh_brkn_config_manager->options['first_installation_timestamp'] ) ) {
 	$avpvh_brkn_config_manager->options['first_installation_timestamp'] = time();
-
-	// Assume this is a new install if there's no first installation timestamp
-	// We don't need to upgrade the database in this case. Only configuration setup.
-
-	//Turn off load limiting if it's not available on this server.
-	$blclog->info( 'Updating server load limit settings...' );
-	$load = Avpvh_Brkn_Utility::get_server_load();
-	if ( empty( $load ) ) {
-		// Disable load limit if we can't retrieve the current load average
-		$avpvh_brkn_config_manager->options['enable_load_limit'] = false;
-		$blclog->info( 'Disable load limit. Cannot retrieve current load average.' );
-	} elseif ( $avpvh_brkn_config_manager->options['enable_load_limit'] && ! isset( $avpvh_brkn_config_manager->options['server_load_limit'] ) ) {
-		$fifteen_minutes    = floatval( end( $load ) );
-		$default_load_limit = round( max( min( $fifteen_minutes * 2, $fifteen_minutes + 2 ), 4 ) );
-		// Set the server load limit to the max possible limit based on current load
-		$avpvh_brkn_config_manager->options['server_load_limit'] = $default_load_limit;
-
-		$blclog->info(
-			sprintf(
-				'Set server load limit to %.2f. Current load average is %.2f',
-				$default_load_limit,
-				$fifteen_minutes
-			)
-		);
-	}
-
-	$blclog->info( 'Completing installation...' );
-	$avpvh_brkn_config_manager->options['installation_complete']    = true;
-	$avpvh_brkn_config_manager->options['installation_flag_set_on'] = date( 'c' ) . ' (' . microtime( true ) . ')'; //phpcs:ignore
-	if ( $avpvh_brkn_config_manager->save_options() ) {
-		$blclog->info( 'Configuration saved.' );
-	} else {
-		$blclog->error( 'Error saving plugin configuration!' );
-	};
-
-	$blclog->save();
-
-	update_option( 'avpvh_brkn_activation_enabled', true );
-	return;
 }
 
 $avpvh_brkn_config_manager->save_options();
