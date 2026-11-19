@@ -4,7 +4,7 @@ Tags: links, broken links, link checker
 Requires at least: 7.1
 Tested up to: 7.1
 Requires PHP: 8.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,8 +18,12 @@ Based on the local engine of Broken Link Checker 2.4.15.1 by WPMU DEV and Janis 
 * A desktop browser user agent by default, as many sites refuse link checkers.
 * Exclusion list with plain text, `*` wildcards and `/regular expressions/`.
 * Bulk find and replace in link URLs.
+* Links to this site that only members may open (private posts, members-only AJAX endpoints, files behind single sign-on) are looked up in WordPress instead of being reported as broken. Plugins can decide for their own URLs with the `avpvh_brkn_local_link_status` filter.
 
 == Changelog ==
+
+= 1.1.0 =
+* Look up links to this site in WordPress when an anonymous request is refused (400, 401, 403 or 404); new filter `avpvh_brkn_local_link_status`.
 
 = 1.0.0 =
 * First release, based on Broken Link Checker 2.4.15.1.
