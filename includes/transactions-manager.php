@@ -1,4 +1,6 @@
 <?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Transaction manager for batching database writes.
  *

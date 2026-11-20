@@ -26,6 +26,12 @@ class Avpvh_Brkn_Local_Links {
 	const ACCESS_CODES = array( 400, 401, 403, 404 );
 
 	/**
+	 * File types the lookup never reports on: code, logs, dumps, backups and configuration
+	 * are not something a post links to, and their presence is nobody's business.
+	 */
+	const SKIPPED_EXTENSIONS = array( 'php', 'phtml', 'phar', 'log', 'sql', 'gz', 'bak', 'old', 'ini', 'env', 'htaccess', 'htpasswd' );
+
+	/**
 	 * Re-check a broken result for a link to this site locally.
 	 *
 	 * @param string               $url    The checked URL.
@@ -180,7 +186,7 @@ class Avpvh_Brkn_Local_Links {
 			return array(
 				'ok'   => true,
 				/* translators: %s: AJAX action name. */
-				'note' => sprintf( __( 'AJAX action "%s" is registered (for logged-in users).', 'avpvh-broken-link-checker' ), $action ),
+				'note' => sprintf( __( 'AJAX action "%s" is registered (for logged-in users).', 'avpvh-broken-link-checker' ), esc_html( $action ) ),
 			);
 		}
 
@@ -188,7 +194,10 @@ class Avpvh_Brkn_Local_Links {
 	}
 
 	/**
-	 * A file under wp-content (uploads, also private ones behind single sign-on).
+	 * A file in the uploads directory (also private uploads behind single sign-on).
+	 *
+	 * Only uploads: that is where the files posts link to live. Code, logs and backups
+	 * elsewhere in wp-content, and this plugin's own log directory, are never looked up.
 	 *
 	 * @param string $path Decoded URL path.
 	 * @return array{ok: bool, note: string}|null
@@ -200,7 +209,6 @@ class Avpvh_Brkn_Local_Links {
 		if ( empty( $uploads['error'] ) ) {
 			$roots[] = array( (string) wp_parse_url( $uploads['baseurl'], PHP_URL_PATH ), $uploads['basedir'] );
 		}
-		$roots[] = array( (string) wp_parse_url( content_url(), PHP_URL_PATH ), WP_CONTENT_DIR );
 
 		foreach ( $roots as list( $url_path, $dir ) ) {
 			$url_path = untrailingslashit( $url_path );
@@ -213,6 +221,13 @@ class Avpvh_Brkn_Local_Links {
 				return null;
 			}
 
+			$extension = strtolower( pathinfo( $relative, PATHINFO_EXTENSION ) );
+			$basename  = strtolower( wp_basename( $relative ) );
+			if ( in_array( $extension, self::SKIPPED_EXTENSIONS, true ) || str_starts_with( $basename, '.' )
+				|| str_starts_with( strtolower( $relative ), 'avpvh-broken-link-checker/' ) ) {
+				return null;
+			}
+
 			$file = trailingslashit( $dir ) . $relative;
 			$real = realpath( $file );
 			$base = realpath( $dir );
@@ -220,14 +235,14 @@ class Avpvh_Brkn_Local_Links {
 				return array(
 					'ok'   => true,
 					/* translators: %s: file path relative to wp-content. */
-					'note' => sprintf( __( 'the file %s exists.', 'avpvh-broken-link-checker' ), $relative ),
+					'note' => sprintf( __( 'the file %s exists.', 'avpvh-broken-link-checker' ), esc_html( $relative ) ),
 				);
 			}
 
 			return array(
 				'ok'   => false,
 				/* translators: %s: file path relative to wp-content. */
-				'note' => sprintf( __( 'Local check: the file %s does not exist.', 'avpvh-broken-link-checker' ), $relative ),
+				'note' => sprintf( __( 'Local check: the file %s does not exist.', 'avpvh-broken-link-checker' ), esc_html( $relative ) ),
 			);
 		}
 
@@ -256,9 +271,9 @@ class Avpvh_Brkn_Local_Links {
 			'note' => sprintf(
 				/* translators: 1: post type, 2: post ID, 3: post status. */
 				__( '%1$s %2$d exists (status: %3$s).', 'avpvh-broken-link-checker' ),
-				$post->post_type,
+				esc_html( $post->post_type ),
 				$post_id,
-				$post->post_status
+				esc_html( $post->post_status )
 			),
 		);
 	}

@@ -515,6 +515,10 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			$this->column_checkbox( $link );
 
 			foreach ( $layout as $column_id ) {
+				// Only columns this class defines; a stored layout can't name anything else.
+				if ( ! is_string( $column_id ) || ! isset( $this->columns[ $column_id ] ) ) {
+					continue;
+				}
 				$column = $this->columns[ $column_id ];
 
 				printf(
@@ -523,14 +527,29 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 					in_array( $column_id, $visible_columns ) ? '' : ' hidden'
 				);
 
-				if ( isset( $column['content'] ) ) {
-					if ( is_callable( $column['content'] ) ) {
-						call_user_func( $column['content'], $link, $instances );
-					} else {
-						echo wp_kses_post( $column['content'] );
-					}
-				} else {
-					echo '[', esc_html( $column_id ), ']';
+				// The columns are this class's own, so call them directly rather than through a stored callable.
+				switch ( $column_id ) {
+					case 'status':
+						$this->column_status( $link, $instances );
+						break;
+					case 'new-url':
+						$this->column_new_url( $link );
+						break;
+					case 'used-in':
+						$this->column_used_in( $link, $instances );
+						break;
+					case 'new-link-text':
+						$this->column_new_link_text( $link, $instances );
+						break;
+					case 'redirect-url':
+						$this->column_redirect_url( $link, $instances );
+						break;
+					default:
+						if ( isset( $column['content'] ) && is_string( $column['content'] ) ) {
+							echo wp_kses_post( $column['content'] );
+						} else {
+							echo '[', esc_html( $column_id ), ']';
+						}
 				}
 
 				echo '</td>';
@@ -743,6 +762,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			?>
 			<a href="<?php print esc_url( $link->url ); ?>"
 			target='_blank'
+			rel='noopener noreferrer'
 			class='blc-link-url'
 			title="<?php echo esc_attr( $link->url ); ?>"
 			data-editable-url="<?php echo esc_attr( $link->url ); ?>">
@@ -875,7 +895,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			if ( $link->redirect_count > 0 ) {
 				// esc_attr() encodes the delimiters but permits any scheme; an href needs esc_url().
 				printf(
-					'<a href="%1$s" target="_blank" class="blc-redirect-url" title="%2$s">%3$s</a>',
+					'<a href="%1$s" target="_blank" rel="noopener noreferrer" class="blc-redirect-url" title="%2$s">%3$s</a>',
 					esc_url( $link->final_url ),
 					esc_attr( $link->final_url ),
 					esc_html( $link->final_url )
@@ -970,7 +990,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 
 					<div class="blc-suggestion-details">
 						<span class="blc-suggestion-name">
-							<a href="http://example.com/" target="_blank">Suggestion name</a>
+							<a href="https://web.archive.org/" target="_blank" rel="noopener noreferrer">Suggestion name</a>
 						</span>
 						<code class="blc-suggestion-url">suggestion URL</code>
 					</div>

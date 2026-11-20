@@ -45,13 +45,13 @@ function reloadDetailsRow(link_id){
 	var details_row = jQuery('#link-details-'+link_id);
 
 	//Load up the new link info                     (so sue me)
-	details_row.find('td').html('<center><?php echo esc_js( __( 'Loading...', 'avpvh-broken-link-checker' ) ); ?></center>').on( 'load', function() {
+	details_row.find('td').html('<center><?php echo esc_js( __( 'Loading...', 'avpvh-broken-link-checker' ) ); ?></center>').load(
 		"<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>",
 		{
 			'action' : 'avpvh_brkn_link_details',
 			'link_id' : link_id
 		}
-	});
+	);
 }
 
 jQuery(function($){
@@ -360,7 +360,8 @@ jQuery(function($){
 							text: status.final_url,
 							title: status.final_url,
 							'class': 'blc-redirect-url',
-							target: '_blank'
+							target: '_blank',
+							rel: 'noopener noreferrer'
 						}
 					)
 				);
@@ -461,21 +462,41 @@ jQuery(function($){
 		var noSuggestionsText = '<?php echo esc_js( _x( 'No suggestions available.', 'link suggestions', 'avpvh-broken-link-checker' ) ); ?>';
 		var iaSuggestionName  = '<?php echo esc_js( /* translators: %s: archive date. */ _x( 'Archived page from %s (via the Wayback Machine)', 'link suggestions', 'avpvh-broken-link-checker' ) ); ?>';
 
-		suggestionList.empty().append('<li>' + searchingText + '</li>');
+		var ownHosts          = <?php echo wp_json_encode( array_values( array_unique( array_filter( array( (string) wp_parse_url( home_url(), PHP_URL_HOST ), (string) wp_parse_url( site_url(), PHP_URL_HOST ) ) ) ) ) ); ?>;
 
 		var suggestionTemplate = $('#blc-suggestion-template').find('li').first();
 
-		//Check the Wayback Machine for an archived version of the page.
-		$.getJSON(
-			'https://archive.org/wayback/available?callback=?',
-			{ url: url },
+		// Links to this site are never sent to the Wayback Machine.
+		var host = '';
+		try {
+			host = new URL(url).hostname.toLowerCase().replace(/^www\./, '');
+		} catch (e) {
+			host = '';
+		}
+		var isOwn = !host || ownHosts.some(function (own) {
+			return own.toLowerCase().replace(/^www\./, '') === host;
+		});
+		if (isOwn) {
+			suggestionList.empty().append($('<li>').text(noSuggestionsText));
+			return;
+		}
 
-			function(data) {
+		suggestionList.empty().append($('<li>').text(searchingText));
+
+		//Check the Wayback Machine for an archived version of the page. Plain JSON over CORS, not JSONP.
+		$.ajax({
+			url: 'https://archive.org/wayback/available',
+			data: { url: url },
+			dataType: 'json',
+			error: function () {
+				suggestionList.empty().append($('<li>').text(noSuggestionsText));
+			},
+			success: function(data) {
 				suggestionList.empty();
 
 				//Check if there are any results.
 				if (!data || !data.archived_snapshots || !data.archived_snapshots.closest || !data.archived_snapshots.closest.available ) {
-					suggestionList.append('<li>' + noSuggestionsText + '</li>');
+					suggestionList.append($('<li>').text(noSuggestionsText));
 					return;
 				}
 
@@ -487,8 +508,12 @@ jQuery(function($){
 					'-'	+ snapshot.timestamp.substr(6, 2);
 				var name = sprintf(iaSuggestionName, readableTimestamp);
 
-				//Enforce HTTPS by default
-				snapshot.url = (snapshot.url).replace( new RegExp("^http:", "m"), "https:");
+				//Enforce HTTPS, and only accept links into the Wayback Machine.
+				snapshot.url = String(snapshot.url || '').replace(/^http:/, 'https:');
+				if (snapshot.url.indexOf('https://web.archive.org/') !== 0 || !/^\d{8}/.test(String(snapshot.timestamp || ''))) {
+					suggestionList.append($('<li>').text(noSuggestionsText));
+					return;
+				}
 
 				//Display the suggestion.
 				var item = suggestionTemplate.clone();
@@ -496,7 +521,7 @@ jQuery(function($){
 				item.find('.blc-suggestion-url').text(snapshot.url);
 				suggestionList.append(item);
 			}
-		);
+		});
 	}
 
 	/**
@@ -704,7 +729,13 @@ jQuery(function($){
 					'_ajax_nonce' : '<?php echo esc_js( wp_create_nonce( 'avpvh_brkn_unlink' ) ); ?>'
 				},
 				function (data, textStatus){
-					eval('data = ' + data);
+					if ( typeof data === 'string' ) {
+						try {
+							data = JSON.parse( data );
+						} catch ( e ) {
+							data = { error: data };
+						}
+					}
 
 					if ( data && (typeof(data['error']) != 'undefined') ){
 						//An internal error occurred before the link could be edited.

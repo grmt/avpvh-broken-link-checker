@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 /*
 Plugin Name: YouTube API
@@ -60,11 +61,11 @@ class Avpvh_Brkn_Youtube_Checker extends Avpvh_Brkn_Checker {
 		$playlist_id = null;
 		if ( strtolower( $components['host'] ) === 'youtu.be' ) {
 			$video_id = trim( $components['path'], '/' );
-		} elseif ( ( strpos( $components['path'], 'watch' ) !== false ) && isset( $query['v'] ) ) {
+		} elseif ( ( strpos( $components['path'], 'watch' ) !== false ) && isset( $query['v'] ) && is_string( $query['v'] ) ) {
 			$video_id = $query['v'];
-		} elseif ( '/playlist' == $components['path'] ) {
+		} elseif ( '/playlist' == $components['path'] && isset( $query['list'] ) && is_string( $query['list'] ) ) {
 			$playlist_id = $query['list'];
-		} elseif ( '/view_play_list' == $components['path'] ) {
+		} elseif ( '/view_play_list' == $components['path'] && isset( $query['p'] ) && is_string( $query['p'] ) ) {
 			$playlist_id = $query['p'];
 		}
 
@@ -85,7 +86,7 @@ class Avpvh_Brkn_Youtube_Checker extends Avpvh_Brkn_Checker {
 		$args = array( 'timeout' => $conf->options['timeout'] );
 
 		$start                      = microtime( true );
-		$response                   = wp_remote_get( $api_url, $args );
+		$response                   = wp_safe_remote_get( $api_url, $args );
 		$result['request_duration'] = microtime( true ) - $start;
 		$this->last_api_request     = $start;
 

@@ -11,8 +11,9 @@ on:
         required: true
         type: string
 
+# Least privilege: only the job that publishes the release may write.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   ci:
@@ -26,6 +27,8 @@ jobs:
     name: Build & Publish Plugin ZIP
     runs-on: ubuntu-latest
     needs: ci
+    permissions:
+      contents: write
     steps:
       - name: Determine tag and version
         id: meta

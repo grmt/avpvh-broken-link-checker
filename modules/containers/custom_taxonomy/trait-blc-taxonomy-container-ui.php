@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * UI trait for Avpvh_Brkn_Taxonomy_Container.
  *

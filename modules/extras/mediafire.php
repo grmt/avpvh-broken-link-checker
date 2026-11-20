@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /*
 Plugin Name: MediaFire API
 Description: Check links to files hosted on MediaFire.
@@ -12,7 +14,7 @@ ModuleLazyInit: true
 ModuleClassName: Avpvh_Brkn_Mediafire_Checker
 ModulePriority: 100
 
-ModuleCheckerUrlPattern: @^http://(?:www\.)?mediafire\.com/(?:(?:download\.php)?\?|download/)([0-9a-zA-Z]{11,20})(?:$|[^0-9a-zA-Z])@
+ModuleCheckerUrlPattern: @^https?://(?:www\.)?mediafire\.com/(?:(?:download\.php)?\?|download/)([0-9a-zA-Z]{11,20})(?:$|[^0-9a-zA-Z])@
 */
 
 /**
@@ -56,6 +58,8 @@ class Avpvh_Brkn_Mediafire_Checker extends Avpvh_Brkn_Checker {
 		//URLs like http://www.mediafire.com/download.php?03mj0mwmnnm are technically valid,
 		//but they introduce unnecessary redirects.
 		$url = str_replace( 'download.php', '', $url );
+		// MediaFire is HTTPS only; never ask over plain HTTP.
+		$url = (string) preg_replace( '#^http://#i', 'https://', $url );
 
 		//Since MediaFire doesn't have an API, we just send a HEAD request
 		//and try do divine the file state from the response headers.
@@ -162,7 +166,7 @@ class Avpvh_Brkn_Mediafire_Checker extends Avpvh_Brkn_Checker {
 			'_redirection' => 0, //Internal flag that turns off redirect handling. See WP_Http::handle_redirects()
 		);
 
-		return wp_remote_head( $url, $args );
+		return wp_safe_remote_head( $url, $args );
 	}
 
 }

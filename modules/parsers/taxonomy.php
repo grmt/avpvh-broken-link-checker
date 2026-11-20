@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: Taxonomy reference
  * Description: Parses taxonomy references stored as taxonomy slugs and checks whether the referenced taxonomy is still registered.

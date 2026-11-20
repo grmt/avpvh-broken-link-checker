@@ -30,7 +30,15 @@ if ( ! function_exists( 'avpvh_brkn_get_default_log_basename' ) ) {
 	 * @return string
 	 */
 	function avpvh_brkn_get_default_log_basename() {
-		return 'blc-log.txt';
+		// A random part, made once per site, so the file can't be found by its name
+		// on servers that don't read the directory's .htaccess.
+		$token = get_option( 'avpvh_brkn_log_token' );
+		if ( ! is_string( $token ) || ! preg_match( '/^[a-z0-9]{20}$/', $token ) ) {
+			$token = strtolower( wp_generate_password( 20, false, false ) );
+			update_option( 'avpvh_brkn_log_token', $token, false );
+		}
+
+		return 'blc-log-' . $token . '.txt';
 	}
 }
 
@@ -235,7 +243,7 @@ if ( ! function_exists( 'avpvh_brkn_prepare_log_directory' ) ) {
 		 * but would otherwise list the directory.
 		 */
 		$protection_files = array(
-			'.htaccess' => 'Deny from all',
+			'.htaccess' => "<IfModule mod_authz_core.c>\n\tRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n\tDeny from all\n</IfModule>\n",
 			'index.php' => '<?php // Silence is golden.',
 		);
 
@@ -386,6 +394,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Logger' ) ) :
 
 		public function __construct( $fileName = '' ) {
 			$this->fileName = $fileName;
+			// Debug lines hold SQL and request details; only with AVPVH_BRKN_DEBUG.
+			$this->log_level = ( defined( 'AVPVH_BRKN_DEBUG' ) && AVPVH_BRKN_DEBUG ) ? AVPVH_BRKN_LEVEL_DEBUG : AVPVH_BRKN_LEVEL_INFO;
 		}
 
 		function log( $message, $object = null, $level = AVPVH_BRKN_LEVEL_INFO ) {

@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: URL fields
  * Description: Parses data fields that contain a single, plaintext URL.

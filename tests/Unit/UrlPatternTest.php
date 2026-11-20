@@ -23,4 +23,19 @@ final class UrlPatternTest extends TestCase {
 		$this->assertSame( true, Avpvh_Brkn_Url_Pattern::is_invalid_regex( '/(unclosed/' ), 'invalid regex is reported' );
 		$this->assertSame( false, Avpvh_Brkn_Url_Pattern::is_invalid_regex( 'example.com' ), 'plain text is not an invalid regex' );
 	}
+
+	public function test_tilde_is_escaped_once(): void {
+		foreach ( array( '/a~b/', '/a\\~b/' ) as $entry ) {
+			$this->assertTrue( Avpvh_Brkn_Url_Pattern::matches_any( Avpvh_Brkn_Url_Pattern::compile( array( $entry ) ), 'x/a~b' ), $entry );
+		}
+		$this->assertTrue( Avpvh_Brkn_Url_Pattern::matches_any( Avpvh_Brkn_Url_Pattern::compile( array( '/a\\\\~b/' ) ), 'a\\~b' ), 'escaped backslash, then a tilde' );
+	}
+
+	public function test_runaway_expression_stops_and_limit_is_restored(): void {
+		$before = ini_get( 'pcre.backtrack_limit' );
+		$start  = microtime( true );
+		$this->assertFalse( Avpvh_Brkn_Url_Pattern::matches_any( Avpvh_Brkn_Url_Pattern::compile( array( '/(a+)+$/' ) ), str_repeat( 'a', 40 ) . 'b' ) );
+		$this->assertLessThan( 2.0, microtime( true ) - $start );
+		$this->assertSame( $before, ini_get( 'pcre.backtrack_limit' ) );
+	}
 }

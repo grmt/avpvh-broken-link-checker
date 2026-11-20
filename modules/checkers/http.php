@@ -191,12 +191,16 @@ class Avpvh_Brkn_Http_Checker_Base extends Avpvh_Brkn_Checker {
 		// IPv6.
 		'::/128',           // Unspecified.
 		'::1/128',          // Loopback.
+		'::/96',            // IPv4-compatible (deprecated).
 		'::ffff:0:0/96',    // IPv4-mapped.
 		'64:ff9b::/96',     // IPv4/IPv6 translation.
 		'100::/64',         // Discard-only.
+		'2001::/32',        // Teredo, embeds an IPv4 address.
 		'2001:db8::/32',    // Documentation.
+		'2002::/16',        // 6to4, embeds an IPv4 address.
 		'fc00::/7',         // Unique local.
 		'fe80::/10',        // Link-local.
+		'fec0::/10',        // Site-local (deprecated).
 		'ff00::/8',         // Multicast.
 	);
 
@@ -387,7 +391,47 @@ class Avpvh_Brkn_Http_Checker_Base extends Avpvh_Brkn_Checker {
 			}
 		}
 
+		// The request must go to these addresses and no others: a second lookup
+		// by the transport could get a different answer.
+		$this->cleared_addresses[ strtolower( $host ) ] = $addresses;
+
 		return true;
+	}
+
+	/**
+	 * Addresses is_safe_url() cleared, per lower-case host.
+	 *
+	 * @var array<string, string[]>
+	 */
+	protected $cleared_addresses = array();
+
+	/**
+	 * A CURLOPT_RESOLVE entry that pins a cleared URL's host to the addresses
+	 * is_safe_url() checked, or null when there is nothing to pin (the site's
+	 * own host, an IP literal, or a URL that was not cleared).
+	 *
+	 * @param string $url URL about to be requested.
+	 * @return string|null
+	 */
+	protected function resolve_pin( $url ) {
+		$parts = wp_parse_url( $url );
+		$host  = isset( $parts['host'] ) ? strtolower( trim( $parts['host'], '.' ) ) : '';
+		if ( '' === $host || filter_var( trim( $host, '[]' ), FILTER_VALIDATE_IP ) || empty( $this->cleared_addresses[ $host ] ) ) {
+			return null;
+		}
+
+		if ( isset( $parts['port'] ) ) {
+			$port = (int) $parts['port'];
+		} else {
+			$port = 'https' === strtolower( $parts['scheme'] ?? '' ) ? 443 : 80;
+		}
+
+		$addresses = array();
+		foreach ( $this->cleared_addresses[ $host ] as $address ) {
+			$addresses[] = filter_var( $address, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 ) ? '[' . $address . ']' : $address;
+		}
+
+		return $host . ':' . $port . ':' . implode( ',', $addresses );
 	}
 
 	/**
@@ -639,6 +683,15 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 					}
 					break;
 
+				case 35: // CURLE_SSL_CONNECT_ERROR
+				case 51: // CURLE_PEER_FAILED_VERIFICATION (old number)
+				case 58: // CURLE_SSL_CERTPROBLEM
+				case 60: // CURLE_PEER_FAILED_VERIFICATION / CURLE_SSL_CACERT
+					$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
+					$result['status_text'] = __( 'Certificate problem', 'avpvh-broken-link-checker' );
+					$result['error_code']  = 'ssl_error';
+					break;
+
 				default:
 					$result['status_code'] = AVPVH_BRKN_LINK_STATUS_WARNING;
 					$result['status_text'] = __( 'Unknown Error', 'avpvh-broken-link-checker' );
@@ -819,10 +872,12 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 		// Make CURL return a valid result even if it gets a 404 or other error.
 		curl_setopt( $ch, CURLOPT_FAILONERROR, false );
 
-		$parts = wp_parse_url( $url );
-		if ( ! empty( $parts['scheme'] ) && 'https' === $parts['scheme'] ) {
-			curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false ); // Required to make HTTPS URLs work.
-			curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, false );
+		// Certificates are verified, against WordPress's own CA bundle: a link whose
+		// certificate a browser refuses doesn't work for visitors either.
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, true );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
+		if ( defined( 'WPINC' ) && is_readable( ABSPATH . WPINC . '/certificates/ca-bundle.crt' ) ) {
+			curl_setopt( $ch, CURLOPT_CAINFO, ABSPATH . WPINC . '/certificates/ca-bundle.crt' );
 		}
 
 		if ( $nobody ) {
@@ -841,6 +896,12 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 		// Register a callback function which will process the HTTP header(s).
 		curl_setopt( $ch, CURLOPT_HEADERFUNCTION, array( $this, 'read_header' ) );
 
+		// Keep at most MAX_BODY bytes of the body: the Range header is only a request,
+		// and a compressed response is decoded in memory.
+		$this->body        = '';
+		$this->body_capped = false;
+		curl_setopt( $ch, CURLOPT_WRITEFUNCTION, array( $this, 'read_body' ) );
+
 		// Record request headers.
 		if ( defined( 'CURLINFO_HEADER_OUT' ) ) {
 			curl_setopt( $ch, CURLINFO_HEADER_OUT, true );
@@ -857,14 +918,31 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 		// negotiated away by third-party code.
 		$this->apply_transport_restrictions( $ch );
 
+		// Connect to the addresses is_safe_url() cleared. Through a proxy, the proxy resolves.
+		$pin = defined( 'WP_PROXY_HOST' ) ? null : $this->resolve_pin( $url );
+		curl_setopt( $ch, CURLOPT_RESOLVE, null === $pin ? array() : array( $pin ) );
+
 		// Execute the request
 		$start_time                = microtime( true );
-		$content                   = curl_exec( $ch );
+		$ok                        = curl_exec( $ch );
 		$measured_request_duration = microtime( true ) - $start_time;
 
 		$info  = curl_getinfo( $ch );
 		$errno = curl_errno( $ch );
 		$error = curl_error( $ch );
+
+		// Stopping at MAX_BODY bytes ends the transfer with a write error: that is not a failure.
+		if ( $this->body_capped && 23 === $errno ) { // CURLE_WRITE_ERROR
+			$errno = 0;
+			$error = '';
+			$ok    = true;
+		}
+		$content = false === $ok ? false : $this->body;
+
+		// Never keep credentials from the request headers.
+		if ( isset( $info['request_header'] ) && is_string( $info['request_header'] ) ) {
+			$info['request_header'] = preg_replace( '/^((?:Proxy-)?Authorization|Cookie):.*$/mi', '$1: [removed]', $info['request_header'] );
+		}
 
 		// Apply filter before curl closes. This now runs once per hop rather than
 		// once per check, because each hop is a request in its own right.
@@ -883,9 +961,41 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 	}
 	// phpcs:enable WordPress.WP.AlternativeFunctions
 
-	function read_header( /** @noinspection PhpUnusedParameterInspection */ $ch, $header ) {
-		$this->last_headers .= $header;
+	/** Most bytes of a response body that are kept. */
+	const MAX_BODY = 16384;
+
+	/** Most bytes of response headers that are kept, over all hops. */
+	const MAX_HEADERS = 32768;
+
+	/** @var string Body of the current request, at most MAX_BODY bytes. */
+	protected $body = '';
+
+	/** @var bool Whether the current request's body was cut off. */
+	protected $body_capped = false;
+
+	public function read_header( /** @noinspection PhpUnusedParameterInspection */ $ch, $header ) {
+		if ( strlen( $this->last_headers ) < self::MAX_HEADERS ) {
+			$this->last_headers .= substr( $header, 0, self::MAX_HEADERS - strlen( $this->last_headers ) );
+		}
 		return strlen( $header );
+	}
+
+	/**
+	 * cURL write callback: keep the first MAX_BODY bytes, then stop the transfer.
+	 *
+	 * @param resource|\CurlHandle $ch   cURL handle.
+	 * @param string               $data Next piece of the body.
+	 * @return int Bytes handled; less than strlen( $data ) stops the transfer.
+	 */
+	public function read_body( /** @noinspection PhpUnusedParameterInspection */ $ch, $data ) {
+		$room = self::MAX_BODY - strlen( $this->body );
+		if ( strlen( $data ) <= $room ) {
+			$this->body .= $data;
+			return strlen( $data );
+		}
+		$this->body       .= substr( $data, 0, max( 0, $room ) );
+		$this->body_capped = true;
+		return 0;
 	}
 
 }
@@ -954,7 +1064,7 @@ class Avpvh_Brkn_Wp_Http extends Avpvh_Brkn_Http_Checker_Base {
 		$request_args = array(
 			'timeout'     => $timeout,
 			'user-agent'  => apply_filters( 'avpvh_brkn_ua', Avpvh_Brkn_Host_Rules::instance()->user_agent( $url ), $url, true ),
-			'aa'          => 1024 * 5,
+			'limit_response_size' => 1024 * 16,
 			/*
 			 * Walk the redirect chain here rather than letting the HTTP API follow
 			 * it, so every hop can be cleared before it is requested. With core
