@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /*
 Plugin Name: Custom taxonomy
 Description: Checks whether the taxonomies assigned to a post via its terms are still registered in WordPress. Reports a broken relationship when a taxonomy has been unregistered (e.g. by deactivating a plugin or theme).

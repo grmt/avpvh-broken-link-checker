@@ -1,4 +1,5 @@
 <?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+defined( 'ABSPATH' ) || exit;
 
 /**
  * Registry for BLC Configuration Manager instances

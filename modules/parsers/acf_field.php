@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: ACF
  * Description: Parses acf fields (AKA custom fields)

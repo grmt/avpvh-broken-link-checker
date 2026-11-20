@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: HTML images
  * Description: e.g. <code>&lt;img src="http://example.com/fluffy.jpg"&gt;</code>

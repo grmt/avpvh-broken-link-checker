@@ -248,8 +248,8 @@ class Avpvh_Brkn_Link_Query {
 	function get_url_search_params() {
 		$url_params = array();
 		foreach ( $_GET as $param => $value ) {
-			if ( in_array( $param, $this->valid_url_params ) ) {
-				$url_params[ $param ] = esc_html( $value );
+			if ( in_array( $param, $this->valid_url_params, true ) && is_string( $value ) ) {
+				$url_params[ $param ] = esc_html( wp_unslash( $value ) );
 			}
 		}
 		return $url_params;

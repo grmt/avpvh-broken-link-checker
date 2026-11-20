@@ -34,6 +34,8 @@ wp_stub_reset();
 
 function __( $s, $d = '' ) { return $s; }
 function esc_html__( $s, $d = '' ) { return $s; }
+function esc_html( $s ) { return htmlspecialchars( (string) $s, ENT_QUOTES ); }
+function wp_basename( $p, $suffix = '' ) { return basename( str_replace( '\\', '/', $p ), $suffix ); }
 function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
 function wp_parse_str( $input, &$result ) { parse_str( (string) $input, $result ); }
 function get_transient( $k ) { return $GLOBALS['wp_stub']['transients'][ $k ] ?? false; }

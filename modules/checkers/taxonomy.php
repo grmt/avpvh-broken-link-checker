@@ -1,4 +1,6 @@
 <?php //phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+defined( 'ABSPATH' ) || exit;
+
 /*
 Plugin Name: Taxonomy checker
 Description: Checks whether taxonomies referenced by a post's terms are still registered.

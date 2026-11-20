@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Container class that represents a single post for taxonomy-validity checking.
  */

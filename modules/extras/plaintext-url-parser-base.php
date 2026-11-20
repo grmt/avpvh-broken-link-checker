@@ -1,4 +1,5 @@
 <?php
+defined( 'ABSPATH' ) || exit;
 
 class Avpvh_Brkn_Plaintext_Url_Base extends Avpvh_Brkn_Parser {
 	var $supported_formats = array( 'html', 'plaintext' );

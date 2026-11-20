@@ -180,21 +180,6 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				return;
 			}
 
-			$fix = filter_input( INPUT_GET, 'fix-install-button', FILTER_VALIDATE_BOOLEAN );
-			$tab = ! empty( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
-
-			if ( true === $fix && 'plugin-information' === $tab ) {
-				echo '<script>';
-				echo "jQuery('#plugin_install_from_iframe').on('click keydown', function(e) { 
-					if (e.type === 'click' || (e.type === 'keydown' && (e.key === 'Enter' || e.key === ' '))) {
-						if (e.key === ' ') e.preventDefault();
-						window.location.href = jQuery(this).attr('href'); 
-						return false;
-					}
-				});";
-				echo '</script>';
-			}
-
 			if ( ! $this->conf->options['run_in_dashboard'] ) {
 				return;
 			}
@@ -1168,31 +1153,6 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
                                     </tr>
 
                                     <tr valign="top">
-                                        <th scope="row">
-											<?php echo esc_html_x( 'Control external links', 'settings page', 'avpvh-broken-link-checker' ); ?>
-                                        </th>
-                                        <td>
-                                            <p>
-												<?php
-												if ( defined( 'TEST_WPEL_PLUGIN_FILE' ) ) {
-													printf(
-														wp_kses_post( /* translators: %s: URL of the External Links plugin page. */ __( 'Configure <a target="_blank" href="%s">External Links</a> settings.', 'avpvh-broken-link-checker' ) ),
-														esc_url( admin_url( 'admin.php?page=wpel-settings-page' ) )
-													);
-												} else {
-													printf(
-														wp_kses_post( /* translators: %s: URL of the External Links plugin page. */ __( 'Install the free <a href="%s" class="thickbox open-plugin-details-modal">External Links plugin</a> to control if external links open in a new tab, and their nofollow, noopener and UGC options.', 'avpvh-broken-link-checker' ) ),
-														'plugin-install.php?fix-install-button=1&tab=plugin-information&plugin=wp-external-links&TB_iframe=true&width=772&height=691'
-													);
-													echo '<br>';
-													esc_html_e( "It's used on over 80,000 sites just like yours.", 'avpvh-broken-link-checker' );
-												}
-												?>
-                                            </p>
-                                        </td>
-                                    </tr>
-
-                                    <tr valign="top">
                                         <th scope="row"><?php esc_html_e( 'Link tweaks', 'avpvh-broken-link-checker' ); ?></th>
                                         <td>
                                             <p style="margin-top: 0; margin-bottom: 0.5em;">
@@ -1356,10 +1316,11 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
                                                 <label for="youtube_api_key">
 													<?php esc_html_e( 'YouTube API Key', 'avpvh-broken-link-checker' ); ?>
                                                     <input
-                                                            type="text"
+                                                            type="password"
+                                                            autocomplete="off"
                                                             name="youtube_api_key"
                                                             id="youtube_api_key"
-                                                            value="<?php echo esc_html( $this->conf->options['youtube_api_key'] ); ?>"
+                                                            value="<?php echo esc_attr( $this->conf->options['youtube_api_key'] ); ?>"
                                                             class="regular-text ltr"
                                                             aria-describedby="youtube_api_key_desc">
                                                 </label><br>
@@ -1480,11 +1441,12 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 												static fn( $entry ) => is_string( $entry ) && Avpvh_Brkn_Url_Pattern::is_invalid_regex( $entry )
 											);
 											if ( ! empty( $invalid_patterns ) ) {
-												printf(
-													'<div class="notice notice-warning inline"><p>%s <code>%s</code></p></div>',
-													esc_html__( 'These regular expressions are not valid and are ignored:', 'avpvh-broken-link-checker' ),
-													implode( '</code> <code>', array_map( 'esc_html', $invalid_patterns ) )
-												);
+												echo '<div class="notice notice-warning inline"><p>';
+												esc_html_e( 'These regular expressions are not valid and are ignored:', 'avpvh-broken-link-checker' );
+												foreach ( $invalid_patterns as $invalid_pattern ) {
+													echo ' <code>' . esc_html( $invalid_pattern ) . '</code>';
+												}
+												echo '</p></div>';
 											}
 											?>
                                         </td>
@@ -2157,7 +2119,9 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 
 			//Error?
 			if ( empty( $current_filter['links'] ) && ! empty( $wpdb->last_error ) ) {
-				printf( /* translators: %s: database error message. */ esc_html__( 'Database error : %s', 'avpvh-broken-link-checker' ), esc_html( $wpdb->last_error ) );
+				// The error itself goes to the PHP error log, not to the page.
+				error_log( 'AV-PvH Broken Link Checker: database error: ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				esc_html_e( 'A database error occurred. Details are in the PHP error log.', 'avpvh-broken-link-checker' );
 			}
 			?>
 
@@ -2266,7 +2230,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				} else {
 					//Error
 					// $message is echoed as raw HTML by the caller.
-					$message   = sprintf( /* translators: %s: database error message. */ esc_html__( 'Database error : %s', 'avpvh-broken-link-checker' ), esc_html( $wpdb->last_error ) );
+					error_log( 'AV-PvH Broken Link Checker: database error: ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					$message   = esc_html__( 'A database error occurred. Details are in the PHP error log.', 'avpvh-broken-link-checker' );
 					$msg_class = 'error';
 				}
 			}
@@ -2448,11 +2413,15 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 							continue;
 						}
 
-						// A replacement that leaves no usable URL (or a javascript: one) is refused.
-						if ( '' === esc_url_raw( $new_url ) ) {
+						// The edit stores the sanitised URL, as the inline edit does. A replacement that
+						// leaves no usable URL, or (without unfiltered_html) a disallowed protocol, is refused.
+						$clean_url = esc_url_raw( $new_url );
+						if ( '' === $clean_url
+							|| ( ! current_user_can( 'unfiltered_html' ) && wp_kses_bad_protocol( $clean_url, wp_allowed_protocols() ) !== $clean_url ) ) {
 							$failed_links ++;
 							continue;
 						}
+						$new_url = $clean_url;
 
 						//Only links the search actually changes need an authorisation check.
 						if ( ! $this->current_user_can_modify_link( $link ) ) {
@@ -2782,8 +2751,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 					//Load the link
 					$link = new Avpvh_Brkn_Link( intval( $link_id ) );
 
-					//Skip links that don't actually exist
-					if ( ! $link->valid() ) {
+					//Skip links that don't actually exist, or that are in content the user may not edit
+					if ( ! $link->valid() || ! $this->current_user_can_modify_link( $link ) ) {
 						continue;
 					}
 
@@ -2850,8 +2819,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 					//Load the link
 					$link = new Avpvh_Brkn_Link( intval( $link_id ) );
 
-					//Skip links that don't actually exist
-					if ( ! $link->valid() ) {
+					//Skip links that don't actually exist, or that are in content the user may not edit
+					if ( ! $link->valid() || ! $this->current_user_can_modify_link( $link ) ) {
 						continue;
 					}
 
@@ -2922,7 +2891,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 			$conf        = avpvh_brkn_get_configuration();
 			$notice_name = 'show_warnings_section_hint';
 
-			if ( isset( $_GET[ $notice_name ] ) && is_numeric( $_GET[ $notice_name ] ) ) {
+			if ( isset( $_GET[ $notice_name ] ) && is_numeric( $_GET[ $notice_name ] )
+				&& isset( $_GET['_wpnonce'] ) && wp_verify_nonce( sanitize_key( wp_unslash( $_GET['_wpnonce'] ) ), $notice_name ) ) {
 				$conf->set( $notice_name, (bool) $_GET[ $notice_name ] );
 				$conf->save_options();
 			}
@@ -2942,7 +2912,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 					'The "Warnings" page lists problems that are probably temporary or suspected to be false positives.<br> Warnings that persist for a long time will usually be reclassified as broken links.',
 					'avpvh-broken-link-checker'
 				) ),
-				esc_attr( add_query_arg( $notice_name, '0' ) ),
+				esc_url( wp_nonce_url( add_query_arg( $notice_name, '0' ), $notice_name ) ),
 				esc_html_x(
 					'Hide notice',
 					'admin notice under Tools - Broken links - Warnings',
@@ -3691,6 +3661,11 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 					printf( /* translators: %d: link ID. */ esc_html__( "Oops, I can't find the link %d", 'avpvh-broken-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
 				}
+
+				// Only for links in content the user may edit, as for editing and unlinking.
+				if ( ! $this->current_user_can_modify_link( $link ) ) {
+					die( esc_html__( "You're not allowed to do that!", 'avpvh-broken-link-checker' ) );
+				}
 				//Make it appear "not broken"
 				$link->broken             = false;
 				$link->warning            = false;
@@ -3737,6 +3712,11 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				if ( ! $link->valid() ) {
 					printf( /* translators: %d: link ID. */ esc_html__( "Oops, I can't find the link %d", 'avpvh-broken-link-checker' ), intval( $_POST['link_id'] ) );
 					die();
+				}
+
+				// Only for links in content the user may edit, as for editing and unlinking.
+				if ( ! $this->current_user_can_modify_link( $link ) ) {
+					die( esc_html__( "You're not allowed to do that!", 'avpvh-broken-link-checker' ) );
 				}
 
 				$link->dismissed = $dismiss;
@@ -4216,7 +4196,8 @@ if ( ! class_exists( 'Avpvh_Brkn_Link_Checker' ) ) {
 				Avpvh_Brkn_Table_Printer::details_row_contents( $link );
 				die();
 			} else {
-				printf( /* translators: %s: error message. */ esc_html__( 'Failed to load link details (%s)', 'avpvh-broken-link-checker' ), esc_html( $wpdb->last_error ) );
+				error_log( 'AV-PvH Broken Link Checker: database error: ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				esc_html_e( 'Failed to load link details.', 'avpvh-broken-link-checker' );
 				die();
 			}
 		}

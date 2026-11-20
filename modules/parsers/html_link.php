@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: HTML links
  * Description: Example : <code>&lt;a href="http://example.com/"&gt;link text&lt;/a&gt;</code>

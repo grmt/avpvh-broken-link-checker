@@ -73,9 +73,11 @@ final class Avpvh_Brkn_Url_Replacer {
 			return str_replace( $this->search, $this->replace, $url );
 		}
 
-		$result = $this->literal
-			? preg_replace_callback( $this->regex, fn(): string => $this->replace, $url )
-			: preg_replace( $this->regex, $this->replace, $url );
+		$result = Avpvh_Brkn_Url_Pattern::with_limit(
+			fn() => $this->literal
+				? preg_replace_callback( $this->regex, fn(): string => $this->replace, $url )
+				: preg_replace( $this->regex, $this->replace, $url )
+		);
 
 		return is_string( $result ) ? $result : $url;
 	}

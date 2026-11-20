@@ -743,6 +743,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			?>
 			<a href="<?php print esc_url( $link->url ); ?>"
 			target='_blank'
+			rel='noopener noreferrer'
 			class='blc-link-url'
 			title="<?php echo esc_attr( $link->url ); ?>"
 			data-editable-url="<?php echo esc_attr( $link->url ); ?>">
@@ -875,7 +876,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			if ( $link->redirect_count > 0 ) {
 				// esc_attr() encodes the delimiters but permits any scheme; an href needs esc_url().
 				printf(
-					'<a href="%1$s" target="_blank" class="blc-redirect-url" title="%2$s">%3$s</a>',
+					'<a href="%1$s" target="_blank" rel="noopener noreferrer" class="blc-redirect-url" title="%2$s">%3$s</a>',
 					esc_url( $link->final_url ),
 					esc_attr( $link->final_url ),
 					esc_html( $link->final_url )
@@ -970,7 +971,7 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 
 					<div class="blc-suggestion-details">
 						<span class="blc-suggestion-name">
-							<a href="http://example.com/" target="_blank">Suggestion name</a>
+							<a href="https://web.archive.org/" target="_blank" rel="noopener noreferrer">Suggestion name</a>
 						</span>
 						<code class="blc-suggestion-url">suggestion URL</code>
 					</div>

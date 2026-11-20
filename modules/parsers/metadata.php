@@ -1,4 +1,6 @@
 <?php
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Plugin Name: Metadata
  * Description: Parses metadata (AKA custom fields)

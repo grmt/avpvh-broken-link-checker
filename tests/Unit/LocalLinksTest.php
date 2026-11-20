@@ -96,10 +96,25 @@ final class LocalLinksTest extends TestCase {
 		$this->assertFalse( $r['ok'] );
 	}
 
-	public function test_file_elsewhere_in_wp_content(): void {
+	public function test_files_outside_uploads_are_not_looked_up(): void {
 		@mkdir( WP_CONTENT_DIR . '/themes/t', 0777, true );
 		file_put_contents( WP_CONTENT_DIR . '/themes/t/style.css', 'x' );
-		$this->assertTrue( Avpvh_Brkn_Local_Links::resolve( self::HOME . '/wp-content/themes/t/style.css' )['ok'] );
+		$this->assertNull( Avpvh_Brkn_Local_Links::resolve( self::HOME . '/wp-content/themes/t/style.css' ) );
+	}
+
+	public static function skipped_files(): array {
+		return array(
+			'php'        => array( 'private/2026/x.php' ),
+			'log'        => array( 'debug.log' ),
+			'sql dump'   => array( 'backup/site.SQL' ),
+			'dot file'   => array( '.htaccess' ),
+			'own logs'   => array( 'avpvh-broken-link-checker/blc-log-abc.txt' ),
+		);
+	}
+
+	#[DataProvider( 'skipped_files' )]
+	public function test_sensitive_files_are_not_looked_up( string $relative ): void {
+		$this->assertNull( Avpvh_Brkn_Local_Links::resolve( self::HOME . '/wp-content/uploads/' . $relative ) );
 	}
 
 	public function test_private_post_is_verified(): void {

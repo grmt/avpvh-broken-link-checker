@@ -32,7 +32,8 @@ final class Avpvh_Brkn_Url_Pattern {
 		}
 
 		if ( preg_match( '#^/(.+)/([imsxu]*)$#s', $pattern, $m ) ) {
-			$regex = '~' . str_replace( '~', '\~', $m[1] ) . '~' . $m[2];
+			// Escape a "~" unless it is escaped already (preceded by an odd number of backslashes).
+			$regex = '~' . preg_replace( '/(?<!\\\\)((?:\\\\\\\\)*)~/', '$1\\\\~', $m[1] ) . '~' . $m[2];
 
 			// An entry that doesn't compile is skipped rather than breaking every check.
 			return self::is_valid( $regex ) ? $regex : null;
@@ -75,13 +76,44 @@ final class Avpvh_Brkn_Url_Pattern {
 	 * @return bool
 	 */
 	public static function matches_any( array $regexes, string $url ): bool {
-		foreach ( $regexes as $regex ) {
-			if ( 1 === preg_match( $regex, $url ) ) {
-				return true;
+		return self::with_limit(
+			static function () use ( $regexes, $url ): bool {
+				foreach ( $regexes as $regex ) {
+					if ( 1 === preg_match( $regex, $url ) ) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+		);
+	}
+
+	/**
+	 * Backtracking budget for user-supplied expressions: plenty for any sensible pattern on
+	 * a URL, and an expression that needs more simply doesn't match.
+	 */
+	const BACKTRACK_LIMIT = 100000;
+
+	/**
+	 * Run a callback with the PCRE backtracking limit lowered to BACKTRACK_LIMIT.
+	 *
+	 * @template T
+	 * @param callable(): T $callback Callback.
+	 * @return T
+	 */
+	public static function with_limit( callable $callback ): mixed {
+		$previous = ini_get( 'pcre.backtrack_limit' );
+		if ( false === $previous || (int) $previous > self::BACKTRACK_LIMIT ) {
+			ini_set( 'pcre.backtrack_limit', (string) self::BACKTRACK_LIMIT ); // phpcs:ignore WordPress.PHP.IniSet.Risky
+		}
+		try {
+			return $callback();
+		} finally {
+			if ( false !== $previous ) {
+				ini_set( 'pcre.backtrack_limit', $previous ); // phpcs:ignore WordPress.PHP.IniSet.Risky
 			}
 		}
-
-		return false;
 	}
 
 	/**
