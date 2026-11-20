@@ -48,11 +48,19 @@ Return `true`/`false`, or `array( 'ok' => bool, 'note' => string )`, or `null` t
 
 ## Tests
 
-```sh
-composer install
-vendor/bin/phpunit
-```
+Two suites:
 
-PHPUnit covers the plugin's own classes (`includes/class-*.php`, see `phpunit.xml.dist`); the legacy engine needs a full WordPress and has no unit tests. CI runs them through the shared `quality.yml` of grmt/wp-plugin-ci, which reports coverage to Codecov and SonarQube Cloud. Locally PHPUnit needs PHP with `dom`, for example `docker run --rm -v "$PWD":/app -w /app php:8.4-cli vendor/bin/phpunit`.
+- **Unit tests** (`tests/Unit`, `phpunit.xml.dist`, PHPUnit 12): the plugin's own classes with WordPress stubbed. `composer install && vendor/bin/phpunit`.
+- **WordPress tests** (`tests/wordpress`, `phpunit-wordpress.xml.dist`, PHPUnit 9.6): the whole plugin, legacy engine included, against WordPress and its test suite with a database. Posts are parsed and links checked through the WordPress HTTP API (answered by `pre_http_request`) and through cURL against a local PHP server; the admin screens and bulk actions are driven as an administrator.
+
+CI runs both through the shared `quality.yml` of grmt/wp-plugin-ci (`wordpress-tests: true`) and reports the coverage of both to Codecov and SonarQube Cloud.
+
+Locally PHPUnit needs PHP with `dom`, for example `docker run --rm -v "$PWD":/app -w /app php:8.4-cli vendor/bin/phpunit`. The WordPress tests also need MySQL or MariaDB, WordPress, the test suite (`tests/phpunit` of wordpress-develop at the same version, with a `wp-tests-config.php`) and PHPUnit 9.6 with `yoast/phpunit-polyfills` 1.x; then
+
+```sh
+WP_TESTS_DIR=/path/to/wordpress-develop/tests/phpunit \
+WP_TESTS_PHPUNIT_POLYFILLS_PATH=/path/to/phpunit9/vendor/yoast/phpunit-polyfills \
+/path/to/phpunit9/vendor/bin/phpunit -c phpunit-wordpress.xml.dist
+```
 
 PHPCS, PHPStan and Plugin Check run in CI (`.github/workflows/CI.yml`, with the shared checks from `grmt/wp-plugin-ci`).

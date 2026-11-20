@@ -73,10 +73,11 @@ jobs:
   # repo has SONAR_TOKEN): shared with the other own plugins.
   quality:
     name: "Quality"
-    uses: grmt/wp-plugin-ci/.github/workflows/quality.yml@main
+    uses: grmt/wp-plugin-ci/.github/workflows/quality.yml@feature/wordpress-tests
     permissions:
       contents: read
       id-token: write
     secrets: inherit
     with:
+      wordpress-tests: true
       sonar-exclusions: "languages/**"

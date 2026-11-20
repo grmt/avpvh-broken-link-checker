@@ -941,7 +941,7 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 
 		// Never keep credentials from the request headers.
 		if ( isset( $info['request_header'] ) && is_string( $info['request_header'] ) ) {
-			$info['request_header'] = preg_replace( '/^((?:Proxy-)?Authorization|Cookie):.*$/mi', '$1: [removed]', $info['request_header'] );
+			$info['request_header'] = preg_replace( '/^((?:Proxy-)?Authorization|Cookie):[^\r\n]*/mi', '$1: [removed]', $info['request_header'] );
 		}
 
 		// Apply filter before curl closes. This now runs once per hop rather than
