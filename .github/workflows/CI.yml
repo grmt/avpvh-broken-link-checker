@@ -37,7 +37,7 @@ jobs:
   plugin-checks:
     name: "Shared"
     needs: build
-    uses: grmt/wp-plugin-ci/.github/workflows/plugin-checks.yml@feature/tests-sonar-repo-checks
+    uses: grmt/wp-plugin-ci/.github/workflows/plugin-checks.yml@main
     with:
       slug: avpvh-broken-link-checker
       artifact: build-artifact
@@ -73,7 +73,7 @@ jobs:
   # repo has SONAR_TOKEN): shared with the other own plugins.
   quality:
     name: "Quality"
-    uses: grmt/wp-plugin-ci/.github/workflows/quality.yml@feature/tests-sonar-repo-checks
+    uses: grmt/wp-plugin-ci/.github/workflows/quality.yml@main
     permissions:
       contents: read
       id-token: write
