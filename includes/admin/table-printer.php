@@ -527,14 +527,29 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 					in_array( $column_id, $visible_columns ) ? '' : ' hidden'
 				);
 
-				if ( isset( $column['content'] ) ) {
-					if ( is_callable( $column['content'] ) ) {
-						call_user_func( $column['content'], $link, $instances );
-					} else {
-						echo wp_kses_post( $column['content'] );
-					}
-				} else {
-					echo '[', esc_html( $column_id ), ']';
+				// The columns are this class's own, so call them directly rather than through a stored callable.
+				switch ( $column_id ) {
+					case 'status':
+						$this->column_status( $link, $instances );
+						break;
+					case 'new-url':
+						$this->column_new_url( $link );
+						break;
+					case 'used-in':
+						$this->column_used_in( $link, $instances );
+						break;
+					case 'new-link-text':
+						$this->column_new_link_text( $link, $instances );
+						break;
+					case 'redirect-url':
+						$this->column_redirect_url( $link, $instances );
+						break;
+					default:
+						if ( isset( $column['content'] ) && is_string( $column['content'] ) ) {
+							echo wp_kses_post( $column['content'] );
+						} else {
+							echo '[', esc_html( $column_id ), ']';
+						}
 				}
 
 				echo '</td>';
