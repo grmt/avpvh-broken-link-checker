@@ -11,6 +11,7 @@
 // phpcs:disable
 
 define( 'ABSPATH', __DIR__ . '/' );
+define( 'AVPVH_BRKN_DIRECTORY', dirname( __DIR__ ) );
 define( 'WP_CONTENT_DIR', sys_get_temp_dir() . '/avpvh-brkn-tests/wp-content' );
 define( 'AVPVH_BRKN_LINK_STATUS_OK', 'ok' );
 define( 'AVPVH_BRKN_LINK_STATUS_WARNING', 'warning' );
@@ -64,6 +65,8 @@ function add_action( $hook, $cb ) { $GLOBALS['wp_stub']['actions'][ $hook ] = $c
 function has_action( $hook ) { return isset( $GLOBALS['wp_stub']['actions'][ $hook ] ); }
 function url_to_postid( $url ) { return $GLOBALS['wp_stub']['url_to_id'][ $url ] ?? 0; }
 function get_post( $id ) { return $GLOBALS['wp_stub']['posts'][ $id ] ?? null; }
+function get_option( $name, $default = false ) { return 'home' === $name ? $GLOBALS['wp_stub']['home'] : $default; }
+function wp_http_validate_url( $url ) { return filter_var( $url, FILTER_VALIDATE_URL ) ? $url : false; }
 
 class Avpvh_Brkn_Utility {
 	public static function idn_to_ascii( $url, $charset = '' ) {
@@ -81,3 +84,6 @@ require __DIR__ . '/../includes/class-url-pattern.php';
 require __DIR__ . '/../includes/class-host-rules.php';
 require __DIR__ . '/../includes/class-url-replacer.php';
 require __DIR__ . '/../includes/class-local-links.php';
+require __DIR__ . '/../includes/module-base.php';
+require __DIR__ . '/../includes/checkers.php';
+require __DIR__ . '/../modules/checkers/http.php';

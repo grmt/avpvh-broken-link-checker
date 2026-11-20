@@ -515,6 +515,10 @@ if ( ! class_exists( 'Avpvh_Brkn_Table_Printer' ) ) {
 			$this->column_checkbox( $link );
 
 			foreach ( $layout as $column_id ) {
+				// Only columns this class defines; a stored layout can't name anything else.
+				if ( ! is_string( $column_id ) || ! isset( $this->columns[ $column_id ] ) ) {
+					continue;
+				}
 				$column = $this->columns[ $column_id ];
 
 				printf(

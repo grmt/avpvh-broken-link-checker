@@ -23,6 +23,7 @@
             <file>includes/class-local-links.php</file>
             <file>includes/class-url-pattern.php</file>
             <file>includes/class-url-replacer.php</file>
+            <file>modules/checkers/http.php</file>
         </include>
     </source>
 </phpunit>

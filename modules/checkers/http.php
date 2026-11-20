@@ -420,7 +420,11 @@ class Avpvh_Brkn_Http_Checker_Base extends Avpvh_Brkn_Checker {
 			return null;
 		}
 
-		$port = isset( $parts['port'] ) ? (int) $parts['port'] : ( 'https' === strtolower( $parts['scheme'] ?? '' ) ? 443 : 80 );
+		if ( isset( $parts['port'] ) ) {
+			$port = (int) $parts['port'];
+		} else {
+			$port = 'https' === strtolower( $parts['scheme'] ?? '' ) ? 443 : 80;
+		}
 
 		$addresses = array();
 		foreach ( $this->cleared_addresses[ $host ] as $address ) {
@@ -969,7 +973,7 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 	/** @var bool Whether the current request's body was cut off. */
 	protected $body_capped = false;
 
-	function read_header( /** @noinspection PhpUnusedParameterInspection */ $ch, $header ) {
+	public function read_header( /** @noinspection PhpUnusedParameterInspection */ $ch, $header ) {
 		if ( strlen( $this->last_headers ) < self::MAX_HEADERS ) {
 			$this->last_headers .= substr( $header, 0, self::MAX_HEADERS - strlen( $this->last_headers ) );
 		}
@@ -983,7 +987,7 @@ class Avpvh_Brkn_Curl_Http extends Avpvh_Brkn_Http_Checker_Base {
 	 * @param string               $data Next piece of the body.
 	 * @return int Bytes handled; less than strlen( $data ) stops the transfer.
 	 */
-	function read_body( /** @noinspection PhpUnusedParameterInspection */ $ch, $data ) {
+	public function read_body( /** @noinspection PhpUnusedParameterInspection */ $ch, $data ) {
 		$room = self::MAX_BODY - strlen( $this->body );
 		if ( strlen( $data ) <= $room ) {
 			$this->body .= $data;
