@@ -37,7 +37,7 @@ jobs:
   plugin-checks:
     name: "Shared"
     needs: build
-    uses: grmt/wp-plugin-ci/.github/workflows/plugin-checks.yml@main
+    uses: grmt/wp-plugin-ci/.github/workflows/plugin-checks.yml@feature/tests-sonar-repo-checks
     with:
       slug: avpvh-broken-link-checker
       artifact: build-artifact
@@ -69,42 +69,14 @@ jobs:
       - name: "PHPCS (WordPress security, API and PHP compatibility)"
         run: vendor/bin/phpcs -q --report=checkstyle | cs2pr --graceful-warnings
 
-  test:
-    name: "Unit tests (PHP ${{ matrix.php }})"
-    runs-on: ubuntu-latest
-    # id-token: Codecov's OIDC upload, so no token secret is needed.
+  # PHPUnit on 8.4 and 8.5, coverage to Codecov, SonarQube Cloud (when the
+  # repo has SONAR_TOKEN): shared with the other own plugins.
+  quality:
+    name: "Quality"
+    uses: grmt/wp-plugin-ci/.github/workflows/quality.yml@feature/tests-sonar-repo-checks
     permissions:
       contents: read
       id-token: write
-    strategy:
-      matrix:
-        php: ["8.4", "8.5"]
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v7
-
-      - name: "Setup PHP"
-        uses: shivammathur/setup-php@2.40.0
-        with:
-          php-version: ${{ matrix.php }}
-          # Coverage once, on the floor.
-          coverage: ${{ matrix.php == '8.4' && 'pcov' || 'none' }}
-
-      - name: "Install Composer dependencies"
-        run: composer install -n --prefer-dist --no-progress
-
-      - name: "PHPUnit"
-        if: matrix.php != '8.4'
-        run: vendor/bin/phpunit
-
-      - name: "PHPUnit with coverage"
-        if: matrix.php == '8.4'
-        run: vendor/bin/phpunit --coverage-clover coverage.xml
-
-      - name: "Upload coverage results"
-        if: matrix.php == '8.4'
-        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-        with:
-          use_oidc: true
-          files: coverage.xml
-          fail_ci_if_error: false
+    secrets: inherit
+    with:
+      sonar-exclusions: "languages/**"
