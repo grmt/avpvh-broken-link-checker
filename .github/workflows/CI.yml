@@ -79,4 +79,5 @@ jobs:
       id-token: write
     secrets: inherit
     with:
+      wordpress-tests: true
       sonar-exclusions: "languages/**"

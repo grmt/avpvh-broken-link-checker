@@ -3,3 +3,4 @@ deploy.local.env
 __pycache__/
 /.phpunit.cache/
 /coverage.xml
+/.phpunit.result.cache

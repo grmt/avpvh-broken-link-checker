@@ -10,4 +10,5 @@
 /composer.lock          export-ignore
 /phpcs.xml.dist         export-ignore
 /phpunit.xml.dist       export-ignore
+/phpunit-wordpress.xml.dist export-ignore
 /codecov.yml            export-ignore
